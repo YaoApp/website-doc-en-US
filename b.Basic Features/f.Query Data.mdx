@@ -1,0 +1,186 @@
+# Query Data
+
+<blockquote>
+	<p>Regular data CURD queries can be implemented using the processor of the data model. </p>
+	<p>
+		For complex scenarios such as data aggregation statistics, or need to connect to the
+		data warehouse, you can use Query DSL in the data flow (Domain Specific Language)
+		implementation.
+	</p>
+</blockquote>
+
+## Using The Data Model Process
+
+Write the data flow description file `query.flow.json` and place it in the `flows` directory of the application.
+
+```json
+{
+	"label": "pet",
+	"version": "1.0.0",
+	"description": "Data query",
+	"nodes": [
+		{
+			"name": "List",
+			"process": "models.pet.Get",
+			"args": [
+				{
+					"select": ["id", "name", "kind"],
+					"wheres": [{ "column": "kind", "value": "cat" }],
+					"limit": 3
+				}
+			]
+		},
+		{
+			"name": "Pagination",
+			"process": "models.pet.Paginate",
+			"args": [
+				{
+					"select": ["id", "name", "kind"],
+					"wheres": [{ "column": "kind", "value": "cat" }],
+					"limit": 1
+				},
+				1,
+				3
+			]
+		},
+		{
+			"name": "A record",
+			"process": "models.pet.Find",
+			"args": [1, { "select": ["id", "name", "kind"] }]
+		},
+		{
+			"name": "Update Record",
+			"process": "models.pet.Update",
+			"args": [1, { "name": "This is a lazy cat" }]
+		},
+		{
+			"name": "Insert Record",
+			"process": "models.pet.Create",
+			"args": [
+				{
+					"sn": "300004",
+					"name": "Roaring Dog",
+					"type": "Dog",
+					"desc": "New Member"
+				}
+			]
+		},
+		{
+			"name": "Delete record",
+			"process": "models.pet.Delete",
+			"args": [1]
+		}
+	],
+	"output": "{{$res}}"
+}
+```
+
+**Run Dataflow**
+
+```bash
+yao run flows.query
+```
+
+Extended reading:
+
+<Extend
+	title='Data Model Documentation'
+	desc='Learn how the query conditions of the data model are set'
+	link='c. Advanced Features/b. Data Model Association Query'
+></Extend>
+
+<Extend
+	title='Data Model Association'
+	desc='Learn how to set up associations between data models and perform association queries.'
+	link='c. Advanced Features/b. Data Model Association Query'
+></Extend>
+
+<Extend
+	title='Data Model Process'
+	desc='Learn more about data model manipulation handlers.'
+	link='e. Process Reference/a. Data Model'
+></Extend>
+
+## Using Query DSL
+
+Yao provides the following Query DSLs that can be used in dataflow nodes:
+
+| DSL           | Description                                                                                     |
+| ------------- | ----------------------------------------------------------------------------------------------- |
+| Gou Query DSL | Applies to SQL-based query data engine. <a href="#"> View Documentation </a>                    |
+| Tai Query DSL | For ElasticSearch-based data engines. <strong>(Not currently available in closed beta)</strong> |
+
+Write the data flow description file `stat.flow.json` and place it in the `flows` directory of the application.
+
+```json
+{
+	"label": "Pet Statistics",
+	"version": "1.0.0",
+	"description": "Pet Statistics",
+	"nodes": [
+		{
+			"name": "Type Statistics S1",
+			"engine": "xiang",
+			"query": {
+				"select": [":COUNT(id) as quantity", "kind as type"],
+				"groups": "Type",
+				"from": "$pet"
+			}
+		},
+		{
+			"name": "Type Statistics S2",
+			"engine": "xiang",
+			"query": {
+				"select": [":COUNT(id) as quantity", "kind as type"],
+				"groups": "Type ROLLUP Total",
+				"from": "$pet"
+			}
+		}
+	],
+	"output": "{{$res}}"
+}
+```
+
+| Field  | Description                                                                                  |
+| ------ | -------------------------------------------------------------------------------------------- |
+| engine | data engine name, `xiang` uses the data source connection stored by the data model           |
+| query  | Query DSL, according to the data source connection type, write the corresponding query logic |
+
+**Run Dataflow**
+
+```bash
+yao run flows.stat
+```
+
+Extended reading:
+
+<Extend
+	title='Complex data query'
+	desc='Learn more about complex data query methods.'
+	link='c. Advanced Features/b. Complex Data Query'
+></Extend>
+
+<Extend
+	title='Gou Query DSL Documentation'
+	desc='Gou Query DSL usage documentation'
+	link='e. Process Reference/a. Data Model'
+></Extend>
+
+## Recommended
+
+Next, it is recommended to study the following chapters:
+
+<Extend
+	title='Data flow using JS'
+	desc='Learn how to use JS scripts to process query results in dataflow.'
+	link='c. Advanced features/f. Data flow using JS'
+></Extend>
+
+<Div style={{ display: 'flex', justifyContent: 'space-between' }}>
+	<Link type='prev' title='Write data flow' link='b. Basic features/e. Write data flow'></Link>
+	<Link
+		type='next'
+		title='Data flow using JS'
+		link='c. Advanced features/f. Data flow using JS'
+	></Link>
+</Div>

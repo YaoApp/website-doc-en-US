@@ -1,0 +1,578 @@
+# Describe Interface
+
+<blockquote>
+	Write a JSON page description and place it in `tables` In the directory, a set of interfaces
+	for data list, data display and data editing can be realized.
+</blockquote>
+
+In a similar way, it is also possible to describe the analytical chart interface (`charts` directory), the dashboard interface (
+`kanban` directory) and data screen interface (`screens` directory).
+
+For special pages, you can write HTML
+The page, placed in the `ui` directory, can be displayed as a stand-alone interface or embedded in the management system through an `iframe`.
+
+## Data Table
+
+Write a data table description file pet.tab.json and place it in the application's tables directory.
+
+**Description file content:**
+
+<Detail title="View source code">
+
+```json
+{
+	"name": "pet",
+	"version": "1.0.0",
+	"decription": "Pet Management Form",
+	"bind": { "model": "pet" },
+	"apis": {},
+	"columns": {
+		"ID": {
+			"label": "ID",
+			"view": { "type": "label", "props": { "value": ":id" } }
+		},
+		"Numbering": {
+			"label": "Number",
+			"view": { "type": "label", "props": { "value": ":sn" } },
+			"edit": { "type": "input", "props": { "value": ":sn" } }
+		},
+		"name": {
+			"label": "Name",
+			"view": { "type": "label", "props": { "value": ":name" } },
+			"edit": { "type": "input", "props": { "value": ":name" } }
+		},
+		"type": {
+			"label": "Type",
+			"view": { "type": "label", "props": { "value": ":kind" } },
+			"edit": {
+				"type": "select",
+				"props": {
+					"value": ":kind",
+					"options": [
+						{ "label": "cat", "value": "cat" },
+						{ "label": "dog", "value": "dog" }
+					]
+				}
+			}
+		},
+		"introduce": {
+			"label": "Introduction",
+			"view": { "type": "label", "props": { "value": ":desc" } },
+			"edit": { "type": "textArea", "props": { "value": ":desc", "rows": 4 } }
+		}
+	},
+	"filters": {
+		"Key words": {
+			"label": "Keyword",
+			"bind": "where.name.match",
+			"input": { "type": "input", "props": { "placeholder": "Please enter keywords" } }
+		}
+	},
+	"list": {
+		"primary": "id",
+		"layout": {
+			"columns": [
+				{ "name": "ID", "width": 80 },
+				{ "name": "number", "width": 100 },
+				{ "name": "name", "width": 200 },
+				{ "name": "type" }
+			],
+			"filters": [{ "name": "keyword" }]
+		},
+		"actions": { "pagination": { "props": { "showTotal": true } } },
+		"option": {}
+	},
+	"edit": {
+		"primary": "id",
+		"layout": {
+			"fieldset": [
+				{
+					"columns": [
+						{ "name": "number", "width": 8 },
+						{ "name": "name", "width": 8 },
+						{ "name": "type", "width": 8 },
+						{ "name": "introduction", "width": 24 }
+					]
+				}
+			]
+		},
+		"actions": { "cancel": {}, "save": {}, "delete": {} }
+	}
+}
+```
+
+</Detail>
+
+**Application Directory Structure:**
+
+```bash
+├── apis # Used to store interface description files
+│ └── pet.http.json
+├── models # Used to store data model description files
+│ └── pet.mod.json
+├── tables # Used to store data table description files
+│ └── pet.tab.json
+├── db
+└── ui
+└── app.json
+```
+
+**Access form interface:**
+
+Page routing: `/xiang/table/<Table Name>`
+
+1. Open a browser, visit `https://127.0.0.1:5099/xiang/login/admin`,
+
+2. Enter the default username: `xiang@iqka.com`, password: `A123456p+`
+
+3. After successful login, enter `https://127.0.0.1:5099/xiang/table/pet` in the address bar
+
+4. It is recommended to add the `/xiang/table/pet` route as a menu item.
+
+<Notice type='warning'>
+	Note: Since the project was born mainly to improve the internal productivity of the team,
+	there is no fine-grained error throwing under the conventional writing description, so
+	developers may write In the process of JSON debugging interface, the interface is empty.
+	Please refer to the component documentation for disposal methods.
+</Notice>
+
+<Notice type='success'>
+	Tip: Yao will automatically generate component associations based on the field types defined
+	in the data model. as in `columns` Re-declaration in , will override the default associated
+	component.
+</Notice>
+
+<Notice type='success'>
+	Tip: The data model is not coupled with the data table. If you do not set the data model
+	binding, you can specify the list by specifying the processor, the detailed data reading
+	logic, and the processing logic for operations such as saving and deleting.
+</Notice>
+
+<Notice type='success'>
+	Tip: A model can be bound to multiple tables, and the component description associated with
+	the field can be shared without having to rewrite it for each table; place the field
+	description in the The `libs` directory, imported via `@`, see the DataTable API documentation
+	for details.
+</Notice>
+
+Extended reading:
+
+<Extend
+	title='Data Table'
+	desc='Learn how to describe data table components, filters, batch management, file import and other functions.'
+	link='d.API Reference/j.DataTables'
+></Extend>
+
+<Extend
+	title='Component'
+	desc='List of components for data display, data entry and charting'
+	link='/components'
+></Extend>
+
+## Data Kanban
+
+Write a data kanban description file pet.kan.json and place it in the application's kanban directory.
+
+**Description file content:**
+
+<Detail title="View source code">
+
+```json
+{
+	"label": "Pet Statistics",
+	"version": "1.0.0",
+	"description": "Pet Statistics",
+	"nodes": [
+		{
+			"name": "Type summary",
+			"engine": "xiang",
+			"query": {
+				"select": [":COUNT(id) as quantity", "kind as type"],
+				"groups": "Type",
+				"from": "$pet"
+			}
+		}
+	],
+	"output": {
+		"data": {
+			"Pet Type Distribution": "{{$res.Type Summary}}"
+		}
+	},
+	"page": {
+		"primary": "kind",
+		"layout": {
+			"filters": [],
+			"charts": [
+				{
+					"name": "Pet Type Distribution",
+					"width": 24,
+					"type": "bar",
+					"props": {
+						"height": 240,
+						"x_key": "Type",
+						"axisLabel": {
+							"interval": 0,
+							"rotate": 45,
+							"textStyle": { "fontSize": 10 }
+						},
+						"tooltip": {
+							"textStyle": { "color": "#a2a5b9", "fontSize": 12 },
+							"backgroundColor": "#232326",
+							"borderRadius": 6
+						},
+						"series": [
+							{
+								"name": "Quantity",
+								"type": "bar",
+								"colorBy": "data",
+								"splitLine": { "show": false },
+								"label": { "show": true, "position": "top" },
+								"axisLabel": { "show": true }
+							}
+						]
+					}
+				}
+			]
+		}
+	}
+}
+```
+
+</Detail>
+
+**Application Directory Structure:**
+
+```bash
+├── apis # Used to store interface description files
+│ └── pet.http.json
+├── models # Used to store data model description files
+│ └── pet.mod.json
+├── tables # is used to store the data table description file
+│ └── pet.tab.json
+├── kanban # Used to store data kanban description files
+│ └── pet.kan.json
+├── db
+└── ui
+└── app.json
+```
+
+**Access Kanban interface:**
+
+Page route: `/xiang/kanban/<Kanban Name>`
+
+1. Enter `https://127.0.0.1:5099/xiang/kanban/pet` in the address bar
+
+2. It is recommended to add the `/xiang/kanban/pet` route as a menu item.
+
+Extended reading:
+
+<Extend
+	title='Data Kanban'
+	desc='Learn how to describe data Kanban related components, processes, API interface input and output, etc.'
+	link='d.API Reference/h.Data Kanban'
+></Extend>
+
+<Extend
+	title='Write Data Flow'
+	desc='Learn how to use data streams to orchestrate data query logic.'
+	link='b. Basic features/e. Write data flow'
+></Extend>
+
+<Extend
+	title='Query Data'
+	desc='Learn how to use the Data Model Process and Query DSL to query data in a data flow.'
+	link='b. Basic features/f. Query data'
+></Extend>
+
+## Analysis Chart
+
+Usually, data analysis requires users to input parameters such as time and date, and retrieve them according to the time range. The data analysis chart component, based on the data kanban description, sets query conditions through `filters`.
+
+Write a data analysis description file pet.cha.json and place it in the application's charts directory.
+
+**Description file content:**
+
+<Detail title="View source code">
+
+```json
+{
+	"label": "Pet Statistics",
+	"version": "1.0.0",
+	"description": "Pet Statistics",
+	"nodes": [
+		{
+			"name": "Type summary",
+			"engine": "xiang",
+			"query": {
+				"select": [":COUNT(id) as quantity", "kind as type"],
+				"wheres": [{ ":kind": "Pet Type", "in": "$kinds" }],
+				"groups": "Type",
+				"from": "$pet"
+			}
+		}
+	],
+	"output": {
+		"data": {
+			"Pet Type Distribution": "{{$res.Type Summary}}"
+		},
+		"query": "{{$in}}"
+	},
+	"apis": {
+		"data": { "default": [{ "kinds": ["cat", "dog"] }] }
+	},
+	"filters": {
+		"type": {
+			"label": "Type",
+			"bind": "kinds",
+			"input": {
+				"type": "select",
+				"props": {
+					"mode": "multiple",
+					"options": [
+						{ "label": "cat", "value": "cat" },
+						{ "label": "dog", "value": "dog" }
+					]
+				}
+			}
+		}
+	},
+	"page": {
+		"primary": "kind",
+		"layout": {
+			"filters": [{ "name": "type" }],
+			"charts": [
+				{
+					"name": "Pet Type Distribution",
+					"width": 24,
+					"type": "bar",
+					"props": {
+						"height": 240,
+						"x_key": "Type",
+						"axisLabel": {
+							"interval": 0,
+							"rotate": 45,
+							"textStyle": { "fontSize": 10 }
+						},
+						"tooltip": {
+							"textStyle": { "color": "#a2a5b9", "fontSize": 12 },
+							"backgroundColor": "#232326",
+							"borderRadius": 6
+						},
+						"series": [
+							{
+								"name": "Quantity",
+								"type": "bar",
+								"colorBy": "data",
+								"splitLine": { "show": false },
+								"label": { "show": true, "position": "top" },
+								"axisLabel": { "show": true }
+							}
+						]
+					}
+				}
+			]
+		}
+	}
+}
+```
+
+</Detail>
+
+**Application Directory Structure:**
+
+```bash
+├── apis # Used to store interface description files
+│ └── pet.http.json
+├── models # Used to store data model description files
+│ └── pet.mod.json
+├── tables # Used to store data table description files
+│ └── pet.tab.json
+├── kanban # Used to store data kanban description files
+│ └── pet.kan.json
+├── charts # Used to store data analysis description files
+│ └── pet.cha.json
+├── db
+└── ui
+└── app.json
+```
+
+**Visit to see:**
+
+Page routing: `/xiang/chart/<Chart Name>`
+
+1. Enter `https://127.0.0.1:5099/xiang/chart/pet` in the address bar
+
+2. It is recommended to add the `/xiang/chart/pet` route as a menu item.
+
+Extended reading:
+
+<Extend
+	title='Analysis Chart'
+	desc='Learn how to describe components related to analysis charts, processes, API interface input and output, etc.'
+	link='d.API Reference/h1.Analytics Chart'
+></Extend>
+
+## Data Screen
+
+Large data screens are often used to project to large-screen devices and display related charts in full screen. The large screen configuration items are the same as Chart, the difference is that the large screen has no filter bar, and the large screen has an additional top indicator bar, and the layout of the large screen is a grid layout, and the layout is vertical, and the width and height need to be set at the same time, and the width is 24. Grid, the height is 12 grids. For more complex large-screen pages, it is recommended to use [HTML page](#html-page).
+
+Write a data screen description file pet.scr.json and place it in the screens directory of the application. In the data board, you can add a large screen connection.
+
+<Detail title="View source code">
+
+```json
+{
+	"label": "Pet Statistics",
+	"version": "1.0.0",
+	"description": "Pet Statistics",
+	"nodes": [
+		{
+			"name": "Type summary",
+			"engine": "xiang",
+			"query": {
+				"select": [":COUNT(id) as quantity", "kind as type"],
+				"groups": "Type",
+				"from": "$pet"
+			}
+		}
+	],
+	"output": {
+		"data": {
+			"Pet Type Distribution": "{{$res.Type Summary}}"
+		}
+	},
+	"page": {
+		"primary": "kind",
+		"layout": {
+			"filters": [],
+			"charts": [
+				{
+					"name": "Pet Type Distribution",
+					"width": 4,
+					"height": 4,
+					"type": "bar",
+					"props": {
+						"x_key": "Type",
+						"axisLabel": {
+							"interval": 0,
+							"rotate": 45,
+							"textStyle": { "fontSize": 10 }
+						},
+						"tooltip": {
+							"textStyle": { "color": "#a2a5b9", "fontSize": 12 },
+							"backgroundColor": "#232326",
+							"borderRadius": 6
+						},
+						"series": [
+							{
+								"name": "Quantity",
+								"type": "bar",
+								"colorBy": "data",
+								"splitLine": { "show": false },
+								"label": { "show": true, "position": "top" },
+								"axisLabel": { "show": true }
+							}
+						]
+					}
+				}
+			]
+		}
+	}
+}
+```
+
+</Detail>
+
+Add a big screen link to the dashboard:
+
+`pet.kan.json`
+
+```json
+{
+  ...
+  "page": {
+    "option": {
+      "request_interval": 60,
+      "screen": "/screen/pet"
+    }
+  }
+  ...
+}
+```
+
+**Application Directory Structure:**
+
+```bash
+├── apis # Used to store interface description files
+│ └── pet.http.json
+├── models # Used to store data model description files
+│ └── pet.mod.json
+├── tables # Used to store data table description files
+│ └── pet.tab.json├── kanban # Used to store data kanban description files
+│ └── pet.kan.json
+├── charts # Used to store data analysis description files
+│ └── pet.cha.json
+├── screens # Used to store the data large screen description file
+│ └── pet.scr.json
+├── db
+└── ui
+└── app.json
+```
+
+**Access the big screen interface:**
+
+Page routing: `/xiang/screen/<Screen Name>`
+
+1. Enter `https://127.0.0.1:5099/xiang/screen/pet` in the address bar
+
+2. It is recommended to add a link to the big data screen through the Kanban `option` configuration.
+
+<Extend
+	title='Data screen'
+	desc='Learn how to describe components related to analysis charts, processes, API interface input and output, etc.'
+	link='d.API reference/h3.Data screen'
+></Extend>
+
+## HTML Page
+
+Yao has a built-in HTTP Server, which puts HTML pages, CSS, JS and other files into the `ui` directory for direct access. In this way, any front-end technology can be used, combined with the built-in API, to completely refactor the management system, and it can also be integrated into the built-in management system through the `iframe` component or the `extend` component.
+
+Write an HTML page index.html and place it in the application's ui directory.
+
+```html
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Yao App Engine</title>
+	</head>
+	<body class="overscroll-none">
+		It works!
+	</body>
+</html>
+```
+
+**Application Directory Structure:**
+
+```bash
+├── apis # Used to store interface description files
+│ └── pet.http.json
+├── models # Used to store data model description files
+│ └── pet.mod.json
+├── tables # Used to store data table description files
+│ └── pet.tab.json
+├── kanban # Used to store data kanban description files
+│ └── pet.kan.json
+├── charts # Used to store data analysis description files
+│ └── pet.cha.json
+├── screens # Used to store the data large screen description file
+│ └── pet.scr.json
+├── db
+└── ui
+│ └── index.html # custom page
+└── app.json
+```
+
+**Visit page:**
+
+Enter `https://127.0.0.1:5099/index.html` in the address bar

@@ -1,0 +1,166 @@
+# Create Database
+
+<blockquote>
+	A data model corresponds to a data table in the database. The structure of the data table is
+	described through a JSON file and placed in the models directory. Use the yao migrate command
+	to create/update the data table structure design.
+</blockquote>
+
+## Data Model Description
+
+Write a data model description file `pet.mod.json` and place it in the `models` directory of the application.
+
+Description file content:
+
+```json
+{
+	"name": "pet",
+	"table": { "name": "pet", "comment": "pet table" },
+	"columns": [
+		{ "label": "ID", "name": "id", "type": "ID", "comment": "ID" },
+		{ "label": "number", "name": "sn", "type": "string", "unique": true },
+		{ "label": "name", "name": "name", "type": "string", "index": true },
+		{
+			"label": "Type",
+			"name": "kind",
+			"type": "enum",
+			"option": ["cat", "dog"],
+			"default": "Cat",
+			"index": true
+		},
+		{
+			"label": "introduction",
+			"name": "desc",
+			"type": "string",
+			"comment": "detailed introduction"
+		}
+	],
+	"values": [
+		{ "sn": "100001", "name": "Cookie", "kind": "cat", "desc": "a cat" },
+		{ "sn": "100002", "name": "Beibei", "kind": "dog", "desc": "a dog" }
+	],
+	"option": { "timestamps": true, "soft_deletes": true }
+}
+```
+
+<Notice type='success'>
+	Tip: <strong>option.timestamps</strong> is true, automatically created The{' '}
+	<strong>created_at</strong> and <strong>updated_at</strong> fields hold the creation time and
+	update time of the data record.
+	<strong>option.soft_deletes</strong> is true, automatically created
+	<strong>deleted_at</strong> field, which is used to mark deleted records. Refer to the data
+	model documentation for details.
+</Notice>
+
+Application directory structure:
+
+```bash
+├── models # Used to store data model description files
+│ └── pet.mod.json
+├── db
+└── ui
+└── app.json
+```
+
+Extended reading:
+
+<Extend
+	title='Data Model Documentation'
+	desc='Learn about the definition of field types, joint index model associations, etc.'
+	link='e.API Reference/a.Data Model'
+></Extend>
+
+## Migrate 
+
+Run `Migrate` in the project root directory to create/update the data table structure and insert default data.
+
+```bash
+cd /data/app
+yao migrate -n pet
+```
+
+<Notice type='warning'>
+	Note: The migrate command will delete the data table with the same name in the database and
+	recreate it, please pay attention to data backup.
+</Notice>
+
+Extended reading:
+
+<Extend
+	title='Command Line Tools'
+	desc='Learn what commands Yao has and how to use them.'
+	link='e.API Reference/a.Command Line Tools'
+></Extend>
+
+## Query Data 
+
+List query
+
+```bash
+yao run models.pet.Get '::{}'
+```
+
+Query data by primary key
+
+```bash
+yao run models.pet.Find 1
+```
+
+delete a piece of data
+
+```bash
+yao run models.pet.Delete 1
+```
+
+add a piece of data
+
+```bash
+yao run models.pet.Create '::{"sn":"200001", "name":"Ball Ball", "type":"Dog", "desc":"New member"}'
+```
+
+update a piece of data
+
+```bash
+yao run models.pet.Update 1 '::{"desc":"A cute tricolor cat"}'
+```
+
+Save a piece of data, specify the primary key to update, do not specify create and create.
+
+```bash
+yao run models.pet.Save '::{"sn":"200002", "name":"Sirius", "type":"dog", "desc":"New member"}'
+```
+
+```bash
+yao run models.pet.Save '::{"id":1,"desc":"A cute tricolor cat"}'
+```
+
+Extended reading:
+
+<Extend
+	title='Model Process Documentation'
+	desc='Data Model Process Detailed Documentation'
+	link='e. Process Reference/a. Data Model'
+></Extend>
+
+## Recommended
+
+Next, it is recommended to study the following chapters:
+
+<Extend
+	title='write interface'
+	desc='Learn how to write RESTFul data interfaces'
+	link='b. Basic features/b. Writing interfaces'
+></Extend>
+
+<Div style={{ display: 'flex', justifyContent: 'space-between' }}>
+	<Link
+		type='prev'
+		title='Installation and debugging'
+		link='a.Introduction/b.Installation and debugging'
+	></Link>
+	<Link
+		type='next'
+		title='Write an interface'
+		link='b. Basic features/b. Write an interface'
+	></Link>
+</Div>

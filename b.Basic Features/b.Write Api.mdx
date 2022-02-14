@@ -1,0 +1,127 @@
+# Write Api
+
+<blockquote>
+	Write the API interface JSON description file, place it in the application `apis` directory,
+	run yao start When the command starts the service, the engine will generate the RESTFul API
+	interface as defined by the interface description.
+</blockquote>
+
+## Api Description
+
+Write an interface description file `pet.http.json`, specify the interface path, request method and bound handler, and place it in the `api` directory of the application.
+
+Description file content:
+
+```json
+{
+	"name": "pet",
+	"version": "1.0.0",
+	"description": "Pet interface",
+	"guard": "bearer-jwt",
+	"group": "pet",
+	"paths": [
+		{
+			"path": "/search",
+			"method": "GET",
+			"guard": "-",
+			"process": "models.pet.Paginate",
+			"query": [":query-param", "$query.page", "$quey.pagesize"],
+			"out": {
+				"status": 200,
+				"type": "application/json"
+			}
+		},
+		{
+			"path": "/save",
+			"method": "POST",
+			"guard": "-",
+			"process": "models.pet.Save",
+			"query": [":payload"],
+			"out": {
+				"status": 200,
+				"type": "application/json"
+			}
+		}
+	]
+}
+```
+
+Application directory structure:
+
+```bash
+├── apis # Used to store interface description files
+│ └── pet.http.json
+├── models # Used to store data model description files
+│ └── pet.mod.json
+├── db
+└── ui
+└── app.json
+```
+
+Extended reading:
+
+<Extend
+	title='Interface Documentation'
+	desc='Learn about the interface input and output specifications, the definition of authentication methods, etc.'
+	link='e.API Reference/b.Interface'
+></Extend>
+
+<Extend
+	title='Use handler'
+	desc='Learn what a processor is and what processes are available.'
+	link='b. Basic Features/d. Using Processes'
+></Extend>
+
+## Start 
+
+```bash
+cd /data/app
+yao start
+```
+
+<Extend
+	title='Command Line Tools'
+	desc='Complete documentation of command line tools'
+	link='e.API Reference/a.Command Line Tools'
+></Extend>
+
+## Debugging
+
+Use `curl` or `Postman` and other interface tools to debug, access interface debugging.
+
+Paging query interface
+
+```bash
+ curl 'http://127.0.0.1:5099/xiang/api/pet/search?where.name.match=Cookie&page=1&pagesize=1'
+```
+
+save data interface
+
+```bash
+curl -X POST http://127.0.0.1:5099/xiang/api/pet/save
+   -H 'Content-Type: application/json'
+   -d '{"sn":"300001", "name":"Wangwang", "type":"dog", "desc":"new member"}'
+```
+
+## Recommended
+
+Next, it is recommended to study the following chapters:
+
+<Extend
+	title='Describe interface'
+	desc='Learn how to make a data manipulation CURD interface.'
+	link='b. Basic features/c. Description interface'
+></Extend>
+
+<Div style={{ display: 'flex', justifyContent: 'space-between' }}>
+	<Link
+		type='prev'
+		title='Create Data Model'
+		link='b. Basic Properties/a. Create Data Model'
+	></Link>
+	<Link
+		type='next'
+		title='Description interface'
+		link='b. Basic features/c. Description interface'
+	></Link>
+</Div>
