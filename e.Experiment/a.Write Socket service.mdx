@@ -1,0 +1,58 @@
+# Write Socket Service
+
+<blockquote>
+	Write a service description file, start a Socket service, and specify a process to respond to
+	client requests.
+</blockquote>
+
+<Notice type='warning'>
+	Note: write Socket The service is an experimental feature, and the JSON structure of the
+	service description may be changed based on usage feedback. Required when starting the service
+	<strong>alpha</strong> parameter.
+</Notice>
+
+## Write Service
+
+Write a service file `rfid.sock.json` and place it in the application `servers` directory.
+
+```json
+{
+	"name": "RFID Receiver",
+	"description": "Used to receive and process RIFD",
+	"version": "0.0.1",
+	"protocol": "tcp",
+	"host": "0.0.0.0",
+	"port": "3019",
+	"process": "scripts.rfid.Read"
+}
+```
+
+Write the Rfid process:
+
+```javascript
+/**
+ * Receive RFID
+ * @param {*} data
+ */
+function Read(data) {
+	sn = getSN(data)
+	if (sn != '') {
+		Process('models.rfid.Create', { sn: sn, uptime: new Date().toISOString() })
+	}
+}
+
+function getSN(data) {
+	// 100000012021128798321101 15 2d 02 f2 96 72 1e 52 b9 cd
+	var idstr = data || ''
+	if (idstr.length != 36) {
+		return ''
+	}
+	return BigInt('0x' + idstr.substring(8, idstr.length - 8).toUpperCase()).toString(10)
+}
+```
+
+## Start Service
+
+```bash
+yao start alpha
+```

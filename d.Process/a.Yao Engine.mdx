@@ -1,0 +1,156 @@
+# Yao Engine
+
+Application engine related processor.
+
+| Process          | Description                           | Documentation               |
+| ------------------ | ------------------------------------- | --------------------------- |
+| xiang.sys.Ping     | Return version information            | [View](#xiang.sys.Ping)     |
+| xiang.sys.Inspect  | Return application system information | [View](#xiang.sys.Inspect)  |
+| xiang.sys.Print    | Print data in console                 | [View](#xiang.sys.Print)    |
+| xiang.env.Get      | Read environment variables            | [View](#xiang.sys.Get)      |
+| xiang.env.Set      | Set environment variables             | [View](#xiang.sys.Set)      |
+| xiang.env.MultiGet | Batch read environment variables      | [View](#xiang.sys.MultiGet) |
+| xiang.env.MultiSet | Batch setting environment variables   | [View](#xiang.sys.MultiSet) |
+
+## xiang.sys.Ping
+
+Return version information
+
+`yao run xiang.sys.Ping`
+
+**Parameters Table**
+
+none
+
+**return value**
+
+```json
+{
+	"engine": "yao",
+	"version": "0.9.0"
+}
+```
+
+## xiang.sys.Inspect
+
+Return application configuration information
+
+`yao run xiang.sys.Inspect`
+
+**Parameters Table**
+
+none
+
+**return value**
+
+```json
+{
+	"name": "Yao",
+	"description": "Another yao app",
+	"option": {
+		"hide_menu": false,
+		"hide_user": false,
+		"login": {
+			"entry": {
+				"admin": "/table/pet"
+			}
+		},
+		"nav_menu": "xiang.menu",
+		"nav_user": "xiang.user"
+	}
+}
+```
+
+## xiang.sys.Print
+
+print data in console
+
+`yao run xiang.sys.Print hello '::{"foo":"bar"}' world`
+
+**Parameters Table**
+
+| Parameters | Type | Required Fields | Description        |
+| ---------- | ---- | --------------- | ------------------ |
+| args[0]    | any  | yes             | variable to print  |
+| args[...]  | any  | no              | variable n printed |
+
+**return value**
+
+none
+
+## xiang.env.Get
+
+read environment variables
+
+`yao run xiang.env.Get PATH`
+
+**Parameters Table**
+
+| Parameters | Type   | Required Fields | Description               |
+| ---------- | ------ | --------------- | ------------------------- |
+| args[0]    | string | yes             | environment variable name |
+
+**return value**
+
+string
+
+```json
+"/usr/data/opt/bin"
+```
+
+## xiang.env.Set
+
+Set environment variables
+
+`yao run xiang.env.Set FOO BAR`
+
+**Parameters Table**
+
+| Parameters | Type   | Required Fields | Description                |
+| ---------- | ------ | --------------- | -------------------------- |
+| args[0]    | string | yes             | environment variable name  |
+| args[1]    | string | yes             | environment variable value |
+
+**return value**
+
+none
+
+## xiang.env.MultiGet
+
+Read multiple environment variables
+
+`yao run xiang.env.MultiGet PATH USER SHELL`
+
+**Parameters Table**
+
+| Parameters | Type   | Required Fields | Description               |
+| ---------- | ------ | --------------- | ------------------------- |
+| args[0]    | string | yes             | environment variable name |
+
+**return value**
+
+[key:string]string
+
+```json
+{
+	"PATH": "/usr/local/opt/bin",
+	"SHELL": "/bin/bash",
+	"USER": "max"
+}
+```
+
+## xiang.env.MultiSet
+
+Set multiple environment variables
+
+`yao run xiang.env.MultiSet '::{"FOO":"BAR", "HELLO":"WORLD"}'`
+
+**Parameters Table**
+
+| Parameters | Type   | Required Fields | Description               |
+| ---------- | ------ | --------------- | ------------------------- |
+| args[0]    | string | yes             | environment variable name |
+
+**return value**
+
+none

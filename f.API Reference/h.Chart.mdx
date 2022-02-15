@@ -1,0 +1,278 @@
+# Chart
+
+Analysis chart (`Chart`) is mainly used for arranging data statistics analysis query logic, supports the use of JavaScript scripts to process the results of each query node, can directly view the analysis chart in the data management background, and can also be used as a processor (`process`), The reference method is `charts.<analytical chart name>`. Analysis chart (`Chart`) supports data analysis engines based on `ElasticSearch` and `MySQL` for various business scenarios.
+
+Data kanban and data big screen pages can also be written in the same way.
+
+## Naming conventions
+
+The analysis chart description file is a JSON text file named with **lowercase English letters** + `.chart.json` extension, `<name>.chart.json`;
+The result processing script file is a JavaScript script file named `<name>.<script>.js` with the extension of `Analysis chart name` + `.` + `script name` + `.js`.
+
+The extension of the data kanban is `.kan.json`, and the extension of the big data screen is `.scr.json`
+
+| Folder (relative to analytic graph root) | File name       | Analytic graph name  | Script name | Process (referenced in API/Flow) | API route address                                     |
+| ---------------------------------------- | --------------- | -------------------- | ----------- | -------------------------------- | ----------------------------------------------------- |
+| /                                        | name.chart.json | `name`               |             | `charts.name`                    | `/api/xiang/chart/name/query interface`               |
+| /                                        | name.count.js   | `name`               | `count`     | -                                | -                                                     |
+| /group                                   | name.chart.json | `group.name`         |             | `charts.group.name`              | `/api/xiang/chart/group.name/query interface`         |
+| /group                                   | name.count.js   | `gorup.name`         | `count`     | -                                | -                                                     |
+| /group1/group2                           | name.chart.json | `group1.group2.name` |             | `charts.group1.group2.name`      | `/api/xiang/chart/group1.group2.name/query interface` |
+| /group1/group2                           | name.count.js   | `group1.group2.name` | `count`     | -                                | -                                                     |
+
+## Document structure
+
+The analysis chart layout document consists of basic information, query nodes, output data, and analysis page rendering parameters. [see full example] (#3 - full example)
+
+```json
+{
+	"lang": "gou",
+	"label": "Latest Information",
+	"version": "1.0.0",
+	"description": "Latest Information",
+	"nodes": [],
+	"output": {},
+	"apis": {},
+	"filters": {},
+	"page": {}
+}
+```
+
+| Fields      | Type                         | Description                                                                                                                                                                                                                         | Required Fields |
+| ----------- | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| lang        | String                       | Data query condition description language. The license value `gou` applies to a database-based data analysis engine. `tai` applies to the analysis engine implemented based on ElasticSearch (mounted separately). Default is `gou` | yes             |
+| label       | String                       | Analysis chart rendering name, used for development platform rendering                                                                                                                                                              | yes             |
+| version     | String                       | Version number, used for dependency check and development platform rendering                                                                                                                                                        | yes             |
+| description | String                       | Analysis chart introduction, used for development platform presentation                                                                                                                                                             | No              |
+| nodes       | Array<Object Node\>          | query nodes [see full description](#21-query-nodes-nodes)                                                                                                                                                                           | yes             |
+| output      | Object \| `String`           | Definition of output result, same as business logic orchestration (`flow`) `output` [View full description](../flow/#22-output-result-output)                                                                                       | yes             |
+| apis        | \[key:String\]:Object API    | Analysis chart query API, you can set the same `key` settings to close the interface, set the authentication method and default value options. [View full description](#23-Analytical chart query interface-apis)                   | No              |
+| filters     | \[key:String\]:Object Filter | Query filter settings. Same as data table (`talbe`) `fliters`. [see full description](../table/#25-query-filters-fliters)                                                                                                           | no              |
+| page        | Object Page                  | Analysis chart query page settings. [View full description](#22-query page-page) [Object Page data structure](../table/#4-Object-Page-data structure).                                                                              | yes             |
+
+### `nodes`
+
+```json
+{
+	"nodes": [
+		{
+			"name": "Industry Distribution",
+			"query": {
+				"model": "service",
+				"select": ["city", ":COUNT(id) as cnt", "@industries.$ as industry"],
+				"wheres": [
+					{ "column": "created_at", "value": "{{$query.from}}", "op": "ge" },
+					{ "column": "created_at", "value": "{{$query.to}}", "op": "le" }
+				],
+				"order": ["cnt.desc"],
+				"limit": 100,
+				"group": ["@industries.$", "city"]
+			}
+		},
+		{
+			"name": "Billing method",
+			"query": {
+				"model": "service",
+				"select": ["city", ":COUNT(id) as cnt", "@price_options.$ as option"],
+				"wheres": [
+					{ "column": "created_at", "value": "{{$query.from}}", "op": "ge" },
+					{ "column": "created_at", "value": "{{$query.to}}", "op": "le" }
+				],
+				"order": ["cnt.desc"],
+				"limit": 100,
+				"group": ["@price_options.$", "city"]
+			}
+		},
+		{
+			"name": "Merge result",
+			"process": "xiang.chart.MergeData",
+			"args": [
+				["city", "industry", "billing"],
+				{
+					"Industry": {
+						"key": "city",
+						"values": "{{$res.Industry scorecloth[*].industry}}"
+					},
+					"Billing": {
+						"key": "city",
+						"values": "{{$res.Billing method[*].option}}"
+					}
+				}
+			]
+		}
+	]
+}
+```
+
+An analysis chart query orchestration (`Chart`) can have multiple query nodes, and each query node can also write and set the `query` query parameters corresponding to the data engine, or call a processor (`process`), which can specify the result Processing scripts and return values ​​can be used to reference contextual information in query nodes. The context data reference and result processing script are specifically consistent with the business logic orchestration (`Flow`), please refer to the related documents: [input and output](../flow/#3-input and output) [context data reference](. ./flow/#3 - context data reference) [result processing script] (../flow/#4 - result processing script)
+
+`Object Node` data structure
+
+| Fields  | Type           | Description                                                                                                                                                                                                                                         | Required Fields |
+| ------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| name    | String         | query node name                                                                                                                                                                                                                                     | yes             |
+| query   | Query DSL      | Query language [see full description](../query)                                                                                                                                                                                                     | no              |
+| process | String         | Invoke the processor `process`, `query` or `process`. If also present ignore the `process` setting.                                                                                                                                                 | No              |
+| args    | Array<Any\>    | Process argument list. Can refer to input/output or context data, same as `flow`. [see full description](../flow/#3 - context data reference)                                                                                                     | no              |
+| script  | String         | Result processing script, supports ES5, same as `flow`. [see full description](../flow/#4-result processing script)                                                                                                                                 | no              |
+| outs    | Array<String\> | Query node result output. Use `{{$out}}` to refer to the processor to return the result, same as `flow`. If not set, the return value is equal to the result returned by the processor. [see full description](../flow/#3 - context data reference) | no              |
+| next    | Object Next    | Jump to the specified query node when the query result meets the set conditions (**Not yet implemented**)                                                                                                                                           | No              |
+
+## `Query DSL`
+
+| Data Analysis Engine | Description                                                                                                                                                                                                  |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `gou`                | Gou Query DSL (Domain Specific Language) is used to describe data query conditions, and is suitable for data analysis engines based on database implementation. [View Documentation](../query/gou/README.md) |
+| `tai`                | Tai Query DSL(Domain Specific Language) is used to describe data query conditions, suitable for data analysis engine based on ElasticSearch [View document](../query/tai/README.md)                          |
+
+### `page`
+
+The query page data structure is [Object Page data structure](../table/#4-Object-Page-data structure).
+
+```json
+{
+	"page": {
+		"primary": "City",
+		"layout": {
+			"filters": [
+				{ "name": "start time", "width": 6 },
+				{ "name": "end time", "width": 6 }
+			],
+			"charts": [
+				{ "type": "line", "props": {} },
+				{ "type": "bar", "props": {} }
+			]
+		}
+	}
+}
+```
+
+#### `layout`
+
+| Field     | Type                                     | Description                                                                                          |
+| --------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `charts`  | Array<Object Render \| String \>         | Available chart components [Object Render data structure](../table/#4-Object-Render-data structure). |
+| `filters` | Array<Object FilterInstance \| String \> | renderable query filters                                                                             |
+
+##### Object FilterInstance Data Structure
+
+| Fields | Type    | Description                                                                | Required Fields |
+| ------ | ------- | -------------------------------------------------------------------------- | --------------- |
+| name   | String  | Field name. Must have been defined in query filter mode (`filters`).       | yes             |
+| width  | Integer | Column width. Use grid system, valid values ​​are `1`-`24`. Default is `6` | no              |
+
+### `apis`
+
+The data and configuration query interface is enabled by default in the analysis chart. You can disable the interface, set the authentication method and default value options by setting the same `key` settings.
+
+```json
+{
+	"apis": {
+		"data": {
+			"disable": true,
+			"guard": "bearer-jwt",
+			"default": {}
+		},
+		"setting": {
+			"guard": "-",
+			"default": {}
+		}
+	}
+}
+```
+
+| Fields  | Type   | Description                                                                                                                                                     | Required Fields |
+| ------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| disable | Bool   | Disables the interface. `true` closes the interface                                                                                                             | no              |
+| guard   | String | Interface authentication middleware, multiple are separated by `,`, set to `-`, no authentication middleware is set, and no default authentication mode is set. | No              |
+| default | Object | Parameter table default value, `{"from":"2021-08-28"}`                                                                                                          | no              |
+
+#### Interface List
+
+| management interface (`key`) | request method | route (relative) | description                                                                                                                    |
+| ---------------------------- | -------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| data                         | `GET`          | `/data`          | Return query results [View full description](apis/data.md)                                                                     |
+| setting                      | `GET`          | `/setting`       | Read analysis chart configuration information, used for front-end interface rendering [View full description](apis/setting.md) |
+
+## Complete Example
+
+Complete examples are stored in the examples directory, [View complete example](examples)
+
+```json
+{
+	"lang": "gou",
+	"label": "Indicator comparison",
+	"version": "1.0.0",
+	"decription": "Indicator comparison",
+	"nodes": [
+		{
+			"name": "Industry Distribution",
+			"process": "models.service.get",
+			"query": {
+				"select": ["city", ":COUNT(id) as cnt", "@industries.$ as industry"],
+				"wheres": [
+					{ "column": "created_at", "value": "{{$query.from}}", "op": "ge" },
+					{ "column": "created_at", "value": "{{$query.to}}", "op": "le" }
+				],
+				"order": ["cnt.desc"],
+				"limit": 100,
+				"group": ["@industries.$", "city"]
+			}
+		},
+		{
+			"name": "Billing method",
+			"process": "models.service.get",
+			"query": {
+				"select": ["city", ":COUNT(id) as cnt", "@price_options.$ as option"],
+				"wheres": [
+					{ "column": "created_at", "value": "{{$query.from}}", "op": "ge" },
+					{ "column": "created_at", "value": "{{$query.to}}", "op": "le" }
+				],
+				"order": ["cnt.desc"],
+				"limit": 100,
+				"group": ["@price_options.$", "city"]
+			}
+		},
+		{
+			"name": "Merge result",
+			"process": "xiang.chart.MergeData",
+			"args": [
+				["city", "industry", "billing"],
+				{
+					"Industry": {
+						"key": "city",
+						"values": "{{$res.Industry distribution[*].industry}}"
+					},
+					"Billing": {
+						"key": "city",
+						"values": "{{$res.Billing method[*].option}}"
+					}
+				}
+			]
+		}
+	],
+	"output": "{{$res.merge result}}",
+	"apis": {
+		"data": {
+			"guard": "-"
+		},
+		"setting": {
+			"guard": "-"
+		}
+	},
+	"filters": {},
+	"page": {
+		"primary": "City",
+		"layout": {
+			"filters": [
+				{ "name": "start time", "width": 6 },
+				{ "name": "end time", "width": 6 }
+			],
+			"charts": [
+				{ "type": "line", "props": {} },
+				{ "type": "bar", "props": {} }
+			]
+		}
+	}
+}
+```

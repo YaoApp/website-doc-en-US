@@ -1,0 +1,260 @@
+# API
+
+Yao currently supports RESTFul API description MQTT, Socket, WEB Socket API description is in internal testing; it is used for data collection and docking, instant messaging, IoT and other types of projects.
+
+## Naming Conventions
+
+The business interface description file is a JSON text file named with **lowercase English letters** + `.protocol name` + `.json` extension, `<name>.<protocol>.json`;
+
+| Folder (relative to business interface root directory) | File name      | Interface name       | API type            |
+| ------------------------------------------------------ | -------------- | -------------------- | ------------------- |
+| /                                                      | name.http.json | `name`               | `http` RESTFul API  |
+| /group                                                 | name.http.json | `group.name`         | `http` RESTFul API  |
+| /group1/group2                                         | name.http.json | `group1.group2.name` | `http` RESTFul API  |
+| /                                                      | name.mqtt.json | `name`               | `mqtt` MQTT API     |
+| /group                                                 | name.mqtt.json | `group.name`         | `mqtt` MQTT API     |
+| /group1/group2                                         | name.mqtt.json | `group1.group2.name` | `mqtt` MQTT API     |
+| /                                                      | name.sock.json | `name`               | `sock` Socket API   |
+| /group                                                 | name.sock.json | `group.name`         | `sock` Socket API   |
+| /group1/group2                                         | name.sock.json | `group1.group2.name` | `sock` Socket API   |
+| /                                                      | name.ws.json   | `name`               | `ws` WEB Socket API |
+| /group                                                 | name.ws.json   | `group.name`         | `ws` WEB Socket API |
+| /group1/group2                                         | name.ws.json   | `group1.group2.name` | `ws` WEB Socket API |
+
+## Each Protocol Specification Document
+
+| Protocol Name | Document Address                 |
+| ------------- | -------------------------------- |
+| http          | [RESTFul API](#RESTFul%20API)    |
+| mqtt          | MQTT API **Not yet implemented** |
+| sock          | Socket API (in beta)             |
+| ws            | WEB Socket API (in beta)         |
+
+## RESTFul API
+
+```json
+{
+	"name": "System Interface",
+	"version": "1.0.0",
+	"description": "System Interface API",
+	"group": "system",
+	"guard": "bearer-jwt",
+	"paths": [
+		{
+			"path": "/info",
+			"method": "GET",
+			"guard": "-",
+			"process": "models.user.Find",
+			"in": ["$param.id", ":params"],
+			"out": {
+				"status": 200,
+				"type": "application/json"
+			}
+		}
+	]
+}
+```
+
+An interface (`API`) document of the `http` protocol, which can define a set of APIs, and can bind a processor (`process`) to each API, and the system automatically calls the processor and returns the result of the processor call;
+
+| Fields      | Type                 | Description                                                                                                                    | Required Fields |
+| ----------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------------- |
+| name        | String               | API rendering name, used for development platform rendering                                                                    | yes             |
+| version     | String               | Version number, used for dependency check and development platform rendering                                                   | yes             |
+| description | String               | API introduction, used for development platform rendering                                                                      | no              |
+| group       | String               | API group name, used as the API route prefix directory when accessing. `/api/<group>/<path>`                                   | yes             |
+| guard       | String               | API global middleware, multiple separated by ",". Unless otherwise specified, all APIs in the group will use global middleware | no              |
+| paths       | Array\<Object Path\> | API list. Check the `Object Path` data structure for details                                                                   | yes             |
+
+### `Object Path` data structure
+
+The API will be accessed through the route `/api/<group>/<path>`, the request succeeds and responds to the status code, Content-Type and the return value of the processor (`process`) defined in `out`, and the request fails and responds to the exception status code and error messages in JSON format [see exception specification] (#4 - exception specification).
+
+| Fields  | Type            | Description                                                                                                                                                                                        | Required Fields |
+| ------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| path    | String          | API route name. The complete routing address is `/api/<group>/<path>`, variables are declared with `:`, such as `/api/user/find/:id`, you can use `$param.id` to access routing request parameters | yes             |
+| method  | String          | The request type. Permitted values ​​`GET`, `POST`, `PUT`, `DELETE`, `HEAD`, `OPTIONS`, `Any`. where `Any` will respond to any type of request                                                     | yes             |
+| guard   | String          | API middleware. If not set, the global middleware is used by default. If you don't want to use global middleware, set the value to `-` .                                                           | No              |
+| process | String          | Invoke processor `process`                                                                                                                                                                         | yes             |
+| in      | Array\<String\> | Request argument list, which will be used as input arguments (`args`) to `process`. The incoming parameter can be quoted, it can be an empty array [View input parameters](#3-input parameters)    | yes             |
+| out     | Object Out      | Request response result definition. See the `Object Out` data structure for details                                                                                                                | yes             |
+| err     | Object Out      | Customize the response when the call fails. **Not yet implemented**                                                                                                                                | No              |
+
+### `Object Out` data structure
+
+| Fields  | Type            | Description                                      | Required Fields |
+| ------- | --------------- | ------------------------------------------------ | --------------- |
+| status  | integer         | request response status code                     | yes             |
+| type    | String          | Request response Content Type                    | Yes             |
+| headers | Array\<String\> | Request Response Headers **Not yet implemented** | No              |
+
+### Input parameters
+
+The parameter list defined in `in` will be used as input parameters to the processor. Supports the use of `:param` , `:payload` , `$param.field name` and other variables to bind request parameters.
+
+#### Numerical value
+
+| Value        | Description                                        |
+| ------------ | -------------------------------------------------- |
+| `"'String'"` | String format value, escape single quotes with `\` |
+| `"Number"`   | Numeric format value                               |
+
+#### variables
+
+| variable                | type               | description                                                                                                                 |
+| ----------------------- | ------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| `":body"`               | string             | Request Body                                                                                                                |
+| `":fullpath"`           | string             | route full path                                                                                                             |
+| `":payload"`            | \[key:String\]:Any | If Request Content-Type is `application/json` , treat `Reqest Body` as JSON. Return the decoded Key-Value Object            |
+| `":query"`              | \[key:String\]:Any | URL-encoded Query String parsed value                                                                                       |
+| `":form"`               | \[key:String\]:Any | POST form                                                                                                                   |
+| `":query-param"`        | Object QueryParam  | Parse URL-encoded Query String, return QueryParam `View data structure (../../model#3-query-parameter-queryparam)`          |
+| `"$form.FieldName"`     | String             | POST form field value                                                                                                       |
+| `"$param.FieldName"`    | String             | Route variable value                                                                                                        |
+| `"$query.FieldName"`    | String             | URL-encoded Query String Field value                                                                                        |
+| `"$payload.field name"` | Any                | payload field value, supports multi-level access. Such as `$payload.user.name` , `$payload.manus.0.name`                    |
+| `"$session.FieldName"`  | Any                | Session The number of session fields, supports multi-level access. Such as $session.user.name , $session.manus.0.name value |
+| `"$file.FieldName"`     | Object File        | Upload temporary file structure                                                                                             |
+
+`Object File` data structure
+
+| Field    | Type                           | Description               |
+| -------- | ------------------------------ | ------------------------- |
+| name     | String                         | file name                 |
+| tempfile | String                         | temporary file address    |
+| size     | Integer                        | file size                 |
+| header   | \[key:String\]:Array\<String\> | MIME-style header mapping |
+
+##### URL Query String and QueryParam comparison table
+
+| Query String                                                      | QueryParam                                                                                                                                                        | Description                                                                                                                   |
+| ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| select=field1,field2                                              | `{"select":["field1","field2"]}`                                                                                                                                  | select field                                                                                                                  |
+| with=rel1,rel2                                                    | `{"withs":{"rel1":{}, "rel2":{}}}`                                                                                                                                | Association                                                                                                                   |
+| rel1.select=field1,field2                                         | `{"withs":{"rel1":{"select":["field1", "field2"]}}}`                                                                                                              | associated model selection fields. The specification is **association .select**                                               |
+| where.status.eq=enabled                                           | `{"wheres":[{"column":"status", "op":"eq", "method":"where", "value":"enabled"}] }`                                                                               | Where query condition. The specification is **where. field name. match relation**                                             |
+| where.mother.friends.status.eq=enabled                            | `{"wheres":[{"rel":"user_mother_friends","column":"status", "op":"eq", "method":" where", "value":"enabled"}]}`                                                   | Specify the association model field specification as **where.relation name.association model name.field name.match relation** |
+| group.types.where.type.eq=admin&group.types.orwhere.type.eq=staff | `{"wheres":[{"wheres":[{"column":"type", "op":" eq", "method":"where", "value":"admin"}]},{"column":"type", "op":"eq", "method":"orwhere", "value" :"staff"}]}]}` | Where group query, generally used for orwhere. The specification is **group.group name.where.field name.match relation**      |
+| order=id.desc,name                                                | `{"orders":[{"column":"id","option":"desc"}, {"column":"name"}]}`                                                                                                 | Order condition. The specification is **field name. Sorting method** Multiple are separated by ","                            |
+
+### Exception Specification
+
+```json
+{
+	"code": 500,
+	"message": "Data with ID=12 does not exist",
+	"context": {
+		"field": "id"
+	}
+}
+```
+
+| Field   | Type    | Description                   |
+| ------- | ------- | ----------------------------- |
+| code    | Integer | Error code                    |
+| message | String  | Error description             |
+| context | Any     | exception context information |
+
+#### HTTP Response Status Code
+
+The returned status is consistent with the error code. For example, if the HTTP Response status code is **400~599**, it will be regarded as a program processing exception.
+
+#### Error Code definition
+
+The meaning of the error code is basically the same as the meaning of the HTTP protocol status code, which is convenient for RESTFul API writing, unified exception handling and engineers to understand the meaning of the error code.
+
+| Error code | Applicable scenarios                                                                                                                                                               |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- |
+| 400~499    | The program failed to run due to incorrect input data                                                                                                                              |
+| 500~599    | The program fails due to insufficient server resources or abnormal program errors                                                                                                  |
+| 400        | The program failed to run because the input data does not meet the requirements. Specific non-conforming data fields should be described in the contextual data.                   |
+| 401        | The program failed to run because you are not logged in.                                                                                                                           |     |
+| 403        | The program failed to run due to insufficient access rights. Specific permission requirement information should be described in the context data.                                  |
+| 404        | The program failed to run because the query resource does not exist. The resource name and data ID should be described in the context data.                                        |
+| 413        | The program failed to run because the input data was out of bounds.                                                                                                                |
+| 500        | The program failed to run due to a server exception. Specific error data should be described in the context data. For example: File writing failed due to insufficient disk space. |
+| 503        | The server is temporarily unreachable, causing the program to fail. For example: MySQL server has gone away!                                                                       |
+| 504        | Program failed due to connection timeout. For example: MySQL server connect timeout!                                                                                               |
+
+**Added error code:**
+
+According to the needs of the program, the definition of the error code can be added. The new error code must meet the following specifications:
+
+① User input errors and server-side errors must be distinguished.
+
+② The user input error code range must be between 418~420, 432~450, 452~499.
+
+③ The server-side error code range must be between 512 and 599.
+
+Reference document: [Hypertext Transfer Protocol (HTTP) Status Code Registry
+](http://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml)
+
+### Complete Example
+
+A complete example can be found in [examples](examples)
+
+```json
+{
+	"name": "User Interface",
+	"version": "1.0.0",
+	"description": "User API",
+	"group": "user",
+	"guard": "bearer-jwt",
+	"paths": [
+		{
+			"path": "/login",
+			"method": "POST",
+			"guard": "-",
+			"process": "plugins.user.Login",
+			"in": ["$payload.mobile", "$payload.password", "$payload.captcha"],
+			"out": {
+				"status": 200,
+				"type": "application/json"
+			}
+		},
+		{
+			"path": "/ping",
+			"method": "GET",
+			"guard": "-",
+			"process": "plugins.user.Login",
+			"in": ["$payload.mobile", "$payload.password", "$payload.captcha"],
+			"out": {
+				"status": 200,
+				"type": "application/json"
+			}
+		},
+		{
+			"path": "/find/:id",
+			"method": "GET",
+			"guard": "-",
+			"process": "models.user.Find",
+			"in": ["$param.id", ":params"],
+			"out": {
+				"status": 200,
+				"type": "application/json"
+			}
+		},
+		{
+			"path": "/search",
+			"method": "GET",
+			"guard": "-",
+			"process": "models.user.Paginate",
+			"in": [":params", "$query.page", "$query.pagesize"],
+			"out": {
+				"status": 200,
+				"type": "application/json"
+			}
+		},
+		{
+			"path": "/info/:id",
+			"method": "GET",
+			"process": "models.user.Find",
+			"in": ["$param.id", ":params"],
+			"out": {
+				"status": 200,
+				"type": "application/json"
+			}
+		}
+	]
+}
+```

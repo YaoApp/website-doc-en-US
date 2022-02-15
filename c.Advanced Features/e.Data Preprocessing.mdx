@@ -1,0 +1,664 @@
+# Data Preprocessing
+
+<blockquote>
+	<p>
+		By modifying the <strong>default value description</strong>, specify the query
+		conditions of the table prefabricated API;
+	</p>
+	<p>
+		by setting The <strong>Hooks</strong> processor implements preprocessing of input and
+		output data for table queries.
+	</p>
+</blockquote>
+
+## Table RESTFul API
+
+The data table provides a set of RESTFul APIs, and the data management interface calls these APIs to realize functional interaction such as adding, deleting, modifying, and querying data forms.
+
+| API          | Request Method | Routing                                      | Description                                                                                |
+| ------------ | -------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| search       | `GET`          | `/api/xiang/table/<table name>/search`       | Query by criteria, pagination.                                                             |
+| select       | `GET`          | `/api/xiang/table/<table name>/select`       | List query, return the data format agreed by the select component.                         |
+| find         | `GET`          | `/api/xiang/table/<table name>/find/:id`     | Query a single record by primary key.                                                      |
+| save         | `POST`         | `/api/xiang/table/<table name>/save`         | Save a single record, there is a primary key update, but there is no primary key creation. |
+| delete       | `POST`         | `/api/xiang/table/<table name>/delete/:id`   | Delete a single record by primary key.                                                     |
+| insert       | `POST`         | `/api/xiang/table/<table name>/insert`       | Batch add records.                                                                         |
+| delete-where | `POST`         | `/api/xiang/table/<table name>/delete/where` | Batch delete eligible records.                                                             |
+| delete-in    | `POST`         | `/api/xiang/table/<table name>/delete/in`    | Batch delete data records with a specified set of primary keys.                            |
+| update-where | `POST`         | `/api/xiang/table/<table name>/update/where` | Batch update eligible records.                                                             |
+| update-in    | `POST`         | `/api/xiang/table/<table name>/update/in`    | Batch update data records with a specified set of primary keys.                            |
+| quicksave    | `POST`         | `/api/xiang/table/<table name>/quicksave`    | Save multiple records, there is a primary key update, there is no primary key creation.    |
+| setting      | `GET`          | `/api/xiang/table/<table name>/setting`      | Read data table configuration information for front-end interface rendering                |
+
+## Set Default Query Conditions
+
+When writing the JSON description of the form, you can specify query conditions for each interface by declaring query parameters such as associated query in `bind` or `apis`.
+
+Write two data models of supplier `supplier` and user `user`, one user corresponds to one supplier, and one supplier has multiple users. When querying a user, it returns the information of the supplier at the same time, and when querying a supplier, it returns the user list of the supplier at the same time.
+
+Supplier model `supplier`:
+
+<Detail title="View source code">
+
+| Fields | Labels |
+| ------ | ------ |
+| id     | ID     |
+| name   | name   |
+
+Data example:
+
+| ID  | Name                    |
+| --- | ----------------------- |
+| 1   | The wisdom of elephants |
+| 2   | Yao App Engine          |
+
+`supplier.mod.json`
+
+```json
+{
+	"name": "Supplier",
+	"table": { "name": "supplier", "comment": "Supplier table" },
+	"columns": [
+		{ "label": "ID", "name": "id", "type": "ID", "comment": "ID" },
+		{
+			"label": "Name",
+			"name": "name",
+			"type": "string",
+			"index": true,
+			"comment": "Supplier Name"
+		}
+	],
+	"relations": [
+		{
+			"name": "users",
+			"type": "hasMany",
+			"model": "user",
+			"key": "supplier_id",
+			"foreign": "id",
+			"query": { "select": ["id", "name"] }
+		}
+	],
+	"values": [
+		{ "id": 1, "name": "Xiang Chuan wisdom" },
+		{ "id": 2, "name": "Yao App Engine" }
+	]
+}
+```
+
+</Detail>
+
+User model `user` :
+
+<Detail title="View source code">
+
+| Fields      | Labels      |
+| ----------- | ----------- |
+| ID          | id          |
+| supplier_id | Supplier ID |
+| name        | name        |
+
+Data example:
+
+| ID  | Supplier | Name           |
+| --- | -------- | -------------- |
+| 1   | 1        | Zhang Wuji     |
+| 2   | 1        | Li Guangfu     |
+| 3   | 2        | Li Muting      |
+| 4   | 2        | Zhao Changqing |
+
+`user.mod.json`
+
+```json
+{
+	"name": "User",
+	"table": { "name": "user", "comment": "user table" },
+	"columns": [
+		{ "label": "ID", "name": "id", "type": "ID", "comment": "ID" },
+		{
+			"label": "Supplier",
+			"name": "supplier_id",
+			"type": "bigInteger",
+			"index": true,
+			"comment": "Vendor ID"
+		},
+		{
+			"label": "Name",
+			"name": "name",
+			"type": "string",
+			"index": true,
+			"comment": "User Name"
+		}
+	],
+	"relations": [
+		{
+			"name": "supplier",
+			"type": "hasOne",
+			"model": "supplier",
+			"key": "id",
+			"foreign": "supplier_id",
+			"query": { "select": ["id", "name"] }
+		}
+	],
+	"values": [
+		{ "id": 1, "supplier_id": 1, "name": "Zhang Wuji" },
+		{ "id": 2, "supplier_id": 1, "name": "Li Guangfu" },
+		{ "id": 3, "supplier_id": 2, "name": "Li Muting" },
+		{ "id": 4, "supplier_id": 2, "name": "Zhao Changqing" }
+	]
+}
+```
+
+</Detail>
+
+### Data Model Binding
+
+When querying user data, the supplier information is displayed on the list page at the same time, and when editing users, the supplier can be selected through the selection box.
+
+Write `user.tab.json` and `supplier.tab.json` to place in the application `tables` directory, use `bind.withs` to declare the associated data model.
+
+<Detail title="View source code">
+
+user.tab.json:
+
+```json
+{
+	"name": "User",
+	"version": "1.0.0",
+	"decription": "User Management Form",
+	"bind": {
+		"model": "user",
+		"withs": { "supplier": { "select": ["id", "name"] } }
+	},
+	"apis": {},
+	"columns": {
+		"ID": {
+			"label": "ID",
+			"view": { "type": "label", "props": { "value": ":id" } }
+		},
+		"Affiliate Supplier": {
+			"label": "Supplier",
+			"view": { "type": "label", "props": { "value": ":supplier.name" } },
+			"edit": {
+				"type": "select",
+				"props": {
+					"value": ":supplier_id",
+					"allowClear": true,
+					"remote": {
+						"api": "/api/xiang/table/supplier/select",
+						"query": { "select": ["id", "name"] }
+					}
+				}
+			}
+		}
+	},
+	"filters": {
+		"Key words": {
+			"label": "Keyword",
+			"bind": "where.name.match",
+			"input": { "type": "input", "props": { "placeholder": "Please enter keywords" } }
+		},
+		"Affiliate Supplier": {
+			"label": "Supplier",
+			"bind": "where.supplier.name.match",
+			"input": {
+				"type": "input",
+				"props": { "placeholder": "Please enter a supplier" }
+			}
+		}
+	},
+	"list": {
+		"primary": "id",
+		"layout": {
+			"columns": [
+				{ "name": "ID", "width": 80 },
+				{ "name": "name", "width": 100 },
+				{ "name": "Vendor", "width": 200 }
+			],
+			"filters": [{ "name": "Keywords" }, { "name": "Suppliers" }]
+		},
+		"actions": { "pagination": { "props": { "showTotal": true } } },
+		"option": {}
+	},
+	"edit": {
+		"primary": "id",
+		"layout": {
+			"fieldset": [
+				{
+					"columns": [
+						{ "name": "name", "width": 12 },
+						{ "name": "Vendor", "width": 12 }
+					]
+				}
+			]
+		},
+		"actions": { "cancel": {}, "save": {}, "delete": {} }
+	}
+}
+```
+
+supplier.tab.json:
+
+```json
+{
+	"name": "Supplier",
+	"version": "1.0.0",
+	"decription": "Vendor Management Form",
+	"bind": { "model": "supplier" },
+	"apis": {},
+	"columns": {
+		"ID": {
+			"label": "ID",
+			"view": { "type": "label", "props": { "value": ":id" } }
+		}
+	},
+	"filters": {
+		"Key words": {
+			"label": "Keyword",
+			"bind": "where.name.match",
+			"input": { "type": "input", "props": { "placeholder": "Please enter keywords" } }
+		}
+	},
+	"list": {
+		"primary": "id",
+		"layout": {
+			"columns": [
+				{ "name": "ID", "width": 80 },
+				{ "name": "name", "width": 100 }
+			],
+			"filters": [{ "name": "keyword" }]
+		},
+		"actions": { "pagination": { "props": { "showTotal": true } } },
+		"option": {}
+	},
+	"edit": {
+		"primary": "id",
+		"layout": {
+			"fieldset": [
+				{
+					"columns": [{ "name": "name", "width": 24 }]
+				}
+			]
+		},
+		"actions": { "cancel": {}, "save": {}, "delete": {} }
+	}
+}
+```
+
+</Detail>
+
+**Debugging with Form Process:**
+
+```bash
+yao run xiang.table.Search user '::{"wheres":[{"rel":"supplier","column":"name", "value":"App", "op":"match"} ]}' 1 2
+yao run xiang.table.Find user 1 '::{}'
+```
+
+**Debugging using the management interface:**
+
+1. `yao start` to start the service
+2. Open a browser and visit `http://127.0.0.1:5099/xiang/table/user`
+3. Open the browser console and view the return value of the API interface.
+
+<Notice type='warning'>
+	Note: Since the project was born mainly to improve the internal productivity of the team,
+	there is no fine-grained error throwing under the description of the conventional writing
+	method, so developers may write In the process of JSON debugging interface, the interface is
+	empty. Please refer to the component documentation for disposal methods.
+</Notice>
+
+### Search API Specify Query Conditions
+
+User list page: 10 pieces of data are displayed by default, only users with supplier ID = 1 are listed, and they are sorted in reverse order by update time. Use `apis.search.default` to declare default query criteria.
+
+The `apis.search.default` data structure is:
+
+| Parameter list         | Type              | Description                           |
+| ---------------------- | ----------------- | ------------------------------------- |
+| apis.search.default[0] | Object QueryParam | Default query condition               |
+| apis.search.default[1] | Integer           | Current page number                   |
+| apis.search.default[2] | Integer           | Number of records to display per page |
+
+Modify `user.tab.json` to add default query conditions:
+
+<Detail title="View source code">
+
+```json
+{
+	"name": "User",
+	"version": "1.0.0",
+	"decription": "User Management Form",
+	"bind": {
+		"model": "user",
+		"withs": { "supplier": { "select": ["id", "name"] } }
+	},
+	"apis": {
+		"search": {
+			"default": [
+				{
+					"withs": { "supplier": { "select": ["id", "name"] } },
+					"wheres": [{ "column": "supplier_id", "value": 1 }],
+					"orders": [{ "column": "updated_at", "options": "desc" }]
+				},
+				1,
+				10
+			]
+		}
+	},
+	"columns": {
+		"ID": {
+			"label": "ID",
+			"view": { "type": "label", "props": { "value": ":id" } }
+		},
+		"Affiliate Supplier": {
+			"label": "Supplier",
+			"view": { "type": "label", "props": { "value": ":supplier.name" } },
+			"edit": {
+				"type": "select",
+				"props": {
+					"value": ":supplier_id",
+					"allowClear": true,
+					"remote": {
+						"api": "/api/xiang/table/supplier/select",
+						"query": { "select": ["id", "name"] }
+					}
+				}
+			}
+		}
+	},
+	"filters": {
+		"Key words": {
+			"label": "Keyword",
+			"bind": "where.name.match",
+			"input": { "type": "input", "props": { "placeholder": "Please enter keywords" } }
+		},
+		"Affiliate Supplier": {
+			"label": "Supplier",
+			"bind": "where.supplier.name.match",
+			"input": {
+				"type": "input",
+				"props": { "placeholder": "Please enter a supplier" }
+			}
+		}
+	},
+	"list": {
+		"primary": "id",
+		"layout": {
+			"columns": [
+				{ "name": "ID", "width": 80 },
+				{ "name": "name", "width": 100 },
+				{ "name": "Vendor", "width": 200 }
+			],
+			"filters": [{ "name": "Keywords" }, { "name": "Suppliers" }]
+		},
+		"actions": { "pagination": { "props": { "showTotal": true } } },
+		"option": {}
+	},
+	"edit": {
+		"primary": "id",
+		"layout": {
+			"fieldset": [
+				{
+					"columns": [
+						{ "name": "name", "width": 12 },
+						{ "name": "Vendor", "width": 12 }
+					]
+				}
+			]
+		},
+		"actions": { "cancel": {}, "save": {}, "delete": {} }
+	}
+}
+```
+
+</Detail>
+
+<Notice type='success'>
+	Tip: apis.*.default supports &#123;&#123;xxx&#125;&#125; Refers to the session data, and
+	limits the query scope based on the session data. Reference for details
+	<a href='#'>User login using session data</a>
+</Notice>
+
+**Debugging with Form Process:**
+
+```bash
+yao run xiang.table.Search user '::{"wheres":[{"rel":"supplier","column":"name", "value":"App", "op":"match"} ]}' 1 2
+```
+
+Further reading:
+
+<Extend
+	title='DatasheetGrid Manual'
+	desc='Detailed data table manual, learn more about how to use it.'
+	link='c. Advanced Features/e. Tabular Data Preprocessing'
+></Extend>
+
+## Using Hooks
+
+Table API input and output data can be processed using Hooks. Hooks are divided into two categories: `before` and `after`. Before hook, which runs before the API call, can be used to process incoming parameters, and after hook, which runs after the API call and can be used to process query results.
+
+When describing the data table, in the `hooks` field, declare the process associated with the **Hook**, for example:
+
+```json
+{
+	"name": "User",
+	"version": "1.0.0",
+	"decription": "User",
+	"bind": { "model": "user" },
+	"hooks": {
+		"before:find": "flows.hooks.before_find",
+		"after:find": "flows.hooks.after_find",
+		"before:search": "flows.hooks.before_search",
+		"after:search": "flows.hooks.after_search",
+		"before:save": "flows.hooks.before_save",
+		"after:save": "flows.hooks.after_save"
+	},
+	"apis": {},
+	"columns": {}
+}
+```
+
+### Before Hook
+
+Use Before Hook to lock search criteria and filter out `search` API out-of-bounds input.
+
+Modify `user.tab.json` to specify the `before:search` hook as the `scripts.user.SearchFilter` process.
+
+<Detail title="View source code">
+
+```json
+{
+	"name": "User",
+	"version": "1.0.0",
+	"decription": "User Management Form",
+	"bind": {
+		"model": "user",
+		"withs": { "supplier": { "select": ["id", "name"] } }
+	},
+	"hooks": {
+		"before:search": "scripts.user.SearchFilter"
+	},
+	"apis": {
+		"search": {
+			"default": [
+				{
+					"withs": { "supplier": { "select": ["id", "name"] } },
+					"wheres": [{ "column": "supplier_id", "value": 1 }],
+					"orders": [{ "column": "updated_at", "options": "desc" }]
+				},
+				1,
+				10
+			]
+		}
+	},
+	"columns": {
+		"ID": {
+			"label": "ID",
+			"view": { "type": "label", "props": { "value": ":id" } }
+		},
+		"Affiliate Supplier": {
+			"label": "Supplier",
+			"view": { "type": "label", "props": { "value": ":supplier.name" } },
+			"edit": {
+				"type": "select",
+				"props": {
+					"value": ":supplier_id",
+					"allowClear": true,
+					"remote": {
+						"api": "/api/xiang/table/supplier/select",
+						"query": { "select": ["id", "name"] }
+					}
+				}
+			}
+		}
+	},
+	"filters": {
+		"Key words": {
+			"label": "Keyword",
+			"bind": "where.name.match",
+			"input": { "type": "input", "props": { "placeholder": "Please enter keywords" } }
+		},
+		"Affiliate Supplier": {
+			"label": "Supplier",
+			"bind": "where.supplier.name.match",
+			"input": {
+				"type": "input",
+				"props": { "placeholder": "Please enter a supplier" }
+			}
+		}
+	},
+	"list": {
+		"primary": "id",
+		"layout": {
+			"columns": [
+				{ "name": "ID", "width": 80 },
+				{ "name": "name", "width": 100 },
+				{ "name": "Vendor", "width": 200 }
+			],
+			"filters": [{ "name": "Keywords" }, { "name": "Suppliers" }]
+		},
+		"actions": { "pagination": { "props": { "showTotal": true } } },
+		"option": {}
+	},
+	"edit": {
+		"primary": "id",
+		"layout": {
+			"fieldset": [
+				{
+					"columns": [
+						{ "name": "name", "width": 12 },
+						{ "name": "Vendor", "width": 12 }
+					]
+				}
+			]
+		},
+		"actions": { "cancel": {}, "save": {}, "delete": {} }
+	}
+}
+```
+
+</Detail>
+
+The process is written in JS, `user.js`, and placed in the application's `scripts` directory.
+
+The input to the `before:search` association process is the input to the `search` API interface.
+
+| Parameters | Description                                  |
+| ---------- | -------------------------------------------- |
+| args[0]    | query condition QueryParam                   |
+| args[1]    | current page number                          |
+| args[2]    | The amount of record data displayed per page |
+
+<Detail title="View source code">
+
+```javascript
+function SearchFilter(param, page, pagesize) {
+	var wheres = param.wheres || []
+	var newParam = {
+		withs: { supplier: { select: ['id', 'name'] } },
+		wheres: [],
+		orders: [{ column: 'updated_at', options: 'desc' }]
+	}
+
+	// filter query conditions
+	for (var i in wheres) {
+		var where = wheres[i] || {}
+		if (where.column != supplier_id) {
+			continue
+		}
+		newParam.wheres.push({ column: 'supplier_id', value: where.value || 1 })
+	}
+
+	return [newParam, page, pagesize]
+}
+```
+
+</Detail>
+
+**Debugging with Form Process:**
+
+```bash
+yao run xiang.table.Search user '::{}' 1 2
+```
+
+### After Hook
+
+Use After Hook to process form submission data and save historical data.
+
+Modify `supplier.tab.json` to specify the `after:save` hook as the `flows.supplier.savelog` process.
+
+<Detail title="View source code">
+
+```json
+{
+	"name": "Supplier",
+	"version": "1.0.0",
+	"decription": "Vendor Management Form",
+	"bind": { "model": "supplier" },
+	"hooks": {
+		"after:save": "flows.supplier.savelog"
+	},
+	"apis": {},
+	"columns": {
+		"ID": {
+			"label": "ID",
+			"view": { "type": "label", "props": { "value": ":id" } }
+		}
+	},
+	"filters": {
+		"Key words": {
+			"label": "Keyword",
+			"bind": "where.name.match",
+			"input": { "type": "input", "props": { "placeholder": "Please enter keywords" } }
+		}
+	},
+	"list": {
+		"primary": "id",
+		"layout": {
+			"columns": [
+				{ "name": "ID", "width": 80 },
+				{ "name": "name", "width": 100 }
+			],
+			"filters": [{ "name": "keyword" }]
+		},
+		"actions": { "pagination": { "props": { "showTotal": true } } },
+		"option": {}
+	},
+	"edit": {
+		"primary": "id",
+		"layout": {
+			"fieldset": [
+				{
+					"columns": [{ "name": "name", "width": 24 }]
+				}
+			]
+		},
+		"actions": { "cancel": {}, "save": {}, "delete": {} }
+	}
+}
+```
+
+</Detail>
+
+Create a `models.supplier.history` data model to hold historical data.
+
+Write the data model file `history.mod.json`, and place

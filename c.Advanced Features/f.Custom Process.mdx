@@ -1,0 +1,254 @@
+# Custom Process
+
+<blockquote>
+
+Use other data sources in the data table without binding the data model by specifying an API process.
+
+</blockquote>
+
+## Specify API
+
+When describing the data table, in the apis field, declare the process associated with the API, for example:
+
+```json
+{
+	"name": "Form Custom Process",
+	"version": "1.0.0",
+	"decription": "Custom Process",
+	"apis": {
+		"search": { "process": "flows.customize.search" },
+		"find": { "process": "flows.customize.find" },
+		"save": { "process": "flows.customize.save" },
+		"delete": { "process": "flows.customize.delete" },
+		"insert": { "process": "flows.customize.insert" },
+		"delete-where": { "process": "flows.customize.delete_where" },
+		"delete-in": { "process": "flows.customize.delete_in" },
+		"update-where": { "process": "flows.customize.update_where" },
+		"update-in": { "process": "flows.customize.update_id" },
+		"quicksave": { "process": "flows.customize.quicksave" },
+		"setting": { "process": "flows.customize.setting" }
+	},
+	"columns": {}
+}
+```
+
+<Notice type='warning'>
+	Note: The input and output of the associated processor must be consistent with the original
+	API interface, otherwise the table interface may be abnormal.
+</Notice>
+
+## Example: Connect To Github Repository
+
+### Process Of Repository List
+
+Write a processor `search.flow.json` to read repository information data from the GitHub API and place it in the application `flows/github/` directory.
+
+<Detail title="View source code">
+
+```json
+{
+	"label": "Query code repository",
+	"version": "1.0.0",
+	"description": "Query code repository",
+	"nodes": [
+		{
+			"name": "Host",
+			"process": "xiang.helper.StrConcat",
+			"args": [
+				"https://api.github.com/orgs/",
+				"{{$in.0.wheres.0.column.value}}",
+				"/repos"
+			]
+		},
+		{
+			"name": "Result",
+			"process": "xiang.network.Get",
+			"args": ["{{$res.Host}}", {}, { "Accept": "application/vnd.github.v3+json" }]
+		}
+	],
+	"output": {
+		"data": "{{$res.result.data}}",
+		"total": 1000
+	}
+}
+```
+
+</Detail>
+
+**Run Dataflow Debug:**
+
+```bash
+yao run flows.github.search '::{"org":"yaoapp"}'
+```
+
+### Process Of Warehouse Details  
+
+Write a processor `find.flow.json` to read the specified repository information data from the GitHub API and place it in the application `flows/github/` directory.
+
+<Detail title="View source code">
+
+```json
+{
+	"label": "Query warehouse details",
+	"version": "1.0.0",
+	"description": "Query warehouse details",
+	"nodes": [
+		{
+			"name": "Host",
+			"process": "xiang.helper.StrConcat",
+			"args": ["https://api.github.com/repositories/", "{{$in.0}}"]
+		},
+		{
+			"name": "Result",
+			"process": "xiang.network.Get",
+			"args": ["{{$res.Host}}", {}, { "Accept": "application/vnd.github.v3+json" }]
+		}
+	],
+	"output": "{{$res.result.data}}"
+}
+```
+
+</Detail>
+
+**Run Dataflow Debug:**
+
+```bash
+yao run flows.github.find 449255223
+```
+
+### Describe Table
+
+Designate the API of the data table as a custom process, while turning off the create, pagination, and editing functions.
+
+Write `github.tab.json` to place in the application `tables` directory and specify the `search` and `find` processes in `apis`.
+
+<Detail title="View source code">
+
+```json
+{
+	"name": "GitHub",
+	"version": "1.0.0",
+	"decription": "GitHub",
+	"apis": {
+		"search": {
+			"process": "flows.customize.search",
+			"default": [
+				{
+					"wheres": [{ "column": "org", "value": "yaoapp" }]
+				},
+				1,
+				100
+			]
+		},
+		"find": { "process": "flows.customize.find" }
+	},
+	"columns": {
+		"ID": {
+			"label": "ID",
+			"view": { "type": "label", "props": { "value": ":id" } },
+			"edit": {
+				"type": "input",
+				"props": { "value": ":id", "hidden": true }
+			}
+		},
+		"name": {
+			"label": "Name",
+			"view": { "type": "label", "props": { "value": ":full_name" } },
+			"edit": {
+				"type": "input",
+				"props": { "value": ":full_name", "hidden": true }
+			}
+		},
+		"owner": {
+			"label": "Owner",
+			"view": { "type": "label", "props": { "value": ":owner.login" } },
+			"edit": {
+				"type": "input",
+				"props": { "value": ":owner.login", "hidden": true }
+			}
+		}
+	},
+	"filters": {
+		"name of association": {
+			"label": "Organization Name",
+			"bind": "where.org.eq",
+			"input": {
+				"type": "input",
+				"props": { "placeholder": "Please enter organization name" }
+			}
+		}
+	},
+	"list": {
+		"primary": "id",
+		"layout": {
+			"columns": [
+				{ "name": "ID", "width": 80 },
+				{ "name": "name", "width": 100 },
+				{ "name": "owner", "width": 100 }
+			],
+			"filters": [{ "name": "Organization Name" }]
+		},
+		"actions": {},
+		"option": {
+			"operation": {
+				"hideEdit": true,
+				"unfold": true,
+				"width": 100,
+				"items": []
+			}
+		}
+	},
+	"edit": {
+		"primary": "id",
+		"layout": {
+			"fieldset": [
+				{
+					"columns": [
+						{ "name": "name", "width": 12 },
+						{ "name": "owner", "width": 12 }
+					]
+				}
+			]
+		},
+		"actions": { "cancel": {}, "save": {}, "delete": {} }
+	}
+}
+```
+
+</Detail>
+
+**Run Form Process Debug:**
+
+```bash
+yao run xiang.table.Search github '::{"org":"yaoapp"}' 1 10
+yao run xiang.table.Find github 449255223 '::{}'
+```
+
+**Debugging using the management interface:**
+
+1. `yao start` to start the service
+2. Open a browser and visit `http://127.0.0.1:5099/xiang/table/github`
+3. Open the browser console and view the return value of the API interface.
+
+## Recommended
+
+Next, it is recommended to study the following chapters:
+
+<Extend
+	title='Use session data'
+	desc='Learn how to use session data to implement custom user systems.'
+	link='c. Advanced Features/g. Using Session Data'
+></Extend>
+
+<Div style={{ display: 'flex', justifyContent: 'space-between' }}>
+	<Link
+		type='prev'
+		title='Table data preprocessing'
+		link='c. Advanced Features/e. Tabular Data Preprocessing'
+	></Link>
+	<Link
+		type='next'
+		title='Use session data'
+		link='c. Advanced Features/g. Using Session Data'
+	></Link>
+</Div>

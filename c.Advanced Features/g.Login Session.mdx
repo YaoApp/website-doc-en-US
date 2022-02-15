@@ -1,0 +1,535 @@
+# Login Session
+
+<blockquote>
+	<p>
+		You can use <strong>session.*</strong>,<strong>Captcha</strong>,
+		<strong>PasswordValidate</strong>
+		<strong>JwtMake</strong>, <strong>JwtValidate</strong> and other processes to implement
+		custom user login and user identity authentication.
+	</p>
+	<p>
+		The session data set when logging in can be used in data streams, JS-written processes
+		and data tables.{' '}
+	</p>
+</blockquote>
+
+## Password login
+
+**Account and password login process:**
+
+1. On the login page, the user fills in the account name, verification code and password, and clicks the button to submit to the specified API.
+2. The API receives the account name and password information, transfers it to the designated processor, verifies the password, and issues a JWT token.
+
+**Process password verification logic:**
+
+1. Call the **CaptchaValidate** processor to verify the captcha.
+2. Call the data model processor to query the user data record through the account name, and obtain the encrypted stored password information.
+3. Call the **PasswordValidate** processor to verify whether the user fills in the correct password.
+4. Issue a JWT token and set session information.
+
+### Step 1: User Data Model
+
+Write `user.tab.json` and place it in the application `tables` directory.
+
+<Detail title="View source code">
+
+```json
+{
+	"name": "User",
+	"table": { "name": "user", "comment": "user table" },
+	"columns": [
+		{ "label": "ID", "name": "id", "type": "ID", "comment": "ID" },
+		{
+			"label": "Supplier",
+			"name": "supplier_id",
+			"type": "bigInteger",
+			"index": true,
+			"comment": "Vendor ID"
+		},
+		{
+			"label": "Email",
+			"name": "email",
+			"type": "string",
+			"index": true,
+			"comment": "User email address",
+			"validations": [
+				{
+					"method": "typeof",
+					"args": ["string"],
+					"message": "{{input}} type error, {{label}} should be a string"
+				},
+				{
+					"method": "email",
+					"args": [],
+					"message": "{{input}} is not an email address"
+				}
+			]
+		},
+		{
+			"label": "Login Password",
+			"name": "password",
+			"type": "string",
+			"crypt": "PASSWORD",
+			"index": true,
+			"nullable": true,
+			"validations": [
+				{
+					"method": "typeof",
+					"args": ["string"],
+					"message": "{{input}} type error, {{label}} should be a string"
+				},
+				{
+					"method": "minLength",
+					"args": [8],
+					"message": "{{label}} cannot be less than 8 characters."
+				}
+			]
+		},
+		{
+			"label": "Name",
+			"name": "name",
+			"type": "string",
+			"index": true,
+			"comment": "User Name"
+		}
+	],
+	"values": [
+		{
+			"id": 1,
+			"supplier_id": 1,
+			"name": "Zhang Wuji",
+			"email": "zhang@yaoapps.com",
+			"password": "5MCIXQYrR"
+		},
+		{
+			"id": 2,
+			"supplier_id": 1,
+			"name": "Li Guangfu",
+			"email": "li@yaoapps.com",
+			"password": "VHP79MBKf"
+		},
+		{
+			"id": 3,
+			"supplier_id": 2,
+			"name": "Li Muting",
+			"email": "mu@yaoapps.com",
+			"password": "Ert6a1Ub8"
+		},
+		{
+			"id": 4,
+			"supplier_id": 2,
+			"name": "Zhao Changqing",
+			"email": "zhao@yaoapps.com",
+			"password": "7CDcn4pcU"
+		}
+	]
+}
+```
+
+</Detail>
+
+**Create data table & add default user:**
+
+```bash
+yao migrate -n user
+```
+
+### Step 2: Login Process
+
+Write `password.flow.json` and `token.flow.json` in the application `flows/login/` directory. Implement password verification logic and JWT token issuance logic respectively.
+
+<Detail title="View source code">
+
+password.flow.json:
+
+```json
+{
+	"label": "User account password login",
+	"version": "1.0.0",
+	"description": "User account password login",
+	"nodes": [
+		{
+			"name": "Verification Code Verification",
+			"process": "xiang.helper.CaptchaValidate",
+			"args": ["{{$captcha.id}}", "{{$captcha.code}}"]
+		},
+		{
+			"name": "User",
+			"process": "models.user.Get",
+			"args": [
+				{
+					"select": ["id", "email", "password", "supplier_id", "name"],
+					"wheres": [{ "column": "email", "value": "?:$mobile" }],
+					"limit": 1
+				}
+			]
+		},
+		{
+			"name": "Password Verification",
+			"process": "xiang.helper.PasswordValidate",
+			"args": ["{{$password}}", "{{$res.user.0.password}}"]
+		},
+		{
+			"name": "Issue JWT",
+			"process": "flows.login.Token",
+			"args": ["{{$res.user.0}}"]
+		}
+	],
+	"output": "{{$res.Issue JWT}}"
+}
+```
+
+token.flow.json:
+
+```json
+{
+	"label": "Token",
+	"version": "1.0.0",
+	"description": "Issue JWT & set session data",
+	"nodes": [
+		{
+			"name": "SID",
+			"process": "session.start"
+		},
+		{
+			"name": "JWT",
+			"process": "xiang.helper.JWTMake",
+			"args": [
+				"{{$in.0.id}}",
+				{},
+				{
+					"timeout": 3600,
+					"sid": "{{$res.SID}}"
+				}
+			]
+		},
+		{
+			"name": "Set session data",
+			"process": "session.set",
+			"args": ["user", "{{$in.0}}"]
+		},
+		{
+			"name": "Set session user ID",
+			"process": "session.set",
+			"args": ["user_id", "{{$in.0.id}}"]
+		}
+	],
+	"output": {
+		"sid": "{{$res.SID}}",
+		"user": "{{$res.user.0}}",
+		"token": "{{$res.JWT.token}}",
+		"expires_at": "{{$res.JWT.expires_at}}",
+		"menus": [
+			{
+				"Comment": "According to the application logic, read the menu list corresponding to the user"
+			}
+		]
+	}
+}
+```
+
+</Detail>
+
+<Notice type='success'>
+	Tip: Combine <strong>password verification</strong> with <strong>signature token</strong>
+	Split into two processes, the token issuance processor can be reused in scenarios such as OAuth
+	third-party login, SMS verification code login, etc.
+</Notice>
+
+**Run Process Debug:**
+
+<Notice type='success'>
+	Tip: To facilitate debugging, you can add a verification code verification node after the
+	login logic is successfully debugged.
+</Notice>
+
+<Notice type='warning'>
+	Note: Due to some historical reasons, in the login submission information of the built-in
+	login interface of yao, the user field name is fixed as
+	<strong>mobile</strong>, will be allowed to be defined in the application description file in subsequent
+	versions.
+</Notice>
+
+```bash
+yao run flows.login.password '::{"mobile":"zhang@yaoapps.com", "password": "5MCIXQYrR"}'
+```
+
+### Step 3: Login API
+
+Write the interface description file `user.http.json`, add two interfaces `/captcha` and `/login/password`, which are used for verification code picture and username and password login interface respectively, and place them in the `api` directory of the application .
+
+Description file content:
+
+<Detail title="View source code">
+
+```json
+{
+	"name": "User",
+	"version": "1.0.0",
+	"description": "Userinterface",
+	"guard": "bearer-jwt",
+	"group": "user",
+	"paths": [
+		{
+			"path": "/captcha",
+			"method": "GET",
+			"guard": "-",
+			"process": "xiang.helper.Captcha",
+			"in": [":query"],
+			"out": {
+				"status": 200,
+				"type": "application/json"
+			}
+		},
+		{
+			"path": "/login/password",
+			"method": "POST",
+			"guard": "-",
+			"process": "flows.login.password",
+			"query": [":payload"],
+			"out": {
+				"status": 200,
+				"type": "application/json"
+			}
+		}
+	]
+}
+```
+
+</Detail>
+
+**Interface debugging:**
+
+Start the service:
+
+```bash
+yao start
+```
+
+Read verification code interface:
+
+```bash
+curl http://127.0.0.1:5099/xiang/api/user/captcha
+```
+
+<Notice type='success'>
+	Tip: Set the environment variable to enable debug mode. After making a request, you can view
+	the verification code id in the service log and code, for debugging.
+</Notice>
+
+Login interface:
+
+```bash
+curl -X POST http://127.0.0.1:5099/xiang/api/user/login/password \
+    -H 'Content-Type: application/json' \
+    -d '{"mobile":"zhang@yaoapps.com", "password": "5MCIXQYrR", "captcha":{"id":1024, "code":"xv98"}}'
+```
+
+### Step 4: Application Description
+
+Edit `app.json` to set up the user login API. The login interface route is `/xiang/login/user/:is` , `is` is a custom variable, which is submitted to the login interface along with the login form to identify the source of the user, and is generally used in multi-tenant systems.
+
+```json
+{
+	"name": "Elephant Biography",
+	"short": "Elephant Biography",
+	"description": "Elephant app background",
+	"option": {
+		"nav_user": "xiang.user",
+		"nav_menu": "menu",
+		"hide_user": true,
+		"hide_menu": true,
+		"login": {
+			"password": {
+				"captcha": "/api/xiang/user/captcha",
+				"login": "/api/user/login/password"
+			}
+		}
+	}
+}
+```
+
+## Use Session Data
+
+The session data set by the user's successful login can be used in data streams, JS scripts and data tables.
+
+### Use In Dataflow
+
+Write `inspect.flow.json` and place it in the application `flows/user/` directory.
+
+```json
+{
+	"label": "Current user information",
+	"version": "1.0.0",
+	"description": "Current user information",
+	"nodes": [
+		{
+			"name": "Session",
+			"process": "session.Get",
+			"args": ["user"]
+		}
+	],
+	"output": "{{$res.session}}"
+}
+```
+
+**Run Debug:**
+
+Start the service and enable debug mode:
+
+```bash
+yao start --debug
+```
+
+Create a new command console:
+
+<Notice type='warning'>
+	Note: To enable the run@ command, you need to enable <strong>debug mode</strong> or set the
+	environment variable
+	<strong>XIANG_REMOTE_RUN</strong>
+	Set to IP whitelist. For example: XIANG_REMOTE_RUN=127.0.0.1
+</Notice>
+
+```bash
+yao run@127.0.0.1:5099 login
+yao run@127.0.0.1:5099 flows.user.inspect
+```
+
+### Use In JS
+
+Write `user.js` and place it in the application `scripts` directory.
+
+```javascript
+function Inspect() {
+	return Process('session.Get', 'user')
+}
+```
+
+```bash
+yao run@127.0.0.1:5099 login
+yao run@127.0.0.1:5099 scripts.user.Inspect
+```
+
+### Use In Tables
+
+Session variables can be directly referenced in the data table `apis.*.default`, and the user management table in the [Table Data Preprocessing] (e. Table Data Preprocessing.mdx) chapter is modified to restrict viewing only the data of the supplier to which the current user belongs. .
+
+<Detail title="View source code">
+
+```json
+{
+	"name": "User",
+	"version": "1.0.0",
+	"decription": "User Management Form",
+	"bind": {
+		"model": "user",
+		"withs": { "supplier": { "select": ["id", "name"] } }
+	},
+	"hooks": {
+		"before:search": "scripts.user.SearchFilter"
+	},
+	"apis": {
+		"search": {
+			"default": [
+				{
+					"withs": { "supplier": { "select": ["id", "name"] } },
+					"wheres": [
+						{ "column": "supplier_id", "value": "{{$user.supplier_id}}" }
+					],
+					"orders": [{ "column": "updated_at", "options": "desc" }]
+				},
+				1,
+				10
+			]
+		}
+	},
+	"columns": {
+		"ID": {
+			"label": "ID",
+			"view": { "type": "label", "props": { "value": ":id" } }
+		},
+		"Affiliate Supplier": {
+			"label": "Supplier",
+			"view": { "type": "label", "props": { "value": ":supplier.name" } },
+			"edit": {
+				"type": "select",
+				"props": {
+					"value": ":supplier_id",
+					"allowClear": true,
+					"remote": {
+						"api": "/api/xiang/table/supplier/select",
+						"query": { "select": ["id", "name"] }
+					}
+				}
+			}
+		}
+	},
+	"filters": {
+		"Key words": {
+			"label": "Keyword",
+			"bind": "where.name.match",
+			"input": { "type": "input", "props": { "placeholder": "Please enter keywords" } }
+		},
+		"Affiliate Supplier": {
+			"label": "Supplier",
+			"bind": "where.supplier.name.match",
+			"input": {
+				"type": "input",
+				"props": { "placeholder": "Please enter a supplier" }
+			}
+		}
+	},
+	"list": {
+		"primary": "id",
+		"layout": {
+			"columns": [
+				{ "name": "ID", "width": 80 },
+				{ "name": "name", "width": 100 },
+				{ "name": "Vendor", "width": 200 }
+			],
+			"filters": [{ "name": "Keywords" }, { "name": "Suppliers" }]
+		},
+		"actions": { "pagination": { "props": { "showTotal": true } } },
+		"option": {}
+	},
+	"edit": {
+		"primary": "id",
+		"layout": {
+			"fieldset": [
+				{
+					"columns": [
+						{ "name": "name", "width": 12 },
+						{ "name": "Vendor", "width": 12 }
+					]
+				}
+			]
+		},
+		"actions": { "cancel": {}, "save": {}, "delete": {} }
+	}
+}
+```
+
+</Detail>
+
+## Recommended
+
+Next, it is recommended to study the following chapters:
+
+<Extend
+	title='Reuse JSON description'
+	desc='Learn how to properly plan and reuse JSON description fragments, and how to obtain JSON resources from the workshop.'
+	link='c.Advanced features/h.Reuse JSON description'
+></Extend>
+
+<Div style={{ display: 'flex', justifyContent: 'space-between' }}>
+	<Link
+		type='prev'
+		title='Form Custom Process'
+		link='c.Advanced Features/f.Form Custom Process'
+	></Link>
+	<Link
+		type='next'
+		title='Reuse JSON description'
+		link='c.Advanced features/h.Reuse JSON description'
+	></Link>
+</Div>

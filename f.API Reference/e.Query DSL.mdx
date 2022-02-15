@@ -1,0 +1,1073 @@
+# Gou Query DSL
+
+Gou Query DSL (Domain Specific Language) is used to describe data query conditions and is suitable for data analysis engines based on database implementation.
+
+## Document Structure
+
+The data type of the data query is `Object QueryDSL`. The query conditions are described by fields such as `select`, `wheres`, and the parser converts them into the corresponding `SQL statement`. [see full example] (#4 - full example)
+
+Data table `service` :
+
+| id  | industries               | city     | score | created_at          | updated_at |
+| --- | ------------------------ | -------- | ----- | ------------------- | ---------- |
+| 1   | ["Tourism", "Education"] | Beijing  | 99    | 2021-10-03 13:40:52 | NULL       |
+| 2   | ["Tourism", "Education"] | Shanghai | 68    | 2021-10-03 13:40:52 | NULL       |
+| 3   | ["Tourism", "Education"] | Beijing  | 92    | 2021-10-03 13:40:52 | NULL       |
+| 4   | ["Tourism", "Education"] | Shanghai | 87    | 2021-10-03 13:40:52 | NULL       |
+| 5   | ["Tourism", "Education"] | Beijing  | 71    | 2021-10-03 13:46:06 | NULL       |
+
+Gou Query DSL:
+
+```json
+{
+	"comment": "Statistics of the highest scores in each industry",
+	"select": ["@industries", "city", ":MAX(score) as high_score"],
+	"from": "service",
+	"wheres": [
+		{ "field": "created_at", "op": ">=", "value": "2021-01-01" },
+		{ "field": "created_at", "op": "<=", "value": "{'2021-12-31'}" },
+		{ "field": "{updated_at}", "op": "null" },
+		{
+			"wheres": [
+				{ "field": "type", "value": 1 },
+				{ "or": true, "field": "type", "value": 2 }
+			]
+		}
+	],
+	"orders": [{ "field": "high_score", "sort": "desc" }],
+	"limit": 100,
+	"groups": ["@industries", "city"]
+}
+```
+
+The parsed `SQL statement` is (MySQL 8):
+
+```sql
+SELECT `@industries`.`industries`,`city`, MAX(`score`) AS `high_score`
+FROM `service`
+JOIN JSON_TABLE(`service`.`industries`, '$[*]' columns (`industries` varchar(50) path '$') ) as `@industries`
+WHERE `created_at` >= '2021-01-01'
+  AND `created_at` <= '2021-12-31'
+  AND `updated_at` IS NULL
+  AND ( `type` = 1 OR `type` = 2)
+GROUP BY `@industries`.`industries`, `city`
+ORDER BY `high_score` DESC
+```
+
+Return result:
+
+| industries | city     | high_score |
+| ---------- | -------- | ---------- |
+| Travel     | Beijing  | 99         |
+| Education  | Beijing  | 99         |
+| Travel     | Shanghai | 87         |
+| Education  | Shanghai | 87         |
+
+### Object QueryDSL Data Structure
+
+| Fields    | Type                      | Description                                                                                                                                                                                                                                          | Required Fields |
+| --------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| select    | Array\<Field Expression\> | Select Field List [View Documentation](#11-Select Field-select) [Field Expression Documentation](#2-Field Expression-Field-Expression)                                                                                                               | Yes             |
+| from      | String                    | Query data table name or data model [View documentation] (#12-select data table-from)                                                                                                                                                                | no              |
+| wheres    | Array\<Object Where\>     | Data query conditions [View documentation](#13-query conditions-wheres)                                                                                                                                                                              | no              |
+| orders    | Array\<Object Order\>     | Sort condition [View document](#14-sort condition-orders)                                                                                                                                                                                            | No              |
+| offset    | Int                       | record start position [view documentation](#15-limit-offset-page-pagesize-data-only)                                                                                                                                                                 | no              |
+| limit     | Int                       | Quantity of data to read [View Documentation](#15-quantity-limit-limit-offset-page-pagesize-data-only)                                                                                                                                               | no              |
+| page      | Int                       | Paging query current page page number [View document](#15-limit-offset-page-pagesize-data-only)                                                                                                                                                      | no              |
+| pagesize  | Int                       | Number of records read per page [view documentation](#15-limit-limit-offset-page-pagesize-data-only)                                                                                                                                                 | no              |
+| data-only | Bool                      | Set to `true`, the query result is Array\<Object Record\>; default is `false`, the query result is Array\<Object Paginate\>, only when `page` or Valid for `pagesize`. [view documentation](#15-quantity-limit-limit-offset-page-pagesize-data-only) | no              |
+| groups    | Array\<Object Group\>     | Aggregate fields and statistics level settings. [View Documentation](#16-data-aggregation-groups-havings)                                                                                                                                            | no              |
+| havings   | Array\<Object Having\>    | Aggregate query result filtering, only valid when `groups` is set. [View Documentation](#16-data-aggregation-groups-havings)                                                                                                                         | No              |
+| unions    | Array\<Object QueryDSL\>  | Union query. Multiple queries combine results into a single table [View Documentation](#17-union-query-unions)                                                                                                                                       | no              |
+| query     | Object QueryDSL           | Subquery. Describe the query logic according to QueryDSL, and generate a two-dimensional data table or value. [view documentation](#18-subquery-query)                                                                                               | no              |
+| joins     | Array\<Object Join\>      | Table joins. **Not recommended** when connecting to tables with large data volumes. [view documentation](#19-table joins deprecated-joins)                                                                                                           | no              |
+| sql       | Object SQL                | SQL statement. **Not necessary, do not use**. [View documentation](#110-sql-statement use with caution-sql)                                                                                                                                          | no              |
+| comment   | String                    | The query condition comment, which is used to help understand the query condition logic and render it in the development platform.                                                                                                                   | No              |
+
+### `select`
+
+`select` is used to describe the list of selected fields, the data type is field expression string array `Array<Field Expression>`, supports data table field names, constants and functions; you can use `as` to set aliases for fields, aliases are regarded as The main table field name, which can be used directly in `wheres`, `order`, `having`.
+
+```json
+{
+	"select": [
+		"name",
+		"short_name as short",
+		"*mobile",
+		":MAX(score) as high_score",
+		"$extra",
+		"$extra.sex as sex",
+		"@prices",
+		"@prices[0] as price",
+		"@addresses[0].id as address_id",
+		"t2.name as t2_name",
+		"t2.short_name as t2_short",
+		"0.618 as golden section",
+		"'enable' as state"
+	]
+}
+```
+
+[View Field Expression Documentation](#2-Field-Expression-Field-Expression)
+
+### `from`
+
+`form` is used to specify the query data table name or data model, and the data type is `String`;
+
+| Example      | Expression                  | Description                                                                                                                                                                      |
+| ------------ | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `goods`      | `data table name`           | query in `goods` data table                                                                                                                                                      |
+| `goods as g` | `Data table name as alias`  | Query in the `goods` data table, set the alias to `g`, `g.field name` is equivalent to `goods.field name` ([expression Documentation](<(#2-Field-Expression-Field-Expression)>)) |
+| `$user`      | `$data model name`          | Query in the data table (`xxx`) associated with the data model `models.user`, set the alias to `user`, `user.field name` and `xxx. field name` equivalent                        |
+| `$user as u` | `$data model name as alias` | Query in the data table (`xxx`) associated with the data model `models.user`, set the alias to `u`, `u.field name` Equivalent to `xxx.fieldname`                                 |
+
+**instruction**
+
+- You can use the `$` identifier to specify the data table to which the data model is bound.
+- You can use `as` to set an alias for the data table, the alias supports Chinese, and the alias can be used instead of the data table name in scenarios such as table connection and field reference.
+- If the subquery `query`([document](#1.8-subquery-query)) is set, the interpreter will respond to the subquery logic first, ignoring the `from` setting. One of `query` and `from` is required.
+
+### `wheres`
+
+`wheres` is used to describe data query conditions, and the data structure is `Array<Object Where>`.
+
+Gou Query DSL:
+
+```json
+{
+	"wheres": [
+		{ "field": "created_at", "op": ">=", "value": "2020-01-01" },
+		{ "field": "created_at", "op": "<=", "value": "{'2020-12-31'}" },
+		{ "field": "created_at", "op": "<=", "value": "{updated_at}" },
+		{
+			"wheres": [
+				{ "field": "type", "value": 1 },
+				{ "or": true, "field": "type", "value": 2 }
+			]
+		},
+		{
+			"comment": "Limited scope: only valid manufacturers are listed",
+			"field": "manu_id",
+			"op": "in",
+			"query": {
+				"select": ["id"],
+				"from": "$manu",
+				"wheres": [{ "field": "status", "value": "enabled" }]
+			}
+		}
+	]
+}
+```
+
+The parsed `SQL statement` is:
+
+```sql
+  WHERE `created_at` >= '2020-01-01'
+    AND `created_at` <= '2020-12-31'
+    AND `created_at` <= `updated_at`
+    AND (
+      `type` = 1 OR `type` = 2
+    )
+    AND `manu_id` IN (SELECT `id` FROM `manu` WHERE `status` = 'enabled' )
+```
+
+#### Object Where Data Structure
+
+| Fields  | Type                  | Description                                                                                                                             | Required Fields |
+| ------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| field   | Field Expression      | Field expression, aliasing is not supported `as` [View Field Expression Documentation](<(#2-Field-Expression-Field-Expression)>)        | Yes             |
+| value   | Any                   | Matches numeric values. If the data type is `Field Expression`, use `{}` to include, such as `{updated_at}`                             | no              |
+| op      | String                | Match relational operator. Allowed values ​​`=`,`like`,`in`,`>` etc, default is `=`                                                     | no              |
+| or      | Bool                  | `true` The logical relation of the query condition is `or`, the default is `false` The logical relation of the query condition is `and` | No              |
+| wheres  | Array\<Object Where\> | Group query. For `condition 1` `and` ( `condition 2` OR `condition 3`) scenario                                                         | no              |
+| query   | Object QueryDSL       | Subquery; `value` value is ignored if `query` is specified. [view subquery documentation](#1.8-subquery-query)                          | no              |
+| comment | String                | The query condition comment, which is used to help understand the query condition logic and render it in the development platform.      | No              |
+
+##### Matching Relational Operators
+
+| operator  | description                                    |
+| --------- | ---------------------------------------------- |
+| `=`       | default equal to WHERE field = number          |
+| `>`       | Greater than WHERE field > number              |
+| `>=`      | Greater than or equal to WHERE field >= number |
+| `<`       | less than WHERE field < number                 |
+| `<=`      | Less than or equal to WHERE field <= number    |
+| `like`    | matches WHERE fields like values ​​            |
+| `match`   | Fuzzy match WHERE field match value            |
+| `null`    | is empty WHERE field IS NULL                   |
+| `notnull` | not null WHERE field IS NOT NULL               |
+| `in`      | list contains WHERE field IN (numeric...)      |
+
+### `orders`
+
+`orders` is used to describe the data sorting conditions, and the data structure is `Array<Object Order>`.
+
+Gou Query DSL:
+
+```json
+{
+	"orders": [
+		{ "comment": "Update time flashback", "field": "updated_at", "sort": "desc" },
+		{ "field": "manu.created_at" }
+	]
+}
+```
+
+The parsed `SQL statement` is:
+
+```sql
+  ORDER BY `updated_at` DESC, `manu`.`created_at` ASC
+```
+
+#### Object Order Data Structure
+
+| Fields  | Type             | Description                                                                                                                      | Required Fields |
+| ------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| field   | Field Expression | Field expression, aliasing is not supported `as` [View Field Expression Documentation](<(#2-Field-Expression-Field-Expression)>) | Yes             |
+| sort    | String           | Sort method, allowed values ​​`asc`, `desc`, default is `asc`                                                                    | no              |
+| comment | String           | Sort condition comment, used to help understand the query condition logic and render it in the development platform.             | No              |
+
+#### `orders syntactic sugar`
+
+If the sorting conditions are simple and easy to understand, you can use the `Array<Field Expression>` structure description; you can also use the `Field Expression` type description, and multiple are separated by `,`.
+
+The parsing results of the following description methods are the same:
+
+##### Full Description
+
+```json
+{
+	"orders": [
+		{ "comment": "Update time flashback", "field": "updated_at", "sort": "desc" },
+		{ "field": "manu.created_at" }
+	]
+}
+```
+
+##### `Array<String>`
+
+```json
+{
+	"orders": [
+		{ "comment": "Update time flashback", "field": "updated_at", "sort": "desc" },
+		"manu.updated_at"
+	]
+}
+```
+
+```json
+{
+	"orders": ["updated_at desc", "manu.updated_at"]
+}
+```
+
+##### Multiple `Field Expression` separated by `,`
+
+```json
+{
+	"orders": "updated_at desc, manu.updated_at asc"
+}
+```
+
+```json
+{
+	"orders": "updated_at desc, manu.updated_at"
+}
+```
+
+### Quantity limit `limit`, `offset`, `page`, `pagesize`, `data-only`
+
+Use `limit`, `offset` or `page`, `pagesize` to limit the range of records. `page` and `pagesize` automatically paginate according to query conditions.
+
+#### Starting from the 20th, read 50 pieces of data
+
+Gou Query DSL:
+
+```json
+{
+	"select": ["id", "name"],
+	"from": "manu",
+	"offset": 20,
+	"limit": 50
+}
+```
+
+The parsed `SQL statement` is (MySQL example):
+
+```sql
+  SELECT `id`, `name` FROM `manu` LIMIT 20,50
+```
+
+#### Page
+
+The record range is limited by `page` and `pagesize`. The default return value of QueryDSL includes paging information. You can set `data-only` to not return paging information.
+
+Gou Query DSL:
+
+```json
+{
+	"select": ["id", "name"],
+	"from": "manu",
+	"page": 1,
+	"pagesize": 50
+}
+```
+
+The parsed `SQL statement` is (MySQL example):
+
+```sql
+  -- Execute the first query, query the total number of records
+  SELECT count(`id`) as `total` FROM `manu`
+
+  -- The parser calculates offset and limit based on total, page and pagesize
+  -- Execute the second query
+  SELECT `id`, `name` FROM `manu` LIMIT 50
+
+```
+
+#### Quantity Limit Settings
+
+| Fields    | Type | Description                                                                                                                                                                                                                                                                                                                                    | Required Fields |
+| --------- | ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| offset    | Int  | Record start position. The default is to start from scratch.                                                                                                                                                                                                                                                                                   | No              |
+| limit     | Int  | The entry of data to read from the start position. Defaults to `0`, unlimited.                                                                                                                                                                                                                                                                 | No              |
+| page      | Int  | Pagination to query the page number of the current page, the default is `1`                                                                                                                                                                                                                                                                    | No              |
+| pagesize  | Int  | Number of records read per page. If only the `page` value is specified, `pagesize` defaults to `15`.                                                                                                                                                                                                                                           | No              |
+| data-only | Bool | Only valid when `page` or `pagesize` are set. Set to `true`, the query result is [data record array Array\<Object Record\>](#31-data record array-arrayobject-record); the default is `false`, the query result is [data with paging information Record array Object Paginate](#32-Data record array with paging information-Object-Paginate). | No              |
+
+### `groups` & `havings`
+
+The data aggregation method is defined in `groups`, and the Group data structure is `Array<Object Group>`.
+
+| Fields  | Type                   | Description                                    | Required Fields |
+| ------- | ---------------------- | ---------------------------------------------- | --------------- |
+| groups  | Array\<Object Group\>  | Aggregate fields and statistics level settings | No              |
+| havings | Array\<Object Having\> | Aggregate query result filtering               | No              |
+
+**Object Group data structure**
+
+| Fields  | Type             | Description                                                                                                                      | Required Fields |
+| ------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| field   | Field Expression | Field expression, aliasing is not supported `as` [View Field Expression Documentation](<(#2-Field-Expression-Field-Expression)>) | Yes             |
+| rollup  | String           | Returns multi-level statistical results at the same time, corresponding to the name of the aggregated field value.               | No              |
+| comment | String           | Aggregate condition comment to help understand query condition logic and render in development platform.                         | No              |
+
+#### Usage Example
+
+##### Table
+
+Data table `service` :
+
+| id  | city     | kind          | amount |
+| --- | -------- | ------------- | ------ |
+| 1   | Beijing  | Cloud Hosting | 50     |
+| 2   | Beijing  | Cloud Hosting | 50     |
+| 3   | Beijing  | Cloud Storage | 50     |
+| 4   | Shanghai | Cloud Hosting | 200    |
+
+##### Aggregate Statistics `group`
+
+Gou Query DSL:
+
+```json
+{
+	"select": ["kind as type", "city as city", ":SUM(amount) as quantity"],
+	"from": "service",
+	"groups": [
+		{ "field": "kind", "comment": "Statistics by type" },
+		{ "field": "city", "comment": "Statistics by city" }
+	]
+}
+```
+
+The parsed `SQL statement` is (MySQL):
+
+```sql
+  SELECT
+    `kind` AS `type`,
+    `city` AS `city`,
+    SUM(`amount`) AS `amount`
+  FROM `service`
+  GROUP BY `kind`, `city`
+```
+
+The query result is:
+
+| Type          | City     | Quantity |
+| ------------- | -------- | -------- |
+| Cloud Hosting | Beijing  | 100      |
+| Cloud Storage | Beijing  | 50       |
+| Cloud Hosting | Shanghai | 200      |
+
+##### `rollup`
+
+Gou Query DSL:
+
+```json
+{
+	"select": ["kind as type", "city as city", ":SUM(amount) as quantity"],
+	"from": "service",
+	"groups": [
+		{ "field": "kind", "rollup": "all types", "comment": "statistics by type" },
+		{ "field": "city", "comment": "Statistics by city" }
+	]
+}
+```
+
+The parsed `SQL statement` is (MySQL):
+
+```sql
+  SELECT
+    IF(GROUPING(`kind`), 'all types', `kind`) AS `type`,
+    `city` AS `city`,
+    SUM(`amount`) AS `amount`
+  FROM `service`
+  GROUP BY `kind`, `city` WITH ROLLUP
+```
+
+The query result is:
+
+| Type          | City     | Quantity |
+| ------------- | -------- | -------- |
+| Cloud Hosting | Shanghai | 200      |
+| Cloud Hosting | Beijing  | 100      |
+| Cloud Host    | **NULL** | 300      |
+| Cloud Storage | Beijing  | 50       |
+| Cloud Storage | **NULL** | 50       |
+| **all types** | **NULL** | 350      |
+
+Gou Query DSL:
+
+```json
+{
+	"select": ["kind as type", "city as city", ":SUM(amount) as quantity"],
+	"from": "service",
+	"groups": [
+		{ "field": "kind", "rollup": "all types", "comment": "statistics by type" },
+		{ "field": "city", "rollup": "All cities", "comment": "Statistics by city" }
+	]
+}
+```
+
+The parsed `SQL statement` is (MySQL):
+
+```sql
+  SELECT
+    IF(GROUPING(`kind`), 'all types', `kind`) AS `type`,
+    IF(GROUPING(`city`), 'all cities', `city`) AS `city`,
+    SUM(`amount`) AS `amount`
+  FROM `service`
+  GROUP BY `kind`, `city` WITH ROLLUP
+```
+
+The query result is:
+
+| Type          | City           | Quantity |
+| ------------- | -------------- | -------- |
+| Cloud Hosting | Shanghai       | 200      |
+| Cloud Hosting | Beijing        | 100      |
+| Cloud Hosting | **All Cities** | 300      |
+| Cloud Storage | Beijing        | 50       |
+| Cloud Storage | **All Cities** | 50       |
+| **All Types** | **All Cities** | 350      |
+
+#### `aggregate functions`
+
+Aggregate functions collect statistics on a set of data records according to a specific algorithm and return a value, which is generally used for aggregation queries.
+
+##### Table
+
+| id  | city     | kind          | amount |
+| --- | -------- | ------------- | ------ |
+| 1   | Beijing  | Cloud Hosting | 50     |
+| 2   | Beijing  | Cloud Hosting | 50     |
+| 3   | Beijing  | Cloud Storage | 50     |
+| 4   | Shanghai | Cloud Hosting | 200    |
+
+##### Aggregate Function Table
+
+| Function         | Parameter List                          | Description                   | SELECT Example                                           | Value                              |
+| ---------------- | --------------------------------------- | ----------------------------- | -------------------------------------------------------- | ---------------------------------- |
+| SUM()            | [`Field Expression`]                    | Summation                     | `:SUM(amount)` , `:SUM(DISTINCT amount)`                 | `350`, `250`                       |
+| COUNT()          | [`Field Expression`]                    | Record row count              | `:COUNT(id)`,`:COUNT(amount)`, `:COUNT(DISTINCT amount)` | `4`,`4`, ` 2`                      |
+| AVG()            | [`Field Expression`]                    | Average                       | `:AVG(amount)`, `:AVG(DISTINCT amount)`                  | `87.5000`, `125.0000`              |
+| MIN()            | [`Field Expression`]                    | minimum value                 | `:MIN(amount)`                                           | `50`                               |
+| MAX()            | [`Field Expression`]                    | maximum value                 | `:MAX(amount)`                                           | `200`                              |
+| STDDEV_POP()     | [`Field Expression`]                    | Population standard deviation | `:STDDEV_POP(amount)`                                    | `64.9519052838329`                 |
+| STDDEV_SAMP()    | [`Field Expression`]                    | Sample standard deviation     | `:STDDEV_SAMP(amount)`                                   | `75`                               |
+| VAR_POP()        | [`Field Expression`]                    | Population variance           | `:VAR_POP(amount)`                                       | `4218.75`                          |
+| VAR_SAMP()       | [`Field Expression`]                    | sample variance               | `:VAR_SAMP(amount)`                                      | `5625`                             |
+| JSON_ARRAYAGG()  | [`Field Expression`]                    | Combine into a JSON Array     | `:JSON_ARRAYAGG(amount)`                                 | `[50, 50, 50, 200]`                |
+| JSON_OBJECTAGG() | [`Field Expression`,`Field Expression`] | Combine into a JSON Object    | `:JSON_OBJECTAGG(city,price)`                            | `{"Shanghai": 200, "Beijing": 50}` |
+
+#### `havings`
+
+Aggregate result data cannot be filtered in `wheres`. If you need to filter aggregate query results, you can use `havings`. The data structure is `Array<Object Having>`
+
+Gou Query DSL:
+
+```json
+{
+	"select": ["kind as type", "city as city", ":SUM(amount) as quantity"],
+	"from": "service",
+	"groups": [
+		{ "field": "kind", "rollup": "all types", "comment": "statistics by type" },
+		{ "field": "city", "rollup": "All cities", "comment": "Statistics by city" }
+	],
+	"havings": [
+		{
+			"field": "type",
+			"value": "cloud host",
+			"comment": "filter cloud host in aggregated results"
+		},
+		{
+			"havings": [
+				{
+					"field": "quantity",
+					"op": "=",
+					"value": 100,
+					"comment": "quantity equals 100"
+				},
+				{ "or": true, "field": "number", "value": 300, "comment": "or 300 records" }
+			]
+		}
+	]
+}
+```
+
+The parsed `SQL statement` is (MySQL):
+
+```sql
+  SELECT
+    IF(GROUPING(`kind`), 'all types', `kind`) AS `type`,
+    IF(GROUPING(`city`), 'all cities', `city`) AS `city`,
+    SUM(`amount`) AS `amount`
+  FROM `service`
+  GROUP BY `kind`, `city` WITH ROLLUP
+  HAVING `type` = 'cloud host' AND (`quantity` = 100 OR `quantity` = 300)
+```
+
+The query result is:
+
+| Type          | City       | Quantity |
+| ------------- | ---------- | -------- |
+| Cloud Hosting | Beijing    | 100      |
+| Cloud Hosting | All Cities | 300      |
+
+**Object Having Data Structure**
+
+| Fields  | Type                   | Description                                                                                                                                     | Required Fields |
+| ------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| field   | Field Expression       | Field expression, aliasing is not supported `as` [View Field Expression Documentation](<(#2-Field-Expression-Field-Expression)>)                | Yes             |
+| value   | Any                    | Matches numeric values. If the data type is `Field Expression`, use `{}` to include, such as `{updated_at}`                                     | no              |
+| op      | String                 | Match relational operator. Allowed values ​​`=`,`like`,`in`,`>` etc, default is `=`                                                             | no              |
+| or      | Bool                   | `true` The logical relationship of the query condition is `or`, the default is `false` The logical relationship of the query condition is `and` | No              |
+| havings | Array\<Object Having\> | Grouping queries. For `condition 1` `and` ( `condition 2` OR `condition 3`) scenario                                                            | no              |
+| query   | Object QueryDSL        | Subquery; `value` value is ignored if `query` is specified. [view subquery documentation](#1.8-subquery-query)                                  | no              |
+| comment | String                 | The query condition comment, which is used to help understand the query condition logic and render it in the development platform.              | No              |
+
+#### `groups syntactic sugar`
+
+##### Groups shorthand
+
+In general, you only need to specify the aggregation field, which can be described by `Array<Field Expression>` structure; or by `Field Expression` type description, and multiple are separated by `,`.
+
+The analysis results described below are the same.
+
+`full description`
+
+```json
+{
+	"select": ["kind as type", "city as city", ":SUM(amount) as quantity"],
+	"from": "service",
+	"groups": [
+		{ "field": "kind", "comment": "Statistics by type" },
+		{ "field": "city", "comment": "Statistics by city" }
+	]
+}
+```
+
+`Simplifies to Array<Field Expression>`
+
+```json
+{
+	"select": ["kind as type", "city as city", ":SUM(amount) as quantity"],
+	"from": "service",
+	"groups": ["kind", { "field": "city", "comment": "Statistics by city" }]
+}
+```
+
+`Simplified to Field Expression`
+
+```json
+{
+	"select": ["kind as type", "city as city", ":SUM(amount) as quantity"],
+	"from": "service",
+	"groups": "kind,city"
+}
+```
+
+##### JSON Array Field Aggregation
+
+When performing aggregate query on `JSON Array` field, you need to connect JSON Table first, and then perform aggregate query on the connected data table. Can be shortened to aggregate directly by JSON Array field.
+
+Data table `service` :
+
+| id  | city     | kind          | industries(JSON Array)          | pricing(JSON Array\<Object\>)                                               | amount |
+| --- | -------- | ------------- | ------------------------------- | --------------------------------------------------------------------------- | ------ |
+| 1   | Beijing  | Cloud Hosting | `["Education","Medical"]`       | `[{"id":1, "name":"Monthly Payment"},{"id":2, "name" :"Pay annually"}]`     | 50     |
+| 2   | Beijing  | Cloud Hosting | `["Art","Medical"]`             | `[{"id":1, "name":"Monthly Payment"},{"id":3, "name" :"one-time payment"}]` | 50     |
+| 3   | Beijing  | Cloud Storage | `["Education","Manufacturing"]` | `[{"id":2, "name":"Annual Payment"},{"id":3, "name" :"one-time payment"}]`  | 50     |
+| 4   | Shanghai | Cloud Hosting | `["Energy","Car"]`              | `[{"id":1, "name":"Monthly Pay"}]`                                          | 200    |
+
+Query DSL:
+
+```json
+{
+	"select": [
+		"@industries as industries",
+		"@pricing[*].name as billing method",
+		":SUM(amount) as amount"
+	],
+	"from": "service",
+	"groups": [
+		{ "field": "industry", "rollup": "all industries" },
+		{ "field": "Billing method", "rollup": "All billing methods" }
+	]
+}
+```
+
+The parsed `SQL statement` (MySQL8):
+
+```sql
+SELECT
+  IF(GROUPING(`Industry`), 'All industries', `Industry`) AS `Industry`,
+  IF(GROUPING(`Billing method`), 'All billing methods', `Billing method`) AS `Billing method`,
+  SUM(`amount`) AS `amount`
+FROM `service`
+  JOIN JSON_TABLE(`service`.`industries`, '$[*]' columns (`industries` varchar(50) path '$') ) as industries
+  JOIN JSON_TABLE(`service`.`pricing`, '$[*]' columns (`billing method` varchar(50) path '$.name') ) as pricing
+GROUP by `Industry`, `Billing method` WITH ROLLUP
+```
+
+Return result:
+
+| Industry       | Billing Method      | Quantity |
+| -------------- | ------------------- | -------- |
+| Manufacturing  | One Time Fee        | 50       |
+| Manufacturing  | Paid annually       | 50       |
+| Manufacturing  | All Billing Methods | 100      |
+| Medical        | One-time fee        | 50       |
+| Medical        | Paid annually       | 50       |
+| Medical        | Paid Monthly        | 100      |
+| Medical        | All Billing Methods | 200      |
+| Education      | One Time Fee        | 50       |
+| Education      | Paid annually       | 100      |
+| Education      | Paid Monthly        | 50       |
+| Education      | All Billing Methods | 200      |
+| Car            | Pay per month       | 200      |
+| Car            | All billing methods | 200      |
+| Energy         | Pay per month       | 200      |
+| Energy         | All Billing Methods | 200      |
+| Art            | One Time Fee        | 50       |
+| Art            | Paid Monthly        | 50       |
+| Art            | All Billing Methods | 100      |
+| All Industries | All Billing Methods | 1000     |
+
+### `unions`
+
+You can combine multiple queries in `unions` to form a data table with the same structure for query, which can be used for data statistics, paging display and other scenarios.
+
+`unions` data structure is `Array<Object QueryDSL>`
+
+Gou Query DSL:
+
+```json
+{
+	"unions": [
+		{
+			"comment": "20 pet cats",
+			"select": ["id", "name"],
+			"from": "cat",
+			"limit": 20
+		},
+		{
+			"comment": "20 pet dogs",
+			"select": ["id", "name"],
+			"from": "dog",
+			"limit": 20
+		},
+		{
+			"comment": "20 ornamental fish",
+			"select": ["id", "name"],
+			"from": "fish",
+			"limit": 20
+		}
+	],
+	"limit": 10,
+	"orders": "id"
+}
+```
+
+Interpreted as `SQL statement` (MySQL):
+
+```sql
+ (SELECT `id`, `name` FROM `cat` LIMIT 20)
+ UNION ALL (SELECT `id`, `name` FROM `dog` LIMIT 20)
+ UNION ALL (SELECT `id`, `name` FROM `fish` LIMIT 20)
+ ORDER BY `id`
+ LIMIT 10
+```
+
+###  `query`
+
+You can dynamically generate a two-dimensional data table or value by describing `query`, and query or apply WHERE, HAVING query conditions on the data table. When used in a SELECT subquery scenario, an alias must be set. If `query` is set, then `from` will be invalid. The `query` data structure is `QueryDSL`.
+
+#### SELECT 
+
+Gou Query DSL:
+
+```json
+{
+	"select": ["id", "name"],
+	"query": {
+		"comment": "Generate a new data table by subquery (alias must be set)",
+		"select": ["id", "short_name as name"],
+		"from": "manu as m",
+		"limit": 50
+	},
+	"orders": "id",
+	"limit": 20
+}
+```
+
+The parsed `SQL statement` :
+
+```sql
+SELECT `id`, `name`
+FROM (
+  SELECT `id`, `short_name` as `name` FROM `manu` LIMIT 50
+) AS `m`
+ORDER BY `id` ASC
+LIMIT 50
+```
+
+#### WHERE 
+
+Gou Query DSL:
+
+```json
+{
+	"select": ["id", "name"],
+	"form": "service",
+	"wheres": [
+		{
+			"field": "manu_id",
+			"op": "in",
+			"query": {
+				"comment": "Query the manufacturer ID array",
+				"select": ["id"],
+				"from": "manu"
+			}
+		}
+	],
+	"orders": "id",
+	"limit": 20
+}
+```
+
+The parsed `SQL statement` :
+
+```sql
+SELECT `id`, `name`
+FROM `service`
+WHERE `manu_id` IN (
+  SELECT `id` FROM `manu`
+)
+ORDER BY `id` ASC
+LIMIT 50
+```
+
+#### HAVING 
+
+Gou Query DSL:
+
+```json
+{
+	"select": ["id", "name", ":COUNT(`id`) as number"],
+	"form": "service",
+	"groups": "id",
+	"havings": [
+		{
+			"field": "Quantity",
+			"op": "=",
+			"query": {
+				"select": ["1"]
+			}
+		}
+	]
+}
+```
+
+The parsed `SQL statement` :
+
+```sql
+SELECT `id`, `name`, COUNT(`id`) as number
+FROM `service`
+GROUP BY `id`
+HAVING `number` = (SELECT 1)
+LIMIT 50
+```
+
+### `joins` <Tag type='warning'>not recommended<Tag>
+
+Connecting two data tables with a large amount of data consumes a lot of server resources, and the query is inefficient. For scenarios such as data statistical analysis, data warehouses or data analysis engines should be used to set business data structures, cleaning and collection logic and query logic according to business scenarios, and finally collect them into a **wide table**, which is performed in the wide table. D. For applications with a large amount of data, it is recommended to use the `Xu` data analysis engine.
+
+`joins` data structure is `Array<Object Join>` [View data structure](#Object-Join-data structure)
+
+Gou Query DSL:
+
+```json
+{
+	"select": ["id", "name", "manu.name as manu_name"],
+	"form": "service",
+	"joins": [
+		{
+			"left": true,
+			"from": "manu",
+			"key": "id",
+			"foreign": "service.manu_id"
+		}
+	]
+}
+```
+
+The parsed `SQL statement` :
+
+```sql
+SELECT `service`.`id`, `service`.`name`, `manu`.`name` as `manu_name`
+FROM `service`
+LEFT JOIN `manu` ON `manu`.`id` = `service`.`manu_id`
+```
+
+The query result is:
+
+| id  | name                      | manu_name                                                   |
+| --- | ------------------------- | ----------------------------------------------------------- |
+| 1   | Tencent Cloud Hosting CVM | Beijing Yundao Tiancheng Technology Co., Ltd.               |
+| 2   | Tencent Cloud Disk        | Beijing Yundao Tiancheng Technology Co., Ltd.               |
+| 3   | Ali host                  | Xiangchuan High-tech (Beijing) Digital Technology Co., Ltd. |
+| 4   | UCloud Cloud Hosting      | Xiangchuan Zhishu (Beijing) Software Technology Co., Ltd.   |
+| 5   | adfasdf                   | Beijing Yundao Tiancheng Technology Co., Ltd.               |
+
+#### Object Join Data Structure
+
+| Fields  | Type   | Description                                                                                 | Required Fields |
+| ------- | ------ | ------------------------------------------------------------------------------------------- | --------------- |
+| from    | String | Join table name, same as Object QueryDSL `from`. [documentation](#12-select datatable-from) | yes             |
+| key     | String | field name of the associated join table                                                     | yes             |
+| foreign | String | Field name of the associated target table (table name or alias needs to be specified)       | Yes             |
+| left    | Bool   | `true` join method is `LEFT JOIN`, default is `false` join method is `JOIN`                 | no              |
+| right   | Bool   | `true` connection method is `RIGHT JOIN`, default is `false` connection method is `JOIN`    | no              |
+
+### `sql`
+
+**Not necessary, do not use** Unless the query logic cannot be described using the Query DSL, do not write SQL statements directly. Directly writing SQL statements will increase the difficulty of application maintenance; increase the security risk of system information leakage; due to uncontrollable query logic, it may cause database or data warehouse downtime; data migration, database, data warehouse, data analysis engine upgrade, etc. Can make the query statement unavailable\*\*.
+
+Gou Query DSL:
+
+```json
+{
+	"sql": {
+		"stmt": "SELECT `id`, `name` FROM `service` WHERE id = ?",
+		"args": [1]
+	}
+}
+```
+
+The parsed `SQL statement` :
+
+```sql
+SELECT `id`, `name` FROM `service` WHERE id = 1
+```
+
+**Object SQL data structure**
+
+| Fields | Type         | Description    | Required Fields |
+| ------ | ------------ | -------------- | --------------- |
+| stmt   | String       | SQL statement  | yes             |
+| args   | Array\<Any\> | parameter list | no              |
+
+## 2. Field Expression `Field Expression`
+
+Field expressions can be used in `select`, `wheres`, `order`, `group` and other scenarios; the data type of field expressions is `String`, which can be main table field names, associated table field names, constants, functions, etc. .
+
+### Expressions
+
+#### Main Table Fields
+
+| type                       | expressionsyntax                                                                                                                                                           |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| main table field           | `field name`                                                                                                                                                               |
+| AES encrypted field        | `*field name`                                                                                                                                                              |
+| JSON Object field          | `$fieldname`, `$fieldname.key`                                                                                                                                             |
+| JSON Array field           | `@field name`, `@field name[n]` n is the subscript of the array                                                                                                            |
+| JSON Array\<Object\> field | `@FieldName`, `$FieldName[n]` n is the array subscript, `@FieldName[n].key` n is the array subscript, `@FieldName [*].key` returns a one-dimensional array of `Object.Key` |
+
+#### Associate Table Fields
+
+| Types                      | Expression Syntax                                                                                                                                                                                                                                                                                                           |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Association table field    | `Association table name (or alias).Field name`                                                                                                                                                                                                                                                                              |
+| AES encrypted field        | `Association table name (or alias).*Field name`                                                                                                                                                                                                                                                                             |
+| JSON Object field          | `Association table name (or alias).$FieldName`, `Association table name (or alias).$FieldName.key`                                                                                                                                                                                                                          |
+| JSON Array field           | `Association table name (or alias).@FieldName`, `Association table name (or alias).@FieldName[n]` n is an array subscript                                                                                                                                                                                                   |
+| JSON Array\<Object\> field | `Association table name (or alias).@Field name`, `Association table name (or alias).@Field name[n]` n is an array subscript, `Association table name (or alias).@FieldName[n].key` n is the subscript of the array, `Associative table name (or alias).@FieldName[*].key` Returns the one-dimensional array of `Object.Key` |
+
+#### Functions
+
+| Types    | Expression Syntax                                                    |
+| -------- | -------------------------------------------------------------------- |
+| function | `:function name (parameter list...)` parameter is `field expression` |
+
+#### Constants
+
+| Types            | Expression Syntax |
+| ---------------- | ----------------- |
+| Integer constant | `Integer value`   |
+| float constant   | `float value`     |
+| string constant  | `'string value'`  |
+
+#### Aliases
+
+| Type              | Expression Syntax                     | Return Value    |
+| ----------------- | ------------------------------------- | --------------- |
+| main table        | `field name as alias`                 | `{"alias":...}` |
+| Association table | `Data table name.Field name as alias` | `{"alias":...}` |
+
+**instruction**
+
+- Fields can be main table field names, associated table field names, constants, functions, etc. For associated table fields, you need to specify the associated table name `associated table name.field name`.
+- Use the `$` identifier to specify `JSON Object` fields.
+- Use the `@` identifier to specify a `JSON Array` field.
+- Use the `*` identifier to specify the `AES encryption` field.
+- Use the `:` identifier to call the query function provided by the database.
+- Integer and floating point constants can be used directly; eg `1`, `0.618`.
+- Use `'` to declare the selection field as a string, such as the string contains `'`, `"` or `\`, use the escape character `\` to escape; for example, `Beijing` is written as `'Beijing'`, ` Beijing'"\Tongzhou District` is written as `'Beijing\'\"\\Tongzhou District'`.
+- You can use `as` to set an alias, the alias supports Chinese, such as setting an alias `select` query results use the alias as the key value, `wheres`, `order`, etc. can be used as the main table field. Such as `name as name`, `short_name as short`, `0.618 as golden section`.
+
+### Expression Example
+
+#### Master Table Example
+
+| Example                            | Record Value                                                        | Return Value                    | Description                                                                                                                                                           |
+| ---------------------------------- | ------------------------------------------------------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `"name"`                           | `{"name":"Yundao Tiancheng"}`                                       | `{"name":"Yundao Tiancheng"}`   | Select the `name` field                                                                                                                                               |
+| `"short_name as short"`            | `{"short_name":"Zheng Zhuanzhi"}`                                   | `{"short":"Xiangzhuan wisdom"}` | Select the `short_name` field, the return value field is named `short `                                                                                               |
+| `"*mobile"`                        | `{"mobile":"B3FE5501344A312773A88160297C34C4"}`                     | `{"mobile":"13111119999"}`      | Select `AES encryption` field `mobile`, return the decrypted value** field Type must be ASE Encrypted**                                                               |
+| `"$extra"`                         | `{"extra":{"sex":"male"}}`                                          | `{"extra":{"sex":"male"}}`      | select the `JSON Object` field `extra`, returns the parsed Object **field type must be JSON**                                                                         |
+| `"$extra.sex as sex"`              | `{"extra":{"sex":"male"}}`                                          | `{"sex":"male"}`                | select `JSON Object` field `extra `key = `sex`The value of the return value field is named `sex` **Field type must be JSON**                                          |
+| `"@prices"`                        | `{"prices":[100,200,300]}`                                          | `{"prices":[100,200,300]}`      | Select the `JSON Array` field `prices`, return the parsed Array ** field Type must be JSON**                                                                          |
+| `"@prices[0] as price"`            | `{"prices":[100,200,300]}`                                          | `{"price":100}`                 | select the value of `JSON Array` field `prices` index = 0, The return value field is named `price` **Field type must be JSON**                                        |
+| `"@addresses[0].id as address_id"` | `{"addresses":[{id:1,"city":"Beijing"},{id:2,"city":"Shanghai"}] }` | `{"address_id":1}`              | Select the value of the `JSON Array<Object>` field `addresses` index = 0, key = `id`, the return value field is named `address_id` **The field type must be as JSON** |
+
+#### Association Table Example
+
+| Example                               | Record Value (Data Table t2)                                        | Return Value                       | Description                                                                                                                                                |
+| ------------------------------------- | ------------------------------------------------------------------- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `"t2.name"`                           | `{"name":"Xiang Chuan Gaoxin"}`                                     | `{"name":"Xiang Chuan Gaoxin"}`    | Select join table (`join`) `t2`'s ` name` field                                                                                                            |
+| `"t2.*mobile"`                        | `{"mobile":"B3FE5501344A312773A88160297C34C4"}`                     | `{"mobile":"13111119999"}`         | Select `t2`'s `AES encryption` field `mobile`, return decryption The numeric value after **field type must be ASE encrypted**                              |
+| `"t2.short_name as short"`            | `{"short_name":"Zone transfer engine"}`                             | `{"short":"Zone transfer engine"}` | Select join table (`join`) ` t2`, the return value field is named `short`                                                                                  |
+| `"t2.$extra.sex as sex"`              | `{"extra":{"sex":"male"}}`                                          | `{"sex":"male"}`                   | select table `t2` `JSON Object` field `extra` key = the value of `sex`, the return value field is named `sex` **The field type must be JSON**              |
+| `"t2.@prices[0] as price"`            | `{"prices":[100,200,300]}`                                          | `{"price":100}`                    | Select the `JSON Array` field `prices' of the table `t2` ` The value of index = 0, the return value field is named `price` **The field type must be JSON** |
+| `"t2.@addresses[0].id as address_id"` | `{"addresses":[{id:1,"city":"Beijing"},{id:2,"city":"Shanghai" }]}` | `{"address_id":1}`                 | Select table `t2`'s `JSON Array<Object>` field `addresses` index = 0, key = `id` value, return value field named ` address_id` **Field type must be JSON** |
+
+#### Function Example
+
+| Example                       | Record Value                    | Return Value         | Description                                                                                                            |
+| ----------------------------- | ------------------------------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `":MAX(score) as high_score"` | `{"score":100},{"score":99}...` | `{"high_score":100}` | Use function `MAX` for statistics The maximum value of the `score` field, the return value field is named `high_score` |
+
+#### Constant Example
+
+| Example                           | Record Value | Return Value                     | Description                                                                                                    |
+| --------------------------------- | ------------ | -------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `"1 as price"`                    | -            | `{"price":1}`                    | select integer constant `1`, return value named `price`                                                        |
+| `"0.618 as price"`                | -            | `{"price":0.618}`                | Select floating point constant `0.618`, return value named `price`                                             |
+| `"'Beijing' as city"`             | -            | `{"city":"Beijing"}`             | Select the string constant `Beijing`, the return value is named `city`                                         |
+| `"'Beijing\"\'Tongzhou' as town"` | -            | `{"town":"Beijing\"\'Tongzhou"}` | Select string constants `Beijing''Tongzhou`, `"` and `'` is escaped with `\`. The return value is named `town` |
+| `"'0.618' as str"`                | -            | `{"str":"0.618"}`                | Select string constant `0.618`, return value named `str`                                                       |
+
+## Query Results
+
+### `Array<Object Record>`
+
+```json
+[
+	{
+		"id": 2,
+		"name": "Xiang Chuan High-tech (Beijing) Digital Technology Co., Ltd."
+	},
+	{
+		"id": 3,
+		"name": "Xiang Chuan Wisdom (Beijing) Software Technology Co., Ltd."
+	}
+]
+```
+
+[View Object Record Data Structure](#3.3-Data Record Data Structure-Object-Record)
+
+### `Object Paginate`
+
+```json
+{
+	"data": [
+		{
+			"id": 2,
+			"name": "Xiang Chuan High-tech (Beijing) Digital Technology Co., Ltd."
+		},
+		{
+			"id": 3,
+			"name": "Xiang Chuan Wisdom (Beijing) Software Technology Co., Ltd."
+		}
+	],
+	"next": 2,
+	"page": 1,
+	"pagecnt": 2,
+	"pagesize": 2,
+	"prev": -1,
+	"total": 3
+}
+```
+
+| Field    | Type                   | Description                                              |
+| -------- | ---------------------- | -------------------------------------------------------- |
+| data     | Array\<Object Record\> | Collection of data records                               |
+| next     | Integer                | Next page, if there is no next page, return `-1`         |
+| prev     | Integer                | Previous page, if there is no previous page, return `-1` |
+| page     | Integer                | Current page number                                      |
+| pagesize | Integer                | Number of records per page                               |
+| pagecnt  | Integer                | Total pages                                              |
+| total    | Integer                | Total records                                            |
+
+### `Object Record`
+
+Object Record data structure is: `[key:String]Any`
+
+```json
+{
+	"id": 2,
+	"link": {
+		"label": "Xiang Chuan wisdom",
+		"url": "https://www.iqka.com"
+	},
+	"logo": null,
+	"name": "Xiang Chuan High-tech (Beijing) Digital Technology Co., Ltd.",
+	"rank": 9999999,
+	"short_name": "Xiang Chuan Gaoxin",
+	"status": "enabled",
+	"summary": null,
+	"type": "Service Provider",
+	"updated_at": null
+}
+```

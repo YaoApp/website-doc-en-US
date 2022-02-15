@@ -1,0 +1,91 @@
+# Write A Process In JS
+
+<blockquote>
+	Use JavaScript to encapsulate complex business logic into processes and reuse them in
+	multiple scenarios. It is recommended to study before reading Basic JavaScript syntax.
+</blockquote>
+
+## Write The Process
+
+Create a `day.js` script and place it in the application `scripts` directory.
+
+day.js :
+
+```javascript
+function Tomorrow(today) {
+	let tomorrow = new Date(today)
+	tomorrow.setDate(today.getDate() + 1)
+	return tomorrow.toISOString().slice(0, 19).replace('T', ' ')
+}
+```
+
+**Running Process:**
+
+```bash
+yao run scripts.day.Tomorrow '2022-01-24'
+```
+
+## Call Other Process
+
+Other processes can be called using the `Process` function.
+
+Create a `format.js` script and place it in the application `scripts/pet/` directory.
+
+format.js :
+
+```javascript
+/**
+ * Set color according to type
+ */
+const color = (kind) => {
+	if (kind == 'cat') {
+		return '#FEFEFE'
+	} else if (kind == 'dog') {
+		return '#55555'
+	}
+}
+
+/**
+ * Add user information
+ */
+function WithUsers(record) {
+	let data = record || {}
+	data['color'] = color(data.kind)
+	data['tommorrow'] = Process('scripts.day.Tomorrow', new Date())
+	data['users'] = Process('models.xiang.user.Get', {
+		limit: 2,
+		select: ['id', 'name']
+	})
+	return data
+}
+```
+
+**Running Process:**
+
+```bash
+yao run scripts.pet.format.WithUsers '::{"kind":"cat"}'
+yao run scripts.pet.format.WithUsers '::{"kind":"dog"}'
+```
+
+## Recommended
+
+Next, it is recommended to study the following chapters:
+
+<Extend
+	title='Table data preprocessing'
+	desc='Learn how the data table sets default query conditions, sets associations and preprocesses form data.'
+	link='c. Advanced Features/e. Tabular Data Preprocessing'
+></Extend>
+
+<Div style={{ display: 'flex', justifyContent: 'space-between' }}>
+	<Link
+		type='prev'
+		title='Complex data query'
+		link='c. Advanced Features/c. Complex Data Query'
+	></Link>
+	<Link
+		type='next'
+		title='Table data preprocessing'
+		link='c. Advanced Features/e. Tabular Data Preprocessing'
+	></Link>
+</Div>

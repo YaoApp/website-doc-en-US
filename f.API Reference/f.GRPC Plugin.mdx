@@ -1,0 +1,45 @@
+# GRPC Plugin
+
+```proto
+syntax = "proto3";
+package proto;
+
+message Request {
+    string name = 1;
+    bytes payload = 2;
+}
+
+message Response {
+    bytes response = 1;
+    string type = 2;
+}
+
+service Model {
+    rpc Exec( Request ) returns ( Response );
+}
+```
+
+## Request
+
+| Field   | Description                                                                                               |
+| ------- | --------------------------------------------------------------------------------------------------------- |
+| name    | The method to call. For example, the processor `plugins.pluginName.Method`, the incoming name is `Method` |
+| payload | parameter list (JSON)                                                                                     |
+
+## Response
+
+| Field    | Description        |
+| -------- | ------------------ |
+| response | Return data (JSON) |
+| type     | Return data type   |
+
+**type permitted value**
+
+| Type    | Description      |
+| ------- | ---------------- |
+| string  | string           |
+| integer | integer          |
+| float   | float            |
+| double  | double precision |
+| array   | array            |
+| map     | Mapping table    |

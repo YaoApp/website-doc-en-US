@@ -1,0 +1,203 @@
+# Reuse JSON
+
+<blockquote>
+	<p>
+		The component description and filter description of the data table can be reused among
+		multiple data tables.
+	</p>
+	<p>
+		Common data models, data streams, and processes written in JS can be found in the
+		<a href='/hub'>creative workshop</a>
+		Find the corresponding template in , without rewriting it.
+	</p>
+</blockquote>
+
+## JSON Fragment Reuse
+
+Multiple-use JSON description fragments can be placed in the application `libs` directory, and loaded through `@` when used.
+
+### Component Description Reuse
+
+Write `c.json`, add the table component description, and place it in the `libs` directory.
+
+<Detail title="View source code">
+
+```json
+{
+	"Label": {
+		"__comment": "{ '@': 'c.Label', 'in': ['updated time',':updated_at']}",
+		"label": "{{$in.0}}",
+		"view": {
+			"name": "label",
+			"props": {
+				"value": "{{$in.1}}"
+			}
+		}
+	},
+	"Single product popup": {
+		"__comment": "{ '@': 'c. Single product pop-up window'}",
+		"label": "Single product",
+		"view": {
+			"type": "formModal",
+			"props": {
+				"type": "view",
+				"value": ":sku_name",
+				"formId": ":sku.id",
+				"formName": "material.sku"
+			}
+		}
+	},
+	"Items belonging to": {
+		"__comment": "{ '@': 'c. The item it belongs to'}",
+		"label": "Single product",
+		"view": {
+			"name": "label",
+			"props": {
+				"value": ":material.name"
+			}
+		},
+		"edit": {
+			"type": "select",
+			"props": {
+				"value": ":sku_id",
+				"allowClear": true,
+				"searchable": true,
+				"remote": {
+					"api": "/api/sku/select",
+					"query": {
+						"select": ["id", "unit"],
+						"limit": 500,
+						"name": "unit"
+					}
+				}
+			}
+		}
+	}
+}
+```
+
+</Detail>
+
+Quoted in the data table description file:
+
+**Description file content:**
+
+<Detail title="View source code">
+
+```json
+{
+	"name": "pet",
+	"version": "1.0.0",
+	"decription": "Pet Management Form",
+	"bind": { "model": "pet" },
+	"apis": {},
+	"columns": {
+		"ID": { "@": "c.Label", "in": ["ID", ":id"] },
+		"Owned item": { "@": "c. Owned item" },
+		"Single product popup": { "@": "c.Single product popup" }
+	},
+	"list": {
+		"primary": "id",
+		"layout": {
+			"columns": [
+				{ "name": "ID", "width": 80 },
+				{ "name": "Item", "width": 100 },
+				{ "name": "Single product popup", "width": 200 }
+			],
+			"filters": []
+		}
+	}
+}
+```
+
+</Detail>
+
+### Filter Reuse
+
+Write `f.json`, add the table component description, and place it in the `libs` directory.
+
+<Detail title="View source code">
+
+```json
+{
+	"Key words": {
+		"__comment": "{ '@': 'f.keyword', 'in': ['where.name.match']}",
+		"label": "Keyword",
+		"bind": "{{$in.0}}",
+		"input": {
+			"type": "input",
+			"props": {
+				"placeholder": "Please enter a keyword"
+			}
+		}
+	}
+}
+```
+
+</Detail>
+
+Quoted in the data table description file:
+
+**Description file content:**
+
+<Detail title="View source code">
+
+```json
+{
+	"name": "pet",
+	"version": "1.0.0",
+	"decription": "Pet Management Form",
+	"bind": { "model": "pet" },
+	"apis": {},
+	"columns": {
+		"ID": { "@": "c.Label", "in": ["ID", ":id"] },
+		"Owned item": { "@": "c. Owned item" },
+		"Single product popup": { "@": "c.Single product popup" }
+	},
+	"filters": {
+		"keyword": { "@": "f.keyword", "in": ["where.name.match"] }
+	},
+	"list": {
+		"primary": "id",
+		"layout": {
+			"columns": [
+				{ "name": "ID", "width": 80 },
+				{ "name": "Item", "width": 100 },
+				{ "name": "Single product popup", "width": 200 }
+			],
+			"filters": [{ "name": "keyword" }]
+		}
+	}
+}
+```
+
+</Detail>
+
+## Workshop
+
+Log in to the workshop, retrieve data models, data streams, and processes in the workshop, and download them to the application directory for use. https://yaoapps.com/hub
+
+In subsequent versions, we will provide a citation tool that can directly cite JSON fragments shared in the workshop.
+
+## Recommended
+
+Next, it is recommended to study the following chapters:
+
+<Extend
+	title='Deployment'
+	desc='Learn how to deploy in production and how to automate deployment.'
+	link='g.deployment'
+></Extend>
+
+<Div style={{ display: 'flex', justifyContent: 'space-between' }}>
+	<Link
+		type='prev'
+		title='Use session data'
+		link='c. Advanced Features/g. Using Session Data'
+	></Link>
+	<Link
+		type='next'
+		title='Write third-party plugins'
+		link='c. Advanced features/i. Writing third-party plugins'
+	></Link>
+</Div>

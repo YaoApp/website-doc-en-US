@@ -1,0 +1,73 @@
+# Deploy
+
+<blockquote>
+	This chapter introduces several ways to deploy Yao to production, and how to do distributed
+	deployment.
+</blockquote>
+
+## System Requirements
+
+| CPU   | Operating System |
+| ----- | ---------------- |
+| x86   | Linux            |
+| Arm64 | Linux            |
+
+## One-click Deployment
+
+Prepare a Linux operating system (recommended to use ubuntu server 20.04 LTS), and enable SSH service.
+
+```bash
+
+```
+
+Run the deploy command:
+
+```bash
+yao deploy root@202.101.110.198 -i id_rsa
+```
+
+## Manual Deployment
+
+### Step 1
+
+Run the script in the terminal:
+
+```bash
+curl -fsSL https://download.yaoapps.com/releases/latest/install.sh | bash
+```
+
+### Step 2
+
+Install `supervisor`:
+
+```bash
+
+```
+
+Service configuration:
+
+```bash
+
+```
+
+### Step 3
+
+Proxy servers such as `Nginx`, `traefik` are recommended.
+
+Install `traefik`
+
+```bash
+
+```
+
+Proxy configuration:
+
+```bash
+
+```
+
+Enable HTTPS
+
+```bash
+
+```

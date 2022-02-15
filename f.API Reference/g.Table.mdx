@@ -1,0 +1,949 @@
+# Table
+
+## Naming Conventions
+
+The data table description file is a JSON text file named **lowercase English letters** `<name>.tab.json`
+
+| Folder (relative to application model root directory) | File name     | Table name           | API routing address                                   |
+| ----------------------------------------------------- | ------------- | -------------------- | ----------------------------------------------------- |
+| /                                                     | name.tab.json | `name`               | `/api/xiang/table/name/admin interface`               |
+| /group/                                               | name.tab.json | `gorup.name`         | `/api/xiang/table/group.name/admin interface`         |
+| /group1/group2/                                       | name.tab.json | `gorup1.gorup2.name` | `/api/xiang/table/group1.group2.name/admin interface` |
+
+## Document Structure
+
+The data table document consists of basic table information, data model binding, business structure mapping table, field mapping table, filter mapping table, list page, edit page, batch insert page and detail page. [see full example] (#5 - full example)
+
+```json
+{
+	"name": "Cloud Service Library",
+	"version": "1.0.0",
+	"bind": {},
+	"apis": {},
+	"columns": {},
+	"filters": {},
+	"list": {},
+	"edit": {},
+	"view": {},
+	"insert": {}
+}
+```
+
+| Fields  | Type                         | Description                                                                                                                                                                                                                                                                                                                                                           | Required Fields |
+| ------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| name    | String                       | Data table name [View full description] (#21-basic information)                                                                                                                                                                                                                                                                                                       | yes             |
+| version | String                       | Version number, used for dependency check and development platform rendering                                                                                                                                                                                                                                                                                          | yes             |
+| bind    | Object Bind                  | Bind the data model. [see full description](#22-bind-data-model-bind)                                                                                                                                                                                                                                                                                                 | no              |
+| hooks   | \[key:String\]:String        | Data table Hook                                                                                                                                                                                                                                                                                                                                                       | No              |
+| apis    | \[key:String\]:Object API    | Data management API settings. For example, if the binding data model is set, the data management API will be automatically generated according to the model information, and the automatically generated API can be overwritten by setting the configuration information of the same `key`. [View full description](#23-Datatable management interface-apis)          | No              |
+| columns | \[key:String\]:Object Column | Field rendering settings. If the binding data model is set, the associated components are automatically set according to the field type information, and the automatically generated associated component information can be overwritten by setting the configuration information of the same `key`. [see full description](#24-field rendering-columns)              | no              |
+| filters | \[key:String\]:Object Filter | Query filter settings. For example, if the binding data model is set, the associated components are automatically set according to the index and field information, and the automatically generated associated component information can be overwritten by setting the configuration information of the same `key`. [see full description](#25-query-filters-fliters) | no              |
+| list    | Object Page                  | List page settings. [see full description](#26-list-page-list)                                                                                                                                                                                                                                                                                                        | yes             |
+| edit    | Object Page                  | Edit page settings. [View full description](#27-edit-page-edit)                                                                                                                                                                                                                                                                                                       | yes             |
+| view    | Object Page                  | View page settings. [view full description](#28-view page-view)                                                                                                                                                                                                                                                                                                       | no              |
+| insert  | Object Page                  | Batch input page settings. [View full description](#29-Batch entry page-insert)                                                                                                                                                                                                                                                                                       | No              |
+
+### Basic Information
+
+```json
+{
+	"name": "User",
+	"title": "Trusted Cloud Cloud Service Library | Data Management",
+	"decription": "trusted cloud cloud service library"
+}
+```
+
+| Fields     | Type   | Description                                                                             | Required Fields |
+| ---------- | ------ | --------------------------------------------------------------------------------------- | --------------- |
+| name       | String | The name of the data table, which can be used for rendering in the development platform | yes             |
+| title      | String | The title of the page rendered by the browser bar when the data table page is opened    | no              |
+| decription | String | Data table introduction, can be used for rendering in the development platform          | No              |
+
+### `bind`
+
+You can bind the data table to the data model by setting `model` and `withs`. After binding, the application engine will generate `apis`, `columns` and `fliters` configurations according to the data model definition. If you need special declarations, you can add special configuration information with the same `key`. You can also add fields in `columns`, `fliters` for rendering on each page.
+
+```json
+{
+	"bind": {
+		"model": "service",
+		"withs": {
+			"manu": {
+				"query": {
+					"select": ["id", "name", "short_name", "status"]
+				}
+			},
+			"kind": {
+				"query": {
+					"select": ["id", "name"]
+				}
+			}
+		}
+	}
+}
+```
+
+| Fields | Type                       | Description                                                                                        | Required Fields |
+| ------ | -------------------------- | -------------------------------------------------------------------------------------------------- | --------------- |
+| model  | String                     | Binding data model name                                                                            | yes             |
+| withs  | \[key:String\]:Object With | Data model association query settings. [View data structure](../model/README.md#31-data structure) | no              |
+
+### `apis`
+
+The data table will provide interfaces such as adding, deleting, modifying and checking, and completing data management operations through these interfaces. For example, if the binding data model is set, the data management API will be automatically generated according to the model information. By setting the configuration information of the same `key`, the automatically generated API can be overwritten. The API input and output data structure must be consistent with the original interface.
+
+#### Object API Data Structure
+
+```json
+{
+	"apis": {
+		"search": {
+			"process": "models.service.Paginate",
+			"guard": "bearer-jwt",
+			"default": [
+				{
+					"withs": {
+						"manu": {
+							"query": {
+								"select": ["id", "name", "short_name", "status"]
+							}
+						}
+					}
+				},
+				null,
+				15
+			]
+		},
+		"find": {
+			"process": "models.service.Find",
+			"default": [
+				null,
+				{
+					"withs": {
+						"manu": {
+							"query": {
+								"select": ["id", "name", "short_name", "status"]
+							}
+						}
+					}
+				}
+			]
+		},
+		"Management interface(key)": {
+			"process": "Process name",
+			"guard": "-",
+			"default": []
+		}
+	}
+}
+```
+
+| Fields  | Type        | Description                                                                                                                                                     | Required Fields |
+| ------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| process | String      | Binding processor (`process`) input and output data structures must be consistent with the original interface                                                   | yes             |
+| guard   | String      | Interface authentication middleware, multiple are separated by `,`, set to `-`, no authentication middleware is set, and no default authentication mode is set. | No              |
+| default | Array<Any\> | The default value of the parameter table, if there is no default value, it can be set to `null`, such as `[null, null, 15]`                                     | No              |
+
+#### Interface List
+
+| management interface (`key`) | request method | route (relative) | description                                                                                                                |
+| ---------------------------- | -------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| search                       | `GET`          | `/search`        | Query by criteria, pagination. [View full description](apis/search.md)                                                     |
+| find                         | `GET`          | `/find`          | Query a single record by primary key. [View full description](apis/find.md)                                                |
+| save                         | `POST`         | `/save`          | Save a single record, there are updates, but there are no creations. [View full description](apis/save.md)                 |
+| delete                       | `POST`         | `/delete`        | Delete a single record by primary key. [View full description](apis/delete.md)                                             |
+| insert                       | `POST`         | `/insert`        | Add records in batches. [View full description](apis/insert.md)                                                            |
+| delete-where                 | `POST`         | `/delete/where`  | Batch delete eligible records. [View full description](apis/delete-where.md)                                               |
+| delete-in                    | `POST`         | `/delete/in`     | Batch delete data records with a specified set of primary keys. [View full description](apis/delete-in.md)                 |
+| update-where                 | `POST`         | `/update/where`  | Batch update eligible records. [View full description](apis/update-where.md)                                               |
+| update-in                    | `POST`         | `/update/in`     | Batch update data records for a specified set of primary keys. [View full description](apis/update-in.md)                  |
+| quicksave                    | `POST`         | `/quicksave`     | Save multiple records, there are updates, but there are no creations. [View full description](apis/quicksave.md)           |
+| setting                      | `GET`          | `/setting`       | Read data table configuration information, used for front-end interface rendering [View full description](apis/setting.md) |
+
+### `columns`
+
+It is possible to set the presentation method of fields in list rendering (`view`), list editing (`edit`) and edit form (`form`). Fields can be added freely and can be used in the rendering settings of each page. For example, if the binding data model is set, the corresponding presentation is automatically generated according to the field name and field type of the data model, and the automatically generated presentation information can be overwritten by setting the configuration information of the same `key`. Field rendering mapping table, which can be read from the `setting` interface.
+
+```json
+{
+	"columns": {
+		"name": {
+			"label": "Service Name",
+			"view": {
+				"type": "label",
+				"props": {
+					"value": ":name"
+				}
+			},
+			"edit": {
+				"type": "input",
+				"props": {
+					"value": ":name"
+				}
+			},
+			"form": {
+				"type": "input",
+				"props": {
+					"value": ":name"
+				}
+			}
+		},
+		"manu.name": {
+			"label": "Manufacturer name",
+			"view": {
+				"type": "label",
+				"props": {
+					"value": ":manu.name"
+				}
+			}
+		},
+		"Manufacturer": {
+			"label": "Manufacturer",
+			"view": {
+				"name": "label",
+				"props": {
+					"value": ":manu.short_name"
+				}
+			},
+			"edit": {
+				"type": "select",
+				"props": {
+					"value": ":manu.id",
+					"searchable": true,
+					"remote": {
+						"api": "/api/manu/get",
+						"query": {
+							"select": ["id", "name"],
+							"keyword": "where_name_like"
+						}
+					}
+				}
+			}
+		}
+	}
+}
+```
+
+#### Object Column Data Structure
+
+| Fields | Type          | Description                                                                                                                                                                | Required Fields |
+| ------ | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| label  | String        | Field name of field rendering                                                                                                                                              | yes             |
+| view   | Object Render | List or view pages, the components and properties used when reading the state, the default is `label` [View Object Render data structure](#3-Object-Render-data structure) | no              |
+| edit   | Object Render | List or view page, components and properties used when editing state, default is `input` [View Object Render data structure](#3-Object-Render-data structure)              | no              |
+| form   | Object Render | Edit page, components and properties used, default is `input` [View Object Render data structure](#3-Object-Render-data structure)                                         | No              |
+
+### `fliters`
+
+You can add data query conditions to display by setting query filters. Query filters are freely added and can be used in listing page rendering settings. For example, if the binding data model is set, the corresponding configuration is automatically generated according to the data model index name and field information, and the automatically generated configuration information can be overwritten by setting the configuration information of the same `key`. Query filter mapping table, which can be read from the `setting` interface.
+
+```json
+{
+	"filters": {
+		"Key words": {
+			"label": "Offkeywords",
+			"bind": "where.name.like",
+			"input": {
+				"type": "input",
+				"props": {
+					"placeholder": "Please enter a keyword"
+				}
+			}
+		},
+		"Manufacturer": {
+			"label": "Manufacturer",
+			"bind": "where.manu_id.in",
+			"input": {
+				"type": "select",
+				"props": {
+					"searchable": true,
+					"multiple": true,
+					"placeholder": "Please select the manufacturer",
+					"remote": {
+						"api": "/api/manu/get",
+						"query": {
+							"select": ["id", "name"],
+							"keyword": "where.name.like",
+							"limit": 500
+						}
+					}
+				}
+			}
+		}
+	}
+}
+```
+
+#### Object Filter Data Structure
+
+| Fields | Type          | Description                                                                                                            | Required Fields |
+| ------ | ------------- | ---------------------------------------------------------------------------------------------------------------------- | --------------- |
+| label  | String        | filter display name                                                                                                    | yes             |
+| bind   | String        | Binding query condition URL Query String Field name, such as `where.manu_id.in` (used as `search` API query parameter) | yes             |
+| input  | Object Render | Query content input component, default is `input` [View Object Render data structure](#3-Object-Render-data structure) | no              |
+
+### `list`
+
+The list page sets the data structure to [Object Page data structure] (#4-Object-Page-data structure).
+
+```json
+{
+	"list": {
+		"primary": "id",
+		"layout": {
+			"columns": [
+				{ "name": "Service Name", "width": 6 },
+				{ "name": "Manufacturer", "width": 6 },
+				{ "name": "Service Type", "width": 4 }
+			],
+			"filters": [
+				{ "name": "keyword", "width": 6 },
+				{ "name": "Manufacturer", "width": 6 }
+			]
+		},
+		"actions": {
+			"create": {
+				"type": "button",
+				"props": {
+					"label": "New Service"
+				}
+			},
+			"view": {},
+			"edit": {},
+			"import": {},
+			"update": {},
+			"delete": {},
+			"insert": {},
+			"updateWhere": {},
+			"deleteWhere": {},
+			"updateSelect": {},
+			"deleteSelect": {},
+			"pagination": {
+				"type": "",
+				"props": {
+					"pages": true,
+					"prev": true,
+					"next": true
+				}
+			},
+			"setting": {}
+		}
+	}
+}
+```
+
+#### `layout`
+
+| Field     | Type                                     | Description                           |
+| --------- | ---------------------------------------- | ------------------------------------- |
+| `columns` | Array<Object ColumnInstance \| String \> | Columns that the data list can render |
+| `filters` | Array<Object FilterInstance \| String \> | renderable query filters              |
+
+##### Object ColumnInstance Data Structure
+
+| Fields | Type    | Description                                                                | Required Fields |
+| ------ | ------- | -------------------------------------------------------------------------- | --------------- |
+| name   | String  | Field name. Must have been defined in field rendering (`columns`).         | yes             |
+| width  | Integer | Column width. Use grid system, valid values ​​are `1`-`24`. Default is `6` | no              |
+
+##### Object FilterInstance Data Structure
+
+| Fields | Type    | Description                                                                | Required Fields |
+| ------ | ------- | -------------------------------------------------------------------------- | --------------- |
+| name   | String  | Field name. Must have been defined in query filter mode (`filters`).       | yes             |
+| width  | Integer | Column width. Use grid system, valid values ​​are `1`-`24`. Default is `6` | no              |
+
+#### `actions`
+
+| Name           | Description                                  |
+| -------------- | -------------------------------------------- |
+| `create`       | New data record button                       |
+| `view`         | View data record details button              |
+| `edit`         | Edit data record form button                 |
+| `import`       | Import data record button                    |
+| `export`       | Export data record button                    |
+| `update`       | Update a single field button                 |
+| `delete`       | Delete a single record button                |
+| `insert`       | Bulk insert button                           |
+| `deleteWhere`  | Batch delete button by condition             |
+| `updateWhere`  | Batch update button by condition             |
+| `deleteSelect` | Batch delete the selected data record button |
+| `updateSelect` | Batch update selected data record button     |
+| `pagination`   | Pagination                                   |
+| `setting`      | Data table configuration button              |
+
+### `edit`
+
+```json
+{
+	"edit": {
+		"primary": "id",
+		"layout": {
+			"groups": [
+				{
+					"title": "Basic Information",
+					"description": "",
+					"columns": [
+						{ "name": "Service Name", "width": 6 },
+						{ "name": "Manufacturer", "width": 6 },
+						{ "name": "Service Type", "width": 6 },
+						{ "name": "state", "width": 6 },
+						{ "name": "rank", "width": 6 }
+					]
+				},
+				{
+					"title": "Data Label",
+					"description": "",
+					"columns": ["Service Field", "Billing Method", "Industry Coverage"]
+				}
+			]
+		},
+		"actions": {
+			"cancel": {},
+			"save": {
+				"type": "button",
+				"props": {
+					"label": "Save"
+				}
+			},
+			"delete": {}
+		}
+	}
+}
+```
+
+The list page sets the data structure to [Object Page data structure] (#4-Object-Page-data structure).
+
+#### `layout`
+
+| Fields   | Type                 | Description                   | Required Fields |
+| -------- | -------------------- | ----------------------------- | --------------- |
+| `groups` | Array<Object Group\> | Edit form field grouping list | Yes             |
+
+**Object Group data structure**
+
+| Fields        | Type                                     | Description                                                                                        | Required Fields |
+| ------------- | ---------------------------------------- | -------------------------------------------------------------------------------------------------- | --------------- |
+| `title`       | String                                   | group name                                                                                         | no              |
+| `description` | String                                   | Group introduction                                                                                 | no              |
+| `columns`     | Array<Object ColumnInstance \| String \> | DataList renderable columns [ColumnInstance data structure](#Object-ColumnInstance-data structure) | yes             |
+
+#### `actions`
+
+| Name     | Description        |
+| -------- | ------------------ |
+| `cancel` | Cancel edit button |
+| `save`   | Save data button   |
+| `delete` | delete data button |
+
+### `view`
+
+Not implemented in this version
+
+### `insert`
+
+Not implemented in this version
+
+## Object Render Data Structure
+
+```json
+{
+	"type": "select",
+	"props": {
+		"value": "{{manu_id}}",
+		"searchable": true,
+		"remote": {
+			"api": "/api/manu/get",
+			"query": {
+				"select": ["id", "name"],
+				"keyword": "where.name.like"
+			}
+		}
+	}
+}
+```
+
+| Fields     | Type         | Description                                                                                                                                            | Required Fields |
+| ---------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------- |
+| type       | String       | Component name used [View supported components](https://github.com/YaoApp/sheng)                                                                       | yes             |
+| props      | Object<Any\> | Component properties, see the corresponding component documentation for details. `String`, `Number` and `Variable` can be used in property parameters. | No              |
+| components | Array<Any\>  | Composite component, referencing an atomic component name or description. `["Billing method", "Industry coverage", {"name":"Name", "props":{}}]`       | No              |
+
+**Using variables in properties (`props`)**
+
+You can use `{{field name}}` or `:field name` in properties (`props`) to refer to the current record data, support using `.` to access `Object` or `Array` type data, such as `{{ fieldname.foo.bar}}`, `{{fieldname.0.foo}}`, `:fieldname.foo.bar`, `:fieldname.0.foo`
+
+## Object Page Data Structure
+
+```json
+{
+	"edit": {
+		"primary": "id",
+		"layout": {
+			"groups": [
+				{
+					"title": "Data Label",
+					"description": "",
+					"columns": ["Service Field", "Billing Method", "Industry Coverage"]
+				}
+			]
+		},
+		"actions": {
+			"cancel": {},
+			"save": {
+				"type": "button",
+				"props": {
+					"label": "Save"
+				}
+			},
+			"delete": {}
+		}
+	}
+}
+```
+
+| Fields  | Type                                        | Description                                                                                                                                                                                   | Required Fields |
+| ------- | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| primary | String                                      | primary key field name                                                                                                                                                                        | yes             |
+| layout  | \[key:String\]:Any                          | Optional configuration items for page layout, which are different for each page and are defined in specific pages.                                                                            | yes             |
+| actions | \[key:String\]:\[key:String\]:Object Render | The mapping table of available page function rendering methods, which are different for each page and are defined in specific pages. [Render Data Structure](#3-Object-Render-Data Structure) | No              |
+| option  | \[key:String\]:Any                          | Page configuration information, freely define as needed. API Setting is returned as is.                                                                                                       | No              |
+
+## Complete Example
+
+Complete examples are stored in the examples directory, [View complete example](examples)
+
+```json
+{
+	"name": "Cloud Service Library",
+	"version": "1.0.0",
+	"decription": "Trusted Cloud Service Library",
+	"bind": {
+		"model": "service",
+		"withs": {
+			"manu": {
+				"query": {
+					"select": ["id", "name", "short_name", "status"]
+				}
+			},
+			"kind": {
+				"query": {
+					"select": ["id", "name"]
+				}
+			}
+		}
+	},
+	"apis": {
+		"search": {
+			"process": "models.service.Paginate",
+			"default": [
+				{
+					"withs": {
+						"manu": {
+							"query": {
+								"select": ["id", "name", "short_name", "status"]
+							}
+						},
+						"kind": {
+							"query": {
+								"select": ["id", "name"]
+							}
+						}
+					},
+					"wheres": [{ "column": "status", "value": "enabled" }]
+				},
+				null,
+				15
+			]
+		},
+		"find": {
+			"process": "models.service.Find",
+			"default": [
+				null,
+				{
+					"withs": {
+						"manu": {
+							"query": {
+								"select": ["id", "name", "short_name", "status"]
+							}
+						},
+						"kind": {
+							"query": {
+								"select": ["id", "name"]
+							}
+						}
+					}
+				}
+			]
+		}
+	},
+	"columns": {
+		"service name": {
+			"label": "Service Name",
+			"view": {
+				"type": "label",
+				"props": {
+					"value": ":name"
+				}
+			},
+			"edit": {
+				"type": "input",
+				"props": {
+					"value": ":name"
+				}
+			}
+		},
+		"Manufacturer": {
+			"label": "Manufacturer",
+			"view": {
+				"name": "label",
+				"props": {
+					"value": ":manu.short_name"
+				}
+			},
+			"edit": {
+				"type": "select",
+				"props": {
+					"value": ":manu.id",
+					"searchable": true,
+					"remote": {
+						"api": "/api/manu/get",
+						"query": {
+							"select": ["id", "name"],
+							"keyword": "where_name_like"
+						}
+					}
+				}
+			}
+		},
+		"Service type": {
+			"label": "Service Type",
+			"view": {
+				"name": "label",
+				"props": {
+					"value": ":kind.name"
+				}
+			},
+			"edit": {
+				"type": "select",
+				"props": {
+					"value": ":kind.id",
+					"tree": true,
+					"searchable": true,
+					"remote": {
+						"api": "/api/kind/tree",
+						"query": {
+							"select": ["id", "name"],
+							"keyword": "where_name_like"
+						}
+					}
+				}
+			}
+		},
+		"Service Domain": {
+			"label": "Service Area",
+			"view": {
+				"name": "tags",
+				"props": {
+					"value": ":fields"
+				}
+			},
+			"edit": {
+				"type": "select",
+				"props": {
+					"value": ":fields",
+					"searchable": true,
+					"inputable": true,
+					"multiple": true,
+					"options": [
+						{ "label": "video conference", "value": "video conference" },
+						{ "label": "IM", "value": "IM" },
+						{
+							"label": "Customer Service Management",
+							"value": "Customer Service Management"
+						},
+						{
+							"label": "Financial Management",
+							"value": "Financial Management"
+						},
+						{
+							"label": "Customer Relationship Management",
+							"value": "Customer Relationship Management"
+						},
+						{
+							"label": "Marketing Management",
+							"value": "Marketing Management"
+						},
+						{ "label": "Office Automation", "value": "Office Automation" },
+						{ "label": "ERP", "value": "ERP" },
+						{ "label": "manpower", "value": "manpower" },
+						{ "label": "Purchase", "value": "Purchase" },
+						{ "label": "Supply Chain", "value": "Supply Chain" },
+						{
+							"label": "Enterprise Network Disk",
+							"value": "Enterprise Network Disk"
+						},
+						{ "label": "Mail Service", "value": "Mail Service" },
+						{
+							"label": "Electronic Contract",
+							"value": "Electronic Contract"
+						},
+						{ "label": "Security Tools", "value": "Security Tools" },
+						{
+							"label": "Public opinion analysis",
+							"value": "Public opinion analysis"
+						},
+						{
+							"label": "Industry application",
+							"value": "Industry application"
+						},
+						{ "label": "other", "value": "other" }
+					]
+				}
+			}
+		},
+		"Billing method": {
+			"label": "Billing method",
+			"view": {
+				"name": "tags",
+				"props": {
+					"value": ":fields"
+				}
+			},
+			"edit": {
+				"type": "select",
+				"props": {
+					"value": ":price_options",
+					"multiple": true,
+					"options": [
+						{
+							"label": "Annual subscription",
+							"value": "Annual subscription"
+						},
+						{
+							"label": "Monthly subscription",
+							"value": "Monthly subscription"
+						},
+						{ "label": "Pay-As-You-Go", "value": "Pay-As-You-Go" },
+						{
+							"label": "Private Deployment",
+							"value": "Private Deployment"
+						},
+						{ "label": "other", "value": "other" }
+					]
+				}
+			}
+		},
+		"industry coverage": {
+			"label": "Industry coverage",
+			"view": {
+				"name": "tags",
+				"props": {
+					"value": ":industries"
+				}
+			},
+			"edit": {
+				"type": "select",
+				"props": {
+					"value": ":industries",
+					"inputable": true,
+					"multiple": true,
+					"options": [
+						{ "label": "real estate", "value": "real estate" },
+						{ "label": "tourism", "value": "tourism" },
+						{ "label": "Education", "value": "Education" },
+						{ "label": "Internet", "value": "Internet" },
+						{ "label": "other", "value": "other" }
+					]
+				}
+			}
+		},
+		"state": {
+			"label": "Status",
+			"view": {
+				"name": "tags",
+				"props": {
+					"value": ":status",
+					"options": [
+						{ "label": "enabled", "value": "enabled", "color": "primary" },
+						{ "label": "off", "value": "disabled", "color": "danger" }
+					]
+				}
+			},
+			"edit": {
+				"type": "select",
+				"props": {
+					"value": ":status",
+					"options": [
+						{ "label": "enabled", "value": "enabled" },
+						{ "label": "off", "value": "disabled" }
+					]
+				}
+			}
+		},
+		"creation time": {
+			"label": "Created Time",
+			"view": {
+				"name": "label",
+				"props": {
+					"value": ":created_at",
+					"datetime-format": "YYYY MM DD @hh:mm:ss"
+				}
+			}
+		},
+		"update time": {
+			"label": "Update time",
+			"view": {
+				"name": "label",
+				"props": {
+					"value": ":update_at",
+					"datetime-format": "YYYY MM DD @hh:mm:ss"
+				}
+			}
+		},
+		"Query Sort": {
+			"label": "Query Sort",
+			"view": {
+				"type": "label",
+				"props": {
+					"value": ":rank"
+				}
+			},
+			"edit": {
+				"type": "input",
+				"props": {
+					"value": ":rank",
+					"type": "number"
+				}
+			}
+		}
+	},
+	"filters": {
+		"Key words": {
+			"label": "Keyword",
+			"bind": "where.name.like",
+			"input": {
+				"type": "input",
+				"props": {
+					"placeholder": "Please enter a keyword"
+				}
+			}
+		},
+		"Manufacturer": {
+			"label": "Manufacturer",
+			"bind": "where.manu_id.in",
+			"input": {
+				"type": "select",
+				"props": {
+					"searchable": true,
+					"multiple": true,
+					"placeholder": "Please select the manufacturer",
+					"remote": {
+						"api": "/api/manu/get",
+						"query": {
+							"select": ["id", "name"],
+							"keyword": "where_name_like"
+						}
+					}
+				}
+			}
+		},
+		"Service type": {
+			"label": "Type",
+			"bind": "where.kind_id.in",
+			"input": {
+				"type": "select",
+				"props": {
+					"tree": true,
+					"searchable": true,
+					"multiple": true,
+					"placeholder": "Please select a type",
+					"remote": {
+						"api": "/api/kind/tree",
+						"query": {
+							"select": ["id", "name"],
+							"keyword": "where_name_like"
+						}
+					}
+				}
+			}
+		}
+	},
+	"list": {
+		"primary": "id",
+		"layout": {
+			"columns": [
+				{ "name": "Service Name", "width": 6 },
+				{ "name": "Manufacturer", "width": 6 },
+				{ "name": "Service Type", "width": 4 },
+				{ "name": "state", "width": 4 },
+				{ "name": "Service Domain", "width": 4 },
+				{ "name": "Billing method", "width": 4 },
+				{ "name": "creation time", "width": 6 },
+				{ "name": "update time", "width": 6 }
+			],
+			"filters": [
+				{ "name": "keyword", "width": 6 },
+				{ "name": "Manufacturer", "width": 6 },
+				{ "name": "Service Type", "width": 4 }
+			]
+		},
+		"actions": {
+			"create": {
+				"type": "button",
+				"props": {
+					"label": "New Service",
+					"icon": "fas fa-plus"
+				}
+			},
+			"view": {},
+			"edit": {},
+			"import": {},
+			"update": {},
+			"delete": {},
+			"insert": {},
+			"updateWhere": {},
+			"deleteWhere": {},
+			"updateSelect": {},
+			"deleteSelect": {},
+			"pagination": ["pages", "prev", "next"],
+			"setting": {}
+		}
+	},
+	"edit": {
+		"primary": "id",
+		"layout": {
+			"fieldset": [
+				{
+					"title": "Basic Information",
+					"description": "",
+					"columns": [
+						{ "name": "Service Name", "width": 6 },
+						{ "name": "Manufacturer", "width": 6 },
+						{ "name": "Service Type", "width": 6 },
+						{ "name": "state", "width": 6 },
+						{ "name": "rank", "width": 6 }
+					]
+				},
+				{
+					"title": "Data Label",
+					"description": "",
+					"columns": ["Service Field", "Billing Method", "Industry Coverage"]
+				}
+			]
+		},
+		"actions": {
+			"cancel": {},
+			"save": {
+				"type": "button",
+				"props": {
+					"label": "Save"
+				}
+			},
+			"delete": {}
+		}
+	},
+	"insert": {},
+	"view": {}
+}
+```

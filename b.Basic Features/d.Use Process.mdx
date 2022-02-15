@@ -17,10 +17,10 @@ A processor is a function `Process( ...args:any[] ) any` that performs a specifi
 | ------------------------- | ----------------------------------------------------- |
 | xiang.\*.\*               | Built-in processor                                    |
 | models.<model name\>.\*   | built-in processes, atomic operations on data models |
-| flows.<data flow name\>   | built-in handlers, handlers written with data flows   |
-| scripts.<script name\>.\* | Built-in handlers, scripting handlers via JavaScript  |
+| flows.<data flow name\>   | built-in processes, processes written with data flows   |
+| scripts.<script name\>.\* | Built-in processes, scripting processes via JavaScript  |
 | plugins.<plugin name\>.\* | Write processes via GRPC plugins                     |
-| session.\*                | built-in, session data handler                        |
+| session.\*                | built-in, session data process                        |
 
 <Notice type='warning'>
 	Note: App Engine built-in processor namespace is <strong>xiang</strong> , Prevent when used on
@@ -43,7 +43,7 @@ yao run models.pet.Get '::{}'
 
 ### Use In API
 
-Specify `process` in the API to set the processor. `query` sets the parameter list for the handler.
+Specify `process` in the API to set the processor. `query` sets the parameter list for the process.
 
 ```json
 {
@@ -147,13 +147,13 @@ Extended reading:
 
 <Extend
 	title='Custom form data query'
-	desc='Learn how to implement custom tabular data interfaces by specifying handlers.'
+	desc='Learn how to implement custom tabular data interfaces by specifying processes.'
 	link='b. Basic features/e. Write data flow'
 ></Extend>
 
 <Extend
 	title='Use Hook in the form'
-	desc='Learn how to implement contextual data processing for tables by specifying handlers.'
+	desc='Learn how to implement contextual data processing for tables by specifying processes.'
 	link='b. Basic features/e. Write data flow'
 ></Extend>
 

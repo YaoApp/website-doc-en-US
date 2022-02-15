@@ -1,0 +1,1125 @@
+# Model
+
+Yao can read data model definitions, implement data migration, metadata atomic operations, metadata input verification, and metadata management backend. Metadata atomic operation methods are mapped as processes (`process`), which support data relationship mapping between models, and can access queries in data flows (`Flow`) and interfaces (`API`). If you use the `golang` language to develop business plug-ins (`Plugin`), you can use Package `Gou` to access various methods of the model, and language SDKs such as `NodeJS` will be provided in the future.
+
+## Naming Conventions
+
+The data model description file is a JSON text file named **lowercase English letters** `<name>.mod.json`
+
+| Folder (relative to application model root) | File name     | Model name           | Process (referenced in API /Flow)     |
+| ------------------------------------------- | ------------- | -------------------- | ------------------------------------- |
+| /                                           | name.mod.json | `name`               | `models.name.<process>`               |
+| /group/                                     | name.mod.json | `gorup.name`         | `models.gorup.name.<process>`         |
+| /group1/group2/                             | name.mod.json | `gorup1.gorup2.name` | `models.gorup1.group2.name.<process>` |
+
+## Document Structure
+
+The data model definition document consists of basic information, data tables, field definitions, index definitions, relational mappings, default data, and configuration sections. [see full example] (#5 - full example)
+
+```json
+{
+	"name": "User",
+	"table": {},
+	"columns": [],
+	"indexes": [],
+	"relations": {},
+	"values": [],
+	"option": {}
+}
+```
+
+| Fields    | Type                  | Description                                                                    | Required Fields |
+| --------- | --------------------- | ------------------------------------------------------------------------------ | --------------- |
+| name      | String                | Model Chinese name [View full description](#21-Basic information)              | Yes             |
+| table     | Object                | Data table definition [View full description](#22-data-table-table)            | Yes             |
+| columns   | Array\<Object\>       | field definitions [View full description](#23-field-definition-columns)        | yes             |
+| indexes   | Array\<Object\>       | index definition [see full description](#24-index definition-indexes)          | yes             |
+| relations | \[key:String\]:Object | relation mapping [see full description](#25-relation-mapping-relations)        | no              |
+| values ​​ | Array\<Object\>       | default data [see full description](#26-default-data-values)                   | no              |
+| option    | Object                | Configuration options [View full description](#27-Configuration option-option) | No              |
+
+### Basic
+
+Basic information includes `name` , `description` , `version` and other fields, which are mainly used for presentation and retrieval in the development platform.
+
+```json
+{
+	"name": "User",
+	"version": "1.0.0",
+	"description": "Website User Metadata Model",
+	"table": {},
+	"columns": [],
+	"indexes": []
+}
+```
+
+| Fields      | Type   | Description                                                                                                         | Required Fields |
+| ----------- | ------ | ------------------------------------------------------------------------------------------------------------------- | --------------- |
+| name        | String | Chinese name                                                                                                        | Yes             |
+| version     | String | The version number x.x.x follows the [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html) specification | yes             |
+| tun         | String | Xiang Chuan Wisdom Shared Warehouse `Tun` (tun.iqka.com) address such as: `microcity/petstore/user`                 | No              |
+| description | String | Data model details                                                                                                  | No              |
+| author      | String | Data model author                                                                                                   | no              |
+| email       | String | Data model author contact information                                                                               | No              |
+| license     | String | Data model sharing protocol such as MIT                                                                             | No              |
+| homepage    | String | Official website of data model provider                                                                             | No              |
+
+### `table`
+
+The data table contains fields such as `name`, `comment`, etc., which define the data table name, comments and other information stored in the database by the model. Supports `MySQL`, `PostgreSQL`, `SQLite` and other `Xun Database` or third-party driven databases.
+
+```json
+{
+	"table": {
+		"name": "user",
+		"comment": "User table",
+		"engine": "InnoDB"
+	}
+}
+```
+
+| Fields  | Type   | Description                                                        | Required Fields |
+| ------- | ------ | ------------------------------------------------------------------ | --------------- |
+| name    | String | data table name                                                    | yes             |
+| comment | String | Chinese name of the data sheet comment                             | No              |
+| engine  | String | Data table engine (MySQL ONLY) allowed values ​​`InnoDB`, `MyISAM` | no              |
+
+### `columns`
+
+A model can contain multiple field definitions, each field definition contains `label`, `name`, `type`, `validations` and other information.
+
+```json
+{
+	"columns": [
+		{ "label": "ID", "name": "id", "type": "ID" },
+		{
+			"label": "Manufacturer",
+			"name": "manu_id",
+			"type": "bigInteger",
+			"length": 50,
+			"comment": "Manufacturer",
+			"nullable": true,
+			"index": true,
+			"validations": [
+				{
+					"method": "typeof",
+					"args": ["integer"],
+					"message": "{{input}} type is wrong, {{label}} should be a number"
+				},
+				{
+					"method": "min",
+					"args": [0],
+					"message": "{{label}} should be greater than 0"
+				}
+			]
+		},
+		{
+			"label": "Phone number",
+			"name": "mobile",
+			"type": "string",
+			"length": 50,
+			"comment": "Phone number",
+			"index": true,
+			"crypt": "AES",
+			"validations": [
+				{
+					"method": "typeof",
+					"args": ["string"],
+					"message": "{{input}} type error, {{label}} should be a string"
+				},
+				{
+					"method": "pattern",
+					"args": ["^1[3-9]\\d{9}$"],
+					"message": "{{input}} is malformed"
+				}
+			]
+		}
+	]
+}
+```
+
+| Fields      | Type                   | Description                                                                                                                                               | Required Fields |
+| ----------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| name        | String                 | Field name, corresponding to the field name in the data table                                                                                             | Yes             |
+| type        | String                 | field type, [view full description](#field type)                                                                                                          | yes             |
+| label       | String                 | Field display name, which is used for presentation in management forms, development platforms, etc.                                                       | Yes             |
+| comment     | String                 | Field comment, corresponding to the field comment in the data table                                                                                       | No              |
+| title       | String                 | Field title, available for rendering in development platforms                                                                                             | no              |
+| description | String                 | Field description, which can be used for rendering in the development platform                                                                            | No              |
+| length      | Integer                | field length, valid for `string` and other type fields [View full description](#field type)                                                               | no              |
+| precision   | Integer                | Field digits (including decimal places), valid for `float`, `decimal` and other type fields [View full description](#Field type)                          | No              |
+| scale       | Integer                | The number of decimal places in the field, valid for `float`, `decimal` and other type fields [View full description](#Field type)                        | No              |
+| option      | Array\<String\>        | field allowable value, valid for `enum` type fields [see full description](#field type)                                                                   | no              |
+| default     | String\|Integer\|Float | Field default value                                                                                                                                       | No              |
+| default_raw | String                 | The default value of the field, supports database functions, such as `NOW()` default and default_raw exist at the same time default_raw has high priority | no              |
+| crypt       | String                 | Field encryption storage method (MySQL Only). Permitted values ​​`AES`, `PASSWORD` [View full description](#encryption method)                            | no              |
+| nullable    | Bool                   | Whether the field can be null, the default is false                                                                                                       | no              |
+| index       | Bool                   | Whether the field is an index, the default is false                                                                                                       | no              |
+| unique      | Bool                   | Whether the field is a unique index, the default is false , if it is true, you do not need to set `index` to true at the same time                        | no              |
+| primary     | Bool                   | Whether the field is the primary key, and each table has at most one primary key field. Default is false                                                  | no              |
+| validations | Array\<Object\>        | Field validation rules [View full description](#Validation method)                                                                                        | No              |
+
+#### Field Type
+
+| Type                 | Description                                         | Optional Parameters  | MySQL Field Type                       |
+| -------------------- | --------------------------------------------------- | -------------------- | -------------------------------------- |
+| string               | string                                              | `length`             | VARCHAR(`length` )                     |
+| char                 | character                                           | `length`             | CHAR (`length` )                       |
+| text                 | Text                                                |                      | TEXT                                   |
+| mediumText           | Chinese text                                        |                      | MEDIUMTEXT                             |
+| longText             | long text                                           |                      | LONGTEXT                               |
+| binary               | binary data                                         |                      | VARBINARY                              |
+| date                 | date                                                |                      | DATE                                   |
+| datetime             | datetime                                            | `length`             | DATETIME                               |
+| datetimeTz           | datetime with time zone                             | `length`             | DATETIME                               |
+| time                 | time                                                | `length`             | TIME                                   |
+| timeTz               | time with time zone                                 | `length`             | TIME                                   |
+| timestamp            | timestamp                                           | `length`             | TIMESTAMP                              |
+| timestampTz          | timestamp with time zone                            | `length`             | TIMESTAMP                              |
+| tinyInteger          | Tiny Integer                                        |                      | TINYINT                                |
+| tinyIncrements       | Unsigned micro integer + auto increment             |                      | TINYINT UNSIGNED AUTO_INCREMENT        |
+| unsignedTinyInteger  | Unsigned Tiny Integer                               |                      | TINYINT UNSIGNED                       |
+| smallInteger         | Small Integer                                       |                      | SMALLINT                               |
+| smallIncrements      | unsigned small integer + auto increment             |                      | SMALLINT UNSIGNED AUTO_INCREMENT       |
+| unsignedSmallInteger | Unsigned Small Integer                              |                      | SMALLINT UNSIGNED                      |
+| integer              | Integer                                             |                      | INT                                    |
+| increments           | unsigned integer + auto increment                   |                      | INT UNSIGNED AUTO_INCREMENT            |
+| unsignedInteger      | unsigned integer type                               |                      | INT UNSIGNED                           |
+| bigInteger           | Long                                                |                      | BIGINT                                 |
+| bigIncrements        | unsigned long + auto increment                      |                      | BIGINT UNSIGNED AUTO_INCREMENT         |
+| unsignedBigInteger   | unsigned long                                       |                      | BIGINT UNSIGNED                        |
+| id                   | long + auto increment                               |                      | BIGINT UNSIGNED AUTO_INCREMENT         |
+| ID                   | Long + auto increment (same as id)                  |                      | BIGINT UNSIGNED AUTO_INCREMENT         |
+| decimal              | decimal (usually used to store currency)            | `precision`, `scale` | DECIMAL(`precision`,`scale`)           |
+| unsignedDecimal      | unsigned decimal (generally used to store currency) | `precision`, `scale` | DECIMAL (`precision`,`scale`) UNSIGNED |
+| float                | float                                               | `precision`, `scale` | FLOAT (`precision`,`scale`)            |
+| unsignedFloat        | unsigned floating point number                      | `precision`, `scale` | FLOAT (`precision`,`scale`) UNSIGNED   |
+| double               | double                                              | `precision`, `scale` | DOUBLE (`precision`,`scale`)           |
+| unsignedDouble       | unsigned double                                     | `precision`, `scale` | DOUBLE (`precision`,`scale`) UNSIGNED  |
+| boolean              | boolean                                             |                      | BOOLEAN                                |
+| enum                 | enum type                                           | `option`             | ENUM(`option...`)                      |
+| json                 | JSON text                                           |                      | JSON                                   |
+| JSON                 | JSON text (same as json)                            |                      | JSON                                   |
+| jsonb                | JSON (binary format storage)                        |                      | JSON                                   |
+| JSONB                | JSON (binary format storage same as jsonb)          |                      | JSON                                   |
+| uuid                 | UUID format string                                  |                      | VARCHAR(36)                            |
+| ipAddress            | IP address                                          |                      | INT                                    |
+| macAddress           | MAC address                                         |                      | BIGINT                                 |
+| year                 | year                                                |                      | SMALLINT                               |
+
+#### Check Method
+
+A field can contain multiple validation rules, and each validation rule can use `min`, `max`, `pattern`, `typeof` and other validation methods.
+
+```json
+{
+	"columns": [
+		{
+			"label": "Phone number",
+			"name": "mobile",
+			"type": "string",
+			"length": 50,
+			"comment": "Phone number",
+			"index": true,
+			"crypt": "AES",
+			"validations": [
+				{
+					"method": "typeof",
+					"args": ["string"],
+					"message": "{{input}} type error, {{label}} should be a string"
+				},
+				{
+					"method": "pattern",
+					"args": ["^1[3-9]\\d{9}$"],
+					"message": "{{input}} is malformed"
+				}
+			]
+		}
+	]
+}
+```
+
+**Validation rule definition**
+
+| Fields  | Type                            | Description                                                                                                                                                                                                                                                      | Required Fields |
+| ------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| method  | String                          | Validation method name, optional `typeof`, `pattern`, etc.                                                                                                                                                                                                       | yes             |
+| args    | Array\<String\|Integer\|Float\> | Validation method parameters, such as `[20]`, `["^1[3-9]\\d{9}$"]`                                                                                                                                                                                               | No              |
+| message | String                          | If the verification fails, the returned error message. Supports the use of `{{<name>}}` to refer to field information, such as `{{label}}` will be replaced with the value defined in the field `label`; `{{input}}` will be replaced with the user input value. | No              |
+
+#### Validation Method List
+
+| Check Method | Parameters                                                                                    | Description         | Example                                                                |
+| ------------ | --------------------------------------------------------------------------------------------- | ------------------- | ---------------------------------------------------------------------- |
+| typeof       | `[<String>]` allowed values ​​`string`, `integer`, `float`, `number`, `datetime`, `timestamp` | numeric types       | `{"method":"typeof", " args":["integer"]}`                             |
+| min          | `[<Integer\|Float>]`                                                                          | minimum value       | `{"method":"min", "args":[20]}`                                        |
+| max          | `[<Integer\|Float>]`                                                                          | max                 | `{"method":"max", "args":[0.618]}`                                     |
+| enum         | `[String...]`                                                                                 | enum options        | `{"method":"enum", "args":["enabled", "disabled"]}`                    |
+| pattern      | `[String]`                                                                                    | Regular match       | `{"method":"pattern", "args":["^1[3-9]\\d{9}$"]}`                      |
+| minLength    | `[<Integer>]`                                                                                 | minimum length      | `{"method":"minLength", "args":[20]}`                                  |
+| maxLength    | `[<Integer>]`                                                                                 | maximum length      | `{"method":"maxLength", "args":[100]}`                                 |
+| email        | `[]`                                                                                          | Email               | `{"method":"email", "args":[]}`                                        |
+| mobile       | `[<String>]` list of regions (optional), defaults to `cn` allowed values ​​`cn`, `us`         | mobile phone number | `{"method":"mobile", "args":[ ]}` `{"method":"mobile", "args":["us"]}` |
+
+#### Encryption
+
+Currently supports `AES` and `PASSWORD` two field value encryption storage algorithms, of which `AES` only supports MySQL database.
+
+| Encryption algorithm | Description                                   | Is it reversible |
+| -------------------- | --------------------------------------------- | ---------------- |
+| `AES`                | AES encryption, need to set `XIANG_DB_AESKEY` | Yes              |
+| `PASSWORD`           | PASSWORD HASH encryption                      | no               |
+
+#### Reserved Words
+
+The following names cannot be used for field names.
+
+| Reserved words   | Description                               |
+| ---------------- | ----------------------------------------- |
+| created_at       | used to record the creation timestamp     |
+| updated_at       | used to record the update timestamp       |
+| deleted_at       | Used to record soft delete markers        |
+| \_\_restore_data | Backup unique field value for soft delete |
+
+### `indexes`
+
+A data model that can contain multiple indexes. For a single index, it is recommended to use the `index` , `unique` and `primary` modifiers when defining the field, and for a compound index or full-text search index, define it in `indexes`.
+
+```json
+{
+	"indexes": [
+		{
+			"comment": "Manufacturer User",
+			"name": "manu_id_mobile_unique",
+			"columns": ["manu_id", "mobile"],
+			"type": "unique"
+		},
+		{
+			"comment": "Resume full text search",
+			"name": "resume_fulltext",
+			"columns": ["resume"],
+			"type": "fulltext"
+		}
+	]
+}
+```
+
+| Fields  | Type            | Description                                                                                                            | Required Fields |
+| ------- | --------------- | ---------------------------------------------------------------------------------------------------------------------- | --------------- |
+| name    | String          | Index name. **The naming convention is field1_field2_fieldn_index type**                                               | yes             |
+| type    | String          | Index type Permitted values ​​`index` index, `unique` unique index, `primary` primary key, `fulltext` full text search | yes             |
+| columns | Array\<String\> | List of associated field names (order dependent) `["Field1","Field2"]` is different from `["Field2","Field1"]`         | yes             |
+| comment | String          | Index comment                                                                                                          | no              |
+
+### `relations`
+
+**The current relationship mapping part is a beta version, and the data structure may be adjusted based on user feedback**
+
+The data model supports one-to-one and one-to-many relationship mappings. Multiple data models can be associated by defining a mapping relationship. When querying, use the `with` parameter to return the associated model data at the same time.
+
+| Mapping Relationship Name | Relationship | Description                                                                                             |
+| ------------------------- | ------------ | ------------------------------------------------------------------------------------------------------- |
+| `hasOne`                  | One-to-one   | Model A is associated with Model B one-to-one [see full description](#251-hasone-one-to-one)            |
+| `hasMany`                 | one-to-many  | Model A is associated with model B through one-to-many [see full description](#253-hasmany-one-to-many) |
+
+Relationships are defined using the `[key:String]:Object Relation` data structure ( `{"Association name1":{}, "Association name2":{}}`, the association name is **lowercase English letters** )
+
+Defined in the model file `user.json`
+
+```json
+{
+	"relations": {
+		"manu": {
+			"type": "hasOne",
+			"model": "manu",
+			"key": "id",
+			"foreign": "manu_id",
+			"query": { "select": ["name", "short_name", "type"] }
+		},
+		"addresses": {
+			"type": "hasMany",
+			"model": "address",
+			"key": "user_id",
+			"foreign": "id",
+			"query": {
+				"select": ["province", "city", "location", "status"],
+				"pagesize": 20
+			}
+		},
+		"mother": {
+			"type": "hasOneThrough",
+			"links": [
+				{
+					"type": "hasOne",
+					"model": "friends",
+					"key": "user_id",
+					"foreign": "user.id",
+					"query": {
+						"select": ["status", "type", "friend_id"],
+						"wheres": [
+							{
+								"column": "type",
+								"value": "monther"
+							}
+						]
+					}
+				},
+				{
+					"type": "hasOne",
+					"model": "user",
+					"key": "id",
+					"foreign": "user_mother_friends.friend_id",
+					"query": {
+						"select": ["name", "id", "status", "type", "secret", "extra"],
+						"withs": {
+							"manu": {},
+							"roles": {},
+							"address": {}
+						}
+					}
+				}
+			]
+		},
+		"roles": {
+			"type": "hasManyThrough",
+			"links": [
+				{
+					"type": "hasMany",
+					"model": "user_roles",
+					"key": "user_id",
+					"foreign": "id",
+					"query": {
+						"select": ["status"],
+						"pagesize": 20
+					}
+				},
+				{
+					"type": "hasOne",
+					"model": "role",
+					"key": "id",
+					"foreign": "role_id",
+					"query": {
+						"select": ["name", "label", "permission"]
+					}
+				}
+			]
+		}
+	}
+}
+```
+
+**`Object Relation`**
+
+| Fields  | Type                     | Description                                                                                                                                                                                                                     | Required Fields |
+| ------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | --- | --- |
+| type    | String                   | Relationship Type Permitted Values ​​`hasOne`, `hasOneThrough` , `hasMany` , `hasManyThrough`                                                                                                                                   | yes             |
+| key     | String                   | Association field name of the association model                                                                                                                                                                                 | no              |
+| model   | String                   | associated model name                                                                                                                                                                                                           | no              |
+| foreign | String                   | current model's associated field name                                                                                                                                                                                           | no              |
+| query   | Object QueryParam        | Relational query parameter default value. If the associated query parameter is not specified in the query, the query parameter defined in the model will be used instead [View full description](#3-query parameter-queryparam) | No              |
+| links   | Array\<Object Relation\> | `hasOneThrough` or `hasManyThrough` multi-table relationship definition                                                                                                                                                         | no              |     | no  |
+
+#### `hasOne` one-to-one
+
+The data model `user` data table structure is as follows:
+
+| Field   | Type       | Description     |
+| ------- | ---------- | --------------- |
+| id      | ID         | User ID         |
+| manu_id | bigInteger | Manufacturer ID |
+| name    | string     | name            |
+
+The data model `manu` data table structure is as follows:
+
+| Field   | Type   | Description             |
+| ------- | ------ | ----------------------- |
+| id      | ID     | Manufacturer ID         |
+| short   | string | Manufacturer short name |
+| company | string | company name            |
+
+When querying user data, you can list the manufacturer information at the same time or query by related manufacturers, you can set the relationship with the `manu` data model when defining the `user` data model.
+
+Defined in the model file `user.json`
+
+```json
+{
+	"name": "User",
+	"relations": {
+		"manu": {
+			"type": "hasOne",
+			"model": "manu",
+			"key": "id",
+			"foreign": "manu_id",
+			"query": { "select": ["short", "company"] }
+		}
+	}
+}
+```
+
+**instruction**
+
+1. Specify the relational mapping type as `hasOne`
+
+2. Set the associated model `model` to `manu`
+
+3. Set the association model `key` to `id`, that is, when the `manu.id` engine is processed, the `id` field of the `manu` table is automatically associated.
+
+4. Set `foreign` to `manu_id`, that is: `user.manu_id` When the engine processes, associate `manu.id` with `user.manu_id`
+
+5. You can set the default query conditions in the `query` field, such as specifying the fields to read.
+
+The SQL parsed by the engine is:
+
+```sql
+SELECT `user`.*,
+  `manu`.`short` AS `user_manu_short`,
+  `manu`.`company` AS `user_manu_company`,
+  FROM `user` AS `user`
+  LEFT JOIN `manu` as `user_manu` ON `user_manu`.`id` = `user`.`manu_id`
+```
+
+**access**
+
+When calling the `process` query, pass in the `with` parameter to return the manufacturer information at the same time
+
+```bash
+GET /api/user/find/1?with=manu&manu.select=id,short
+```
+
+#### `hasMany` one-to-many
+
+The data model `user` data table structure is as follows:
+
+| Field   | Type       | Description     |
+| ------- | ---------- | --------------- |
+| id      | ID         | User ID         |
+| manu_id | bigInteger | Manufacturer ID |
+| name    | string     | name            |
+
+The data model `address` data table structure is as follows:
+
+| Field    | Type       | Description                                 |
+| -------- | ---------- | ------------------------------------------- |
+| id       | ID         | Address ID                                  |
+| user_id  | bigInteger | owning user ID (associated with `user.id` ) |
+| location | string     | Detailed address                            |
+
+For a business scenario like a user has multiple communication addresses, it can be implemented by establishing a one-to-many mapping relationship.
+
+Defined in the model file `user.json`
+
+```json
+{
+  "name": "User",
+  "relations": {
+    "addresses": {
+      "type": "hasMany",
+      "model": "address",
+      "key": "user_id",
+      "foreign": "id",
+      "query": {
+        "select": ["location"],
+        "limit": 20
+      }
+    },
+}
+```
+
+**instruction**
+
+1. Specify the relationship mapping type as `hasMany`
+
+2. Set the associated model `model` to `address`
+
+3. Set the association model `key` to `user_id`, that is: when the `address.user_id` engine is processed, the `user_id` field of the `address` table is automatically associated.
+
+4. Set `foreign` to `id`, that is: when `user.id` is processed by the engine, associate `user.id` with `address.user_id`
+
+5. You can set the default query conditions in the `query` field, such as specifying the fields to read. For `hasMany` it is recommended to set the default `limit` constraint to return data entries
+
+For `hasMany` type relational mappings, the engine will query twice. The main model and the associated ID list are queried for the first time, and the associated data information is queried based on the ID list for the second time.
+
+First query:
+
+```sql
+SELECT `user`.* FROM `user` AS `user`
+```
+
+The engine processes the result and reads `user`.`id`
+
+Second query:
+
+```sql
+SELECT `address`.`user_id`, `address`.`location` FROM `address` AS `address`
+  WHERE `address`.`user_id` IN (<user.id...>)
+```
+
+The engine processes the result and associates the user address information
+
+**access**
+
+When invoking the `process` query, pass in the `with` parameter to obtain the related information of `addresses` at the same time
+
+```bash
+GET /api/user/find/1?with=addresses
+```
+
+### `option`
+
+Set model configuration parameters in `option`
+
+```json
+{
+	"name": "Address",
+	"option": {
+		"timestamps": true,
+		"soft_deletes": true
+	}
+}
+```
+
+| Options      | Type | Description                                                                                                                                                                                                                         |
+| ------------ | ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| timestamps   | Bool | When true, `created_at`, `updated_at` fields are automatically created, and the corresponding operation time is marked when inserting and updating data                                                                             |
+| soft_deletes | Bool | forWhen true, `deleted_at` and `__restore_data` fields are automatically created. When data is deleted, the unique field data is backed up, and the operation time is marked. The data marked for deletion is ignored when querying |
+
+## `QueryParam`
+
+Query conditions are described by Object `QueryParam` when the model association is defined and the process is called.
+
+```json
+{
+	"select": ["id", "name", "mobile", "status"],
+	"withs": {
+		"manu": {
+			"query": {
+				"select": ["name", "short_name", "status"]
+			}
+		},
+		"addresses": {}
+	},
+	"wheres": [
+		{ "column": "status", "value": "enabled" },
+		{ "rel": "manu", "column": "status", "value": "enabled" },
+		{
+			"wheres": [
+				{ "column": "name", "value": "%Zhangsan%", "op": "like" },
+				{
+					"method": "orwhere",
+					"column": "name",
+					"value": "%Lisi%",
+					"op": "like"
+				}
+			]
+		}
+	],
+	"orders": [
+		{ "column": "id", "option": "desc" },
+		{ "rel": "manu", "column": "name" }
+	],
+	"limit": 2
+}
+```
+
+The application engine parses the above query conditions into the following SQL:
+
+```SQL
+SELECT
+  `user`.`id`,`user`.`name`,`user`.`mobile`,`user`.`status`,
+  `user_manu`.`name` AS `user_manu_name`,
+  `user_manu`.`short_name` AS `user_manu_short_name` ,
+  `user_manu`.`status` AS `user_manu_status`
+FROM `user` AS `user`
+LEFT JOIN `manu` AS `user_manu` ON `user_manu`.`id` = `user`.`manu_id`
+WHERE `user`.`status` = 'enabled'
+AND `user_manu`.`status` = 'enabled'
+AND (
+   `user`.`name` like '%Zhang San%' OR `user`.`name` like '%Li Si%'
+)
+ORDER BY `user`.`id` desc, `user_manu`.`name` asc
+LIMIT 2
+```
+
+### Data Structure
+
+**`QueryParam`**
+
+| Fields   | Type                       | Description                | Required Fields |
+| -------- | -------------------------- | -------------------------- | --------------- |
+| select   | Array\<String\>            | Select field list          | No              |
+| wheres   | Array\<Object Where\>      | query conditions           | no              |
+| orders   | Array\<Object Order\>      | Sort condition             | No              |
+| limit    | Integer                    | return record entry        | no              |
+| page     | Integer                    | Current page number        | No              |
+| pagesize | Integer                    | Number of records per page | No              |
+| withs    | `[key:String]:Object With` | read associated model      | no              |
+
+**`Object Where`**
+
+| Fields | Type                  | Description                                                                                 | Required Fields |
+| ------ | --------------------- | ------------------------------------------------------------------------------------------- | --------------- |
+| rel    | String                | If querying by the fields of the associated model, fill in the name of the associated model | No              |
+| column | String                | field name                                                                                  | no              |
+| method | String                | query method `where`,`orwhere`                                                              | no              |
+| op     | String                | match relation `eq`,`like`,`in`,`gt` etc.                                                   | no              |
+| value  | Any                   | matches numeric value                                                                       | no              |
+| wheres | Array\<Object Where\> | Group query                                                                                 | no              |
+
+| Query method | Description                                 |
+| ------------ | ------------------------------------------- |
+| where        | WHERE field = number, WHERE field >= number |
+| orwhere      | ... OR WHERE field = number                 |
+
+| Matching Relationship | Description                                    |
+| --------------------- | ---------------------------------------------- |
+| eq                    | default equals WHERE field = number            |
+| like                  | matches the WHERE field like value             |
+| gt                    | greater than WHERE field > numeric value       |
+| ge                    | greater than or equal to WHERE field >= number |
+| lt                    | less than WHERE field < number                 |
+| le                    | Less than or equal to WHERE field <= number    |
+| null                  | is empty WHERE field IS NULL                   |
+| notnull               | not null WHERE field IS NOT NULL               |
+| in                    | list contains WHERE field IN (numeric...)      |
+
+**`Object Order`**
+
+| Fields | Type   | Description                                                                                | Required Fields |
+| ------ | ------ | ------------------------------------------------------------------------------------------ | --------------- |
+| rel    | String | If sorting by the fields of the associated model, fill in the name of the associated model | No              |
+| column | String | field name                                                                                 | no              |
+| option | String | Sort method, default is asc desc, asc                                                      | no              |
+
+**`Object With`**
+
+| Fields | Type              | Description       | Required Fields |
+| ------ | ----------------- | ----------------- | --------------- |
+| name   | String            | Relationship name | No              |
+| query  | Object QueryParam | query parameter   | no              |
+
+### URL Query String and QueryParam comparison table
+
+Query conditions can be passed in through URL Query String, [see the comparison table for details](../api/protocol/http.md#url-query-string- and -queryparam- comparison table)
+
+## Process
+
+The data model provides a set of atomic operation processes `process` , which can be used for service interface (`API`) and data flow (`Flow`) orchestration.
+
+| Process           | Citation                               | Description                                                                                                                                                                                           |
+| ------------------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | ------ | -------------------------- | ---------------------------------------------------------------------------------------------- |
+| find                | models. model name. Find               | query a single record [details](process/Find.md)                                                                                                                                                      |
+| get                 | models. Model name. Get                | Query by condition, no pagination [Details](process/Get.md)                                                                                                                                           |
+| paginate            | models. model name. Paginate           | query by condition, pagination [details](process/Paginate.md)                                                                                                                                         |     | create | models. Model name. Create | Create a single record, return the ID of the newly created record [Details](process/Create.md) |
+| update              | models. model name. Update             | update a single record [details](process/Update.md)                                                                                                                                                   |
+| save                | models. model name. Save               | save a single record, there is no create record, there is an update record, return record ID [details](process/Save.md)                                                                               |
+| delete              | models.model name.Delete               | delete a single record (mark delete) [details](process/Delete.md)                                                                                                                                     |
+| destroy             | models. model name. Destroy            | delete a single record (true delete) [details](process/Destroy.md)                                                                                                                                    |
+| insert              | models.Model name.Insert               | Insert multiple records, return the number of inserted rows [Details](process/Insert.md)                                                                                                              |
+| updatewhere         | models. model name. UpdateWhere        | Update records by condition, return the number of updated rows [Details](process/UpdateWhere.md)                                                                                                      |
+| deletewhere         | models. model name. DeleteWhere        | delete data by condition, return the number of rows deleted (marked for deletion) [details](process/DeleteWhere.md)                                                                                   |
+| destroywhere        | models. model name. DestroyWhere       | delete data by condition, return the number of rows deleted (true delete) [details](process/DestroyWhere.md)                                                                                          |
+| eachsave            | models. model name.EachSave            | save multiple records, there is no created record, there is an update record, return record ID collection [details](process/EachSave.md)                                                              |
+| eachsaveAfterDelete | models. model name.EachSaveAfterDelete | After deleting a set of records with a given ID, save multiple records, no created records exist, there are update records, and return record ID collection [Details](process/EachSaveAfterDelete.md) |
+
+## Complete Example
+
+Complete examples are stored in the examples directory, [View complete example](examples)
+
+```json
+{
+	"name": "User",
+	"table": {
+		"name": "user",
+		"comment": "User table",
+		"engine": "InnoDB"
+	},
+	"columns": [
+		{ "label": "ID", "name": "id", "type": "ID" },
+		{
+			"label": "Manufacturer",
+			"name": "manu_id",
+			"type": "bigInteger",
+			"length": 50,
+			"comment": "Manufacturer",
+			"nullable": true,
+			"index": true,
+			"validations": [
+				{
+					"method": "typeof",
+					"args": ["integer"],
+					"message": "{{input}} type is wrong, {{label}} should be a number"
+				},
+				{
+					"method": "min",
+					"args": [0],
+					"message": "{{label}} should be greater than 0"
+				}
+			]
+		},
+		{
+			"label": "Type",
+			"name": "type",
+			"type": "enum",
+			"option": ["admin", "staff", "user"],
+			"comment": "Account type admin administrator, staff employee, user user",
+			"default": "staff",
+			"index": true,
+			"validations": [
+				{
+					"method": "typeof",
+					"args": ["string"],
+					"message": "{{input}} type error, {{label}} should be a string"
+				},
+				{
+					"method": "enum",
+					"args": ["admin", "staff", "user"],
+					"message": "{{input}} is not permitted, {{label}} should be admin/staff/user"
+				}
+			]
+		},
+		{
+			"label": "Phone number",
+			"name": "mobile",
+			"type": "string",
+			"length": 50,
+			"comment": "Phone number",
+			"index": true,
+			"crypt": "AES",
+			"validations": [
+				{
+					"method": "typeof",
+					"args": ["string"],
+					"message": "{{input}} type error, {{label}} should be a string"
+				},
+				{
+					"method": "pattern",
+					"args": ["^1[3-9]\\d{9}$"],
+					"message": "{{input}} is malformed"
+				}
+			]
+		},
+		{
+			"label": "Login Password",
+			"name": "password",
+			"type": "string",
+			"length": 256,
+			"comment": "Login Password",
+			"crypt": "PASSWORD",
+			"index": true,
+			"validations": [
+				{
+					"method": "typeof",
+					"args": ["string"],
+					"message": "{{input}} type error, {{label}} should be a string"
+				},
+				{
+					"method": "minLength",
+					"args": [6],
+					"message": "{{label}} should consist of 6-18 digits, upper and lower case letters, numbers and symbols"
+				},
+				{
+					"method": "maxLength",
+					"args": [18],
+					"message": "{{label}} should consist of 6-18 digits, upper and lower case letters, numbers and symbols"
+				},
+				{
+					"method": "pattern",
+					"args": ["[0-9]+"],
+					"message": "{{label}} should contain at least one number"
+				},
+				{
+					"method": "pattern",
+					"args": ["[A-Z]+"],
+					"message": "{{label}} should contain at least one uppercase letter"
+				},
+				{
+					"method": "pattern",
+					"args": ["[a-z]+"],
+					"message": "{{label}} should contain at least one lowercase letter"
+				},
+				{
+					"method": "pattern",
+					"args": ["[@#$&*]+"],
+					"message": "{{label}} should contain at least one symbol"
+				}
+			]
+		},
+		{
+			"label": "Name",
+			"name": "name",
+			"type": "string",
+			"length": 80,
+			"comment": "Name",
+			"index": true,
+			"validations": [
+				{
+					"method": "typeof",
+					"args": ["string"],
+					"message": "{{input}} type error, {{label}} should be a string"
+				},
+				{
+					"method": "minLength",
+					"args": [2],
+					"message": "{{label}} requires at least 2 characters"
+				},
+				{
+					"method": "maxLength",
+					"args": [40],
+					"message": "{{label}} cannot exceed 20 characters"
+				}
+			]
+		},
+		{
+			"label": "ID number",
+			"name": "idcard",
+			"type": "string",
+			"length": 256,
+			"comment": "ID number",
+			"crypt": "AES",
+			"nullable": true,
+			"index": true,
+			"validations": [
+				{
+					"method": "typeof",
+					"args": ["string"],
+					"message": "{{input}} type error, {{label}} should be a string"
+				},
+				{
+					"method": "pattern",
+					"args": ["^(\\d{18})|(\\d{14}X)$"],
+					"message": "{{label}} is malformed"
+				}
+			]
+		},
+		{
+			"label": "Account Balance",
+			"name": "balance",
+			"type": "integer",
+			"length": 20,
+			"comment": "Account Balance (Redundancy)",
+			"default": 0,
+			"index": true,
+			"validations": [
+				{
+					"method": "typeof",
+					"args": ["integer"],
+					"message": "{{input}} type is wrong, {{label}} should be a number"
+				},
+				{
+					"method": "min",
+					"args": [0],
+					"message": "{{label}} should be greater than 0"
+				}
+			]
+		},
+		{
+			"label": "API Key",
+			"name": "key",
+			"type": "string",
+			"length": 256,
+			"comment": "API Key",
+			"nullable": true,
+			"unique": true,
+			"validations": [
+				{
+					"method": "typeof",
+					"args": ["string"],
+					"message": "{{input}} type error, {{label}} should be a string"
+				},
+				{
+					"method": "pattern",
+					"args": ["^[0-9A-Za-z@#$&*]{8}$"],
+					"message": "{{label}} should consist of 8 digits, upper and lower case letters, numbers and symbols"
+				}
+			]
+		},
+		{
+			"label": "API key",
+			"name": "secret",
+			"type": "string",
+			"length": 256,
+			"nullable": true,
+			"crypt": "AES",
+			"comment": "API key",
+			"index": true,
+			"validations": [
+				{
+					"method": "typeof",
+					"args": ["string"],
+					"message": "{{input}} type error, {{label}} should be a string"
+				},
+				{
+					"method": "pattern",
+					"args": ["^[0-9A-Za-z@#$&*]{32}$"],
+					"message": "{{label}} should consist of 32 bits, upper and lower case letters, numbers and symbols"
+				}
+			]
+		},
+		{
+			"label": "Resume",
+			"name": "resume",
+			"type": "text",
+			"comment": "Resume",
+			"nullable": true
+		},
+		{
+			"label": "Extended Information",
+			"name": "extra",
+			"type": "json",
+			"comment": "Extended information",
+			"nullable": true
+		},
+		{
+			"label": "Status",
+			"comment": "User status enabled is valid, disabled is invalid",
+			"name": "status",
+			"type": "enum",
+			"default": "enabled",
+			"option": ["enabled", "disabled"],
+			"index": true,
+			"validations": [
+				{
+					"method": "typeof",
+					"args": ["string"],
+					"message": "{{input}} type error, {{label}} should be a string"
+				},
+				{
+					"method": "enum",
+					"args": ["enabled", "disabled"],
+					"message": "{{input}} is not permitted, {{label}} should be enabled/disabled"
+				}
+			]
+		}
+	],
+	"relations": {
+		"manu": {
+			"type": "hasOne",
+			"model": "manu",
+			"key": "id",
+			"foreign": "manu_id",
+			"select": ["name", "short_name", "type"]
+		},
+		"addresses": {
+			"type": "hasMany",
+			"model": "address",
+			"key": "user_id",
+			"foreign": "id",
+			"query": {
+				"select": ["province", "city", "location", "status"],
+				"pagesize": 20
+			}
+		},
+		"mother": {
+			"type": "hasOneThrough",
+			"links": [
+				{
+					"type": "hasOne",
+					"model": "friends",
+					"key": "user_id",
+					"foreign": "user.id",
+					"query": {
+						"select": ["status", "type", "friend_id"],
+						"wheres": [
+							{
+								"column": "type",
+								"value": "monther"
+							}
+						]
+					}
+				},
+				{
+					"type": "hasOne",
+					"model": "user",
+					"key": "id",
+					"foreign": "user_mother_friends.friend_id",
+					"query": {
+						"select": ["name", "id", "status", "type", "secret", "extra"],
+						"withs": {
+							"manu": { "name": "manu" },
+							"roles": { "name": "roles" },
+							"address": { "name": "address" }
+						}
+					}
+				}
+			]
+		},
+		"roles": {
+			"type": "hasManyThrough",
+			"links": [
+				{
+					"type": "hasMany",
+					"model": "user_roles",
+					"key": "user_id",
+					"foreign": "id",
+					"query": {
+						"select": ["status"],
+						"pagesize": 20
+					}
+				},
+				{
+					"type": "hasOne",
+					"model": "role",
+					"key": "id",
+					"foreign": "role_id",
+					"query": {
+						"select": ["name", "label", "permission"]
+					}
+				}
+			]
+		}
+	},
+	"values": [
+		{
+			"name": "Administrator",
+			"manu_id": 1,
+			"type": "admin",
+			"idcard": "230624198301170015",
+			"mobile": "13900001111",
+			"password": "cvSK@RY6",
+			"key": "FB3fxCeQ",
+			"secret": "XMTdNRVigbgUiAPdiJCfaWgWcz2PaQXw",
+			"status": "enabled",
+			"extra": { "sex": "male" }
+		},
+		{
+			"name": "Employee",
+			"manu_id": 1,
+			"type": "staff",
+			"idcard": "23082619820207024X",
+			"mobile": "13900002222",
+			"password": "qV@uT1DI",
+			"key": "JDh2ZiUt",
+			"secret": "wBeYjL7FjbcvpAdBrxtDFfjydsoPKhRN",
+			"status": "enabled",
+			"extra": { "sex": "female" }
+		},
+		{
+			"name": "User",
+			"manu_id": 2,
+			"type": "user",
+			"idcard": "23082619820207004X",
+			"mobile": "13900003333",
+			"password": "qV@uT1DI",
+			"key": "XZ12MiPz",
+			"secret": "wBeYjL7FjbcvpAdBrxtDFfjydsoPKhRN",
+			"status": "enabled",
+			"extra": { "sex": "female" }
+		}
+	],
+	"indexes": [
+		{
+			"comment": "Manufacturer User",
+			"name": "manu_id_mobile_unique",
+			"columns": ["manu_id", "mobile"],
+			"type": "unique"
+		},
+		{
+			"comment": "Resume full text search",
+			"name": "resume_fulltext",
+			"columns": ["resume"],
+			"type": "fulltext"
+		}
+	],
+	"option": { "timestamps": true, "soft_deletes": true }
+}
+```

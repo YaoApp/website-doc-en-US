@@ -1,0 +1,266 @@
+# Doc Components
+
+It mainly shows which components are supported by the document.
+
+## Headings
+
+headings will be parsed into a file title tree and displayed in the right anchor navigation bar. Currently H1-H6 is supported, where H1-H4 represent normal levels, that is, the heading size is larger than the text, H5, H6 represent abnormal levels, and H1 is usually the document Title, H2 is the section title (the top margin of H2 will be larger than the others), which are expressed as different levels of titles in turn.
+
+<Card>
+
+# H1
+
+##H2
+
+### H3
+
+#### H4
+
+##### H5
+
+###### H6
+
+</Card>
+
+## list
+
+### Ul
+
+- element 1
+
+- element 2
+
+- element 3
+
+### Ol
+
+1. element 1
+
+2. element 2
+
+3. element 3
+
+## Code
+
+### Inline
+
+`this is an inner code`
+
+### Block
+
+```go
+model User {
+  id Int @id @default(autoincrement())
+  name String?
+  email String @unique
+  profileViews Int @default(0)
+  role Role @default(USER)
+  coinflips Boolean[]
+  posts Post[]
+  city ​​String
+  country String
+  profile ExtendedProfile?
+  pets Json
+}
+
+model ExtendedProfile {
+  id Int @id @default(autoincrement())
+  userId Int? @unique
+  bio String?
+  User User? @relation(fields: [userId], references: [id])
+}
+
+model Post {
+  id Int @id @default(autoincrement())
+  title String
+  published Boolean @default(true)
+  author User @relation(fields: [authorId], references: [id])
+  authorId Int
+  comments Json
+  views Int @default(0)
+  likes Int @default(0)
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+```
+
+## Blockquote
+
+<blockquote>
+	Here is a long quotation here is a long quotation here is a long quotation here is a long
+	quotation here is a long quotation here is a long quotation here is a long quotation here is a
+	long quotation here is a long quotation.
+</blockquote>
+
+## Table
+
+| Field      | Type       | Length/Parameter           | Default Value | Description                          |
+| ---------- | ---------- | -------------------------- | ------------- | ------------------------------------ |
+| id         | ID         |                            |               | Table ID                             |
+| channel_id | bigInteger |                            |               | Customer Source                      |
+| name       | string     | 80                         |               | customer name                        |
+| company    | string     | 200                        |               | company name                         |
+| gender     | integer    |                            | 0             | gender 0, unknown, 1 male, 2, female |
+| birthday   | date       |                            |               | birthday                             |
+| desc       | text       |                            |               | CV                                   |
+| status     | enum       | ["enabled"], ["disabled"], | enabled       | status                               |
+
+## Details
+
+<details>
+	<summary>Collapse Content</summary>
+	12312
+</details>
+
+## Custom Components
+
+### Details
+
+This component is an enhanced component of the details function. The purpose is to support embedding code inside details and highlight it. Note: a blank line is required, otherwise an error will be reported.
+
+<Detail title="Collapse code block">
+
+```js
+// Highlighted
+
+export default {
+	data() {
+		return {
+			msg: `Highlighted!
+      This line isn't highlighted,
+      but this and the next 2 are.`,
+			motd: 'VuePress is awesome',
+			lorem: 'ipsum'
+		}
+	}
+}
+```
+
+</Detail>
+
+### Card
+
+Cards are often used to illustrate content, or to optimize document structure.
+
+<Notice type='warning'>
+	Note: Do not indent the inner text, otherwise it will be converted to code, and the last line
+	ends with a separate paragraph, otherwise there will be style problems.
+</Notice>
+
+<Card>
+
+There are mountains in the Great Wilderness, called stars, from the sun and the moon.
+
+There is a country of white people. Emperor Jun gave birth to Emperor Hong, Emperor Hong gave birth to Baimin, Baimin sold his surname, and he used millet to make four birds: leopard, tiger, bear, and scorpion.
+
+There is the country of green hills, there are foxes, and there are nine tails. There are soft servants and people, and it is a country that protects the land. A country with black teeth. Emperor Jun was born with black teeth, surnamed Jiang, ate food, and made four birds.
+
+There is the country of Xiazhou. A country with more than one cover. There is a man of gods, with eight human faces and a tiger's body and ten tails. His name is Tianwu.
+
+In the Great Wilderness, there is a mountain named Juling Yutian, Dongji, Liyang, where the sun and the moon come out. The name is Zhedan, the east is called Zhe, and the wind is called Jun. At the eastern pole to get in and out of the wind.
+
+</Card>
+
+### Notice
+
+Notice is often used to explain, prompt or warn the text.
+
+<Notice type='warning'>
+	You are viewing documentation for v2.x and earlier. Documentation for v3.x is here. Here's a
+	hint.
+</Notice>
+
+<Notice type='danger'>
+	This API will be deprecated in the next version, please use it with caution. This is a
+	warning.{' '}
+</Notice>
+
+<Notice type='success'>
+	The meaning of this code is to doze in class by punching the card, check the card, punch in
+	the class, start punching in, start punching in, start punching in class, start punching in
+	class, start punching in class, start punching in class, start punching in class, start
+	punching in class, start punching in class and start punching in class. Here is an
+	explanation.
+</Notice>
+
+### Badge
+
+Badge is usually used as a marker to remind readers of critical information or dangerous operations.
+
+#### Custom Theme <Badge type='warning'>v3.0.0</Badge>
+
+#### Autoplay<Badge type='danger'>Deprecated</Badge>
+
+#### version 1.5.0<Badge type='success'>tested</Badge>
+
+### Icon
+
+```ts
+/** Icon component, supports the following two icon libraries:
+ * feather icon https://feathericons.com/
+ * material design icon https://fonts.google.com/icons
+ */
+
+import clsx from 'clsx'
+import { useMemo } from 'react'
+
+interface IProps {
+	/** Chart style class */
+	className?: string
+	/** Icon name, starts with `icon` for feather icon and ends with `outline/filled` for material design icon */
+	name: string
+	/** Icon size in px */
+	size?: number
+	/** Icon color, applicable to all font colors */
+	color?: string
+	/** Click event */
+	onClick?: () => void
+}
+```
+
+icon-github <Icon name='icon-github'></Icon>
+
+icon-github size={36} <Icon name='icon-github' size={36}></Icon>
+
+icon-github size={48} color='blue' <Icon name='icon-github' size={36} color='blue'></Icon>
+
+### Button
+
+Same as [Ant Design Button](https://ant-design.gitee.io/components/button-cn/).
+
+#### General usage
+
+<Button type='primary' style={{ marginRight: 12 }}>
+	Primary Button
+</Button>
+
+<Button style={{ marginRight: 12 }}>Default Button</Button>
+
+<Button type='dashed'>Dashed Button</Button>
+
+#### Use with Icon
+
+<Button className='flex align_center' type='primary' size='large'>
+	<Icon className='mr_8' name='icon-github' color='white' size={15}></Icon> Github
+</Button>
+
+### Tabs
+
+Columns are displayed for content that is out of order and has the same purpose.
+
+<Tabs defaultActiveKey='1'>
+<TabPane tab='Tab 1' key='1'>
+      Content of Tab Pane 1
+</TabPane>
+
+<TabPane tab='Tab 2' key='2'>
+	Content of Tab Pane 2
+</TabPane>
+
+<TabPane tab='Tab 3' key='3'>
+      Content of Tab Pane 3
+</TabPane>
+</Tabs>
