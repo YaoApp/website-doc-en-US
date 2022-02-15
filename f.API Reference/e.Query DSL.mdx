@@ -819,7 +819,7 @@ HAVING `number` = (SELECT 1)
 LIMIT 50
 ```
 
-### `joins` <Tag type='warning'>not recommended<Tag>
+### `joins` <Badge type='warning'>not recommended</Badge>
 
 Connecting two data tables with a large amount of data consumes a lot of server resources, and the query is inefficient. For scenarios such as data statistical analysis, data warehouses or data analysis engines should be used to set business data structures, cleaning and collection logic and query logic according to business scenarios, and finally collect them into a **wide table**, which is performed in the wide table. D. For applications with a large amount of data, it is recommended to use the `Xu` data analysis engine.
 
