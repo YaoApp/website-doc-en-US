@@ -429,7 +429,7 @@ Further reading:
 <Extend
 	title='DatasheetGrid Manual'
 	desc='Detailed data table manual, learn more about how to use it.'
-	link='c. Advanced Features/e. Tabular Data Preprocessing'
+	link='c.Advanced%20Features/e.Data%20Preprocessing'
 ></Extend>
 
 ## Using Hooks
@@ -659,6 +659,68 @@ Modify `supplier.tab.json` to specify the `after:save` hook as the `flows.suppli
 
 </Detail>
 
-Create a `models.supplier.history` data model to hold historical data.
+Create a `flows.supplier.savelog` data flow to implement historical data saving logic.
 
-Write the data model file `history.mod.json`, and place
+Write a data flow description file `svelog.flow.json` and place it in the application's `flows/supplier/` directory.
+
+The input of the `after:save` association handler is the return value of the `save` API interface and the POST submission data `payload`.
+
+| Parameters | Description                                      |
+| ---------- | ------------------------------------------------ |
+| args[0]    | handler return value (data ID) bound by save API |
+| args[1]    | save API payload                                 |
+
+<Detail title="View source code">
+
+```json
+{
+	"label": "Save historical data records",
+	"version": "1.0.0",
+	"description": "Save historical data records",
+	"nodes": [
+		{
+			"name": "Save data",
+			"process": "models.supplier.history.Save",
+			"args": [
+				{
+					"supplier_id": "{{$in.0}}",
+					"data": "{{$in.1}}"
+				}
+			]
+		}
+	],
+	"output": ["{{$in.0}}"]
+}
+```
+
+</Detail>
+
+**Debugging with Form Processor:**
+
+```bash
+yao run xiang.table.Save supplier '::{"name":"New supplier"}'
+```
+
+### Hooks List
+
+| Hook          | Description                        | Input                                                                 | Output Specification                                                             |
+| ------------- | ---------------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| before:find   | Called before the Find handler     | The Find interface is passed in data                                  | The output result is used as the input parameter of the Find correlation handler |
+| after:find    | Called after the Find handler      | Find interface associated with the handler execution result           | Custom (output result as the final output of the Find handler)                   |
+| before:search | Called before the Search processor | Pass in data through the Search interface                             | Output results as input parameters of the Search correlation processor           |
+| after:search  | Called after the Search handler    | Search interface associated with the handler execution result         | Custom (the output result is the final output of the Search handler)             |
+| before:save   | Called before the Save handler     | The Save interface is passed in data                                  | The output result is used as the input parameter of the Save associated handler  |
+| after:save    | Called after the Save handler      | Save interface is associated with the execution result of the handler | Custom (the output result is the final output of the Save interface)             |
+
+<Div style={{ display: 'flex', justifyContent: 'space-between' }}>
+	<Link
+		type='prev'
+		title='Write a processor with JS'
+		link='c.Advanced%20Features/d.Write%20A%20Process%20In%20JS'
+	></Link>
+	<Link
+		type='next'
+		title='Form Custom Processor'
+		link='c.Advanced%20Features/f.Custom%20Process'
+	></Link>
+</Div>

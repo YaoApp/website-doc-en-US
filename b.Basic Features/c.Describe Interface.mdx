@@ -136,31 +136,23 @@ Page routing: `/xiang/table/<Table Name>`
 	Please refer to the component documentation for disposal methods.
 </Notice>
 
-<Notice type='success'>
-	Tip: Yao will automatically generate component associations based on the field types defined
-	in the data model. as in `columns` Re-declaration in , will override the default associated
-	component.
-</Notice>
+Yao will automatically generate component associations based on the field types defined
+in the data model. as in `columns` Re-declaration in , will override the default associated
+component.The data model is not coupled with the data table. If you do not set the data model
+binding, you can specify the list by specifying the processor, the detailed data reading
+logic, and the processing logic for operations such as saving and deleting.
 
-<Notice type='success'>
-	Tip: The data model is not coupled with the data table. If you do not set the data model
-	binding, you can specify the list by specifying the processor, the detailed data reading
-	logic, and the processing logic for operations such as saving and deleting.
-</Notice>
-
-<Notice type='success'>
-	Tip: A model can be bound to multiple tables, and the component description associated with
-	the field can be shared without having to rewrite it for each table; place the field
-	description in the The `libs` directory, imported via `@`, see the DataTable API documentation
-	for details.
-</Notice>
+A model can be bound to multiple tables, and the component description associated with
+the field can be shared without having to rewrite it for each table; place the field
+description in the The `libs` directory, imported via `@`, see the DataTable API documentation
+for details.
 
 Extended reading:
 
 <Extend
 	title='Data Table'
 	desc='Learn how to describe data table components, filters, batch management, file import and other functions.'
-	link='d.API Reference/j.DataTables'
+	link='f.API%20Reference/g.Table'
 ></Extend>
 
 <Extend
@@ -269,19 +261,19 @@ Extended reading:
 <Extend
 	title='Data Kanban'
 	desc='Learn how to describe data Kanban related components, processes, API interface input and output, etc.'
-	link='d.API Reference/h.Data Kanban'
+	link='f.API%20Reference/h.Chart'
 ></Extend>
 
 <Extend
 	title='Write Data Flow'
 	desc='Learn how to use data streams to orchestrate data query logic.'
-	link='b. Basic features/e. Write data flow'
+	link='b.Basic%20Features/e.Write%20Dataflow'
 ></Extend>
 
 <Extend
 	title='Query Data'
 	desc='Learn how to use the Data Model Process and Query DSL to query data in a data flow.'
-	link='b. Basic features/f. Query data'
+	link='b.Basic%20Features/f.Query%20Data'
 ></Extend>
 
 ## Analysis Chart
@@ -409,7 +401,7 @@ Extended reading:
 <Extend
 	title='Analysis Chart'
 	desc='Learn how to describe components related to analysis charts, processes, API interface input and output, etc.'
-	link='d.API Reference/h1.Analytics Chart'
+	link='f.API%20Reference/h.Chart'
 ></Extend>
 
 ## Data Screen
@@ -528,9 +520,9 @@ Page routing: `/xiang/screen/<Screen Name>`
 2. It is recommended to add a link to the big data screen through the Kanban `option` configuration.
 
 <Extend
-	title='Data screen'
+	title='Chart'
 	desc='Learn how to describe components related to analysis charts, processes, API interface input and output, etc.'
-	link='d.API reference/h3.Data screen'
+	link='f.API%20Reference/h.Chart'
 ></Extend>
 
 ## HTML Page
