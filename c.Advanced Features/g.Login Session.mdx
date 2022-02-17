@@ -9,8 +9,7 @@
 	</p>
 	<p>
 		The session data set when logging in can be used in data streams, JS-written processes
-		and data tables.{' '}
-	</p>
+		and data tables.
 </blockquote>
 
 ## Password login
@@ -18,13 +17,17 @@
 **Account and password login process:**
 
 1. On the login page, the user fills in the account name, verification code and password, and clicks the button to submit to the specified API.
+
 2. The API receives the account name and password information, transfers it to the designated processor, verifies the password, and issues a JWT token.
 
 **Process password verification logic:**
 
 1. Call the **CaptchaValidate** processor to verify the captcha.
+
 2. Call the data model processor to query the user data record through the account name, and obtain the encrypted stored password information.
+
 3. Call the **PasswordValidate** processor to verify whether the user fills in the correct password.
+
 4. Issue a JWT token and set session information.
 
 ### Step 1: User Data Model
