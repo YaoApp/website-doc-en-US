@@ -78,13 +78,13 @@ Use `curl` or `Postman` and other interface tools to debug, access interface deb
 Paging query interface
 
 ```bash
- curl 'http://127.0.0.1:5099/xiang/api/pet/search?where.name.match=Cookie&page=1&pagesize=1'
+ curl 'http://127.0.0.1:5099/api/pet/search?where.name.match=Cookie&page=1&pagesize=1'
 ```
 
 save data interface
 
 ```bash
-curl -X POST http://127.0.0.1:5099/xiang/api/pet/save
+curl -X POST http://127.0.0.1:5099/api/pet/save
    -H 'Content-Type: application/json'
    -d '{"sn":"300001", "name":"Wangwang", "type":"dog", "desc":"new member"}'
 ```
