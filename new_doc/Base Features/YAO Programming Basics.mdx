@@ -1,0 +1,120 @@
+# YAO programming basics
+
+The YAO application engine is an application development and runtime tool for professional developers. If you are familiar with JavaScript/HTML/CSS and basic database query, you can realize most of the functions.
+
+To read the basic documents, you need to have basic programming experience and be familiar with basic database operations.
+
+To read advanced documents, you need to understand RESTFul API, be proficient in JavaScript scripting language, understand HTML/CSS, etc.
+
+To read expert documentation, you need to master the Go programming language and be familiar with the Linux operating system.
+
+The following table shows the ability requirements for developers to develop different types of applications using YAO:
+
+| Building Apps                    | Levels   | Databases                      | RESTFul API      | JavaScript    | HTML/CSS/VUE/React/Other | Golang |
+| -------------------------------- | -------- | ------------------------------ | ---------------- | ------------- | ------------------------ | ------ |
+| Simple management background     | Basics   | Familiar with basic queries    | -                | -             | -                        | -      |
+| Simple business system           | Basics   | Familiar with basic queries    | Can be connected | Understanding | -                        | -      |
+| C-side page/application          | Basic    | -                              | Docking          | Understanding | Proficient               | -      |
+| Complex business system          | Advanced | Ability to design data table   | Designable       | Master        | Understand               | -      |
+| Complex management background    | Advanced | Data table design ability      | Designable       | Master        | Understand               | -      |
+| Self-built low-code platform     | Expert   | Capable of data table design   | Designable       | Mastery       | Proficient               | -      |
+| Participate in code contribution | Expert   | Have data table design ability | Designable       | Master        | Proficient               | Master |
+
+## Basic Concepts
+
+### YAO DSL
+
+Domain-specific language DSL (domain specific language), is a computer language dedicated to a specific application domain.
+
+According to business characteristics, YAO defines a set of YAO DSL to describe functional modules such as data structure, data flow, API interface, concurrent tasks, scheduled tasks, and Socket services. These functional modules are defined as Widgets.
+YAO DSL and YAO Widget support the definition of extensions according to their own business characteristics, which makes it easier to build a low-code platform based on YAO that meets their own business characteristics.
+
+YAO DSL can be written in several ways:
+
+1. Write by hand
+2. Procedurally generated based on context logic
+3. Generate with a visual editor
+
+This coding method can effectively improve productivity, reduce copy-paste error rates, and make it possible to write programs with programs.
+
+We are also trying to connect AI with YAO to explore the possibility of fully automatic programming by AI "engineers".
+
+### YAO Widget
+
+YAO has built-in multiple Widgets and XGEN interface engines, and implements various specific functions by writing DSL.
+
+YAO has built-in Widgets, almost covering most of the common functions of application development.
+
+| Built-in Widget | Function Description    |
+| --------------- | ----------------------- |
+| model           | Data Structure Modeling |
+| flow            | Data logic arrangement  |
+| api             | RESTFul API             |
+| table           | table CURD              |
+| chart           | data chart              |
+| login           | User login              |
+| register        | User registration       |
+| task            | Concurrent tasks        |
+| schedule        | Scheduled tasks         |
+| socket          | Socket                  |
+| websocket       | WebSocket               |
+
+[View Widget Documentation](../manual/Widgets/API)
+
+### YAO Process
+
+Yao is based on the flow-based programming idea, everything is a processor. Processors can be used in Widgets such as Flow, API, Table, Task, etc. In this way, various specific business logics can be implemented.
+
+YAO has built-in a series of atomic operation processors, and also supports the use of JavaScript script extensions.
+
+| Processor Type            | Function Description                           |
+| ------------------------- | ---------------------------------------------- |
+| Application Engine        | Engine Related Processor                       |
+| Data Model                | Data Atomic Operation Processor                |
+| Network Request           | Network Request Atomic Processor               |
+| File Handling             | File I/O Processor                             |
+| Session Data              | User Session Count Processor                   |
+| Encryption and decryption | Encryption and decryption algorithm processor  |
+| Arrays                    | Array Data Processors                          |
+| String                    | String Data Processor                          |
+| Flow Control              | Data Flow Orchestration Flow Control Processor |
+
+[view processor documentation](../manual/processors/application-engine)
+
+### relational database
+
+A relational database is a database created on the basis of a relational model, and uses mathematical concepts and methods such as set algebra to process data in the database. Various entities in the real world and various connections between entities are represented by relational models. The relational model was first proposed by Edgar Codd in 1970, and complies with Codd's Twelve Laws. Although there are some critics of this model today, it is still the traditional standard for data storage. Standard Data Query Language SQL is a relational database-based language that performs retrieval and manipulation of data in relational databases.
+
+The relational model consists of three parts: relational data structure, relational operation set, and relational integrity constraints. [Wikipedia link](https://en.wikipedia.org/wiki/%E5%85%B3%E7%B3%BB%E6%95%B0%E6%8D%AE%E5%BA%93)
+
+Relational database versions supported by YAO
+
+| Database | Version | Description |
+| -------- | ------- | ----------- |
+| MySQL    | 5.7.x   |             |
+| MySQL    | 8.0.x   |             |
+| SQLite   | 3.x     |             |
+| Postgres | 9.6     | Coming soon |
+| Postgres | 14      | Coming soon |
+
+### Web Server
+
+The Web Server accepts requests through the HTTP protocol or HTTPS protocol, and responds according to the content requested by the client (browser). [Wikipedia link](https://en.wikipedia.org/wiki/Web_server)
+
+### HTTP protocol
+
+Hypertext Transfer Protocol (HTTP) is an application layer protocol in the Internet Protocol Suite model for distributed, collaborative, hypermedia information systems. [Wikipedia link](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol)
+
+### REST API
+
+REST API, also known as RESTful API, is an application programming interface (API or Web API) that follows the REST architecture specification and supports interaction with RESTful web services. REST is an acronym for Representational State Transfer and was created by computer scientist Roy Fielding.
+
+[Wikipedia link](https://en.wikipedia.org/wiki/Representational_state_transfer)
+
+<Div style={{ display: "flex", justifyContent: "right" }}>
+  <Link
+    type="next"
+    title="How to get help"
+    link="Basics/How to get help"
+  ></Link>
+</Div>

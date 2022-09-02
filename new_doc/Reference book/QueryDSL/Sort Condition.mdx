@@ -1,0 +1,103 @@
+# sort criteria
+
+## Sort conditions `orders`
+
+`orders` is used to describe the data sorting conditions, and the data structure is `Array<Object Order>`.
+
+Gou Query DSL:
+
+```json
+{
+  "orders": [
+    {
+      "comment": "Update time flashback",
+      "field": "updated_at",
+      "sort": "desc"
+    },
+    { "field": "manu.created_at" }
+  ]
+}
+```
+
+The parsed `SQL statement` is:
+
+```sql
+  ORDER BY `updated_at` DESC, `manu`.`created_at` ASC
+```
+
+## Object Order data structure
+
+| Fields  | Type             | Description                                                                                                          | Required Fields |
+| ------- | ---------------- | -------------------------------------------------------------------------------------------------------------------- | --------------- |
+| field   | Field Expression | field expression, aliasing is not supported `as`                                                                     | yes             |
+| sort    | String           | Sort method, allowed values ​​`asc`, `desc`, default is `asc`                                                        | no              |
+| comment | String           | Sort condition comment, used to help understand the query condition logic and render it in the development platform. | No              |
+
+## Orders syntactic sugar `orders syntactic sugar`
+
+If the sorting conditions are simple and easy to understand, you can use the `Array<Field Expression>` structure description; you can also use the `Field Expression` type description, and multiple are separated by `,`.
+
+The parsing results of the following description methods are the same:
+
+## full description
+
+```json
+{
+  "orders": [
+    {
+      "comment": "Update time flashback",
+      "field": "updated_at",
+      "sort": "desc"
+    },
+    { "field": "manu.created_at" }
+  ]
+}
+```
+
+## use `Array<String>`
+
+```json
+{
+  "orders": [
+    {
+      "comment": "Update time flashback",
+      "field": "updated_at",
+      "sort": "desc"
+    },
+    "manu.updated_at"
+  ]
+}
+```
+
+```json
+{
+  "orders": ["updated_at desc", "manu.updated_at"]
+}
+```
+
+##### Multiple `Field Expression` separated by `,`
+
+```json
+{
+  "orders": "updated_at desc, manu.updated_at asc"
+}
+```
+
+```json
+{
+  "orders": "updated_at desc, manu.updated_at"
+}
+```
+
+<Div style={{ display: "flex", justifyContent: "space-between" }}>
+  <Link
+    type="prev"
+    title="Query Conditions"
+    link="Manual/QueryDSL/Query Conditions"
+  ></Link>
+  <Link
+    type="next"
+    title="Aggregate Query"
+    link="Manual/QueryDSL/Aggregate Query"
+  ></Link>
+</Div>

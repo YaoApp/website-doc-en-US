@@ -1,0 +1,320 @@
+# complex data query
+
+<blockquote>
+  This chapter details the data model based processor and Gou Query DSL has two
+  data query methods. It is recommended to learn the basics of relational
+  databases and understand SQL syntax before reading , you can write basic SQL
+  statements.
+</blockquote>
+
+## Query using the Model processor
+
+Data model processors `Find`, `Get`, `Paginate`, `UpdateWhere`, `DeleteWhere`, `DestroyWhere` all support the incoming query parameter `Object QueryParam` to limit the scope of reading records.
+
+Object QueryParam:
+
+<Detail title="View source code">
+
+JSON description:
+
+```json
+{
+  "select": ["id", "name", "mobile", "status"],
+  "withs": {
+    "manu": { "select": ["name", "short_name", "status"] },
+    "addresses": {}
+  },
+  "wheres": [
+    { "column": "status", "value": "enabled" },
+    { "rel": "manu", "column": "status", "value": "enabled" },
+    {
+      "wheres": [
+        { "column": "name", "value": "%Zhangsan%", "op": "like" },
+        {
+          "method": "orwhere",
+          "column": "name",
+          "value": "%Lisi%",
+          "op": "like"
+        }
+      ]
+    }
+  ],
+  "orders": [
+    { "column": "id", "option": "desc" },
+    { "rel": "manu", "column": "name" }
+  ],
+  "limit": 2
+}
+```
+
+The SQL parsed by the engine:
+
+```sql
+SELECT
+  `user`.`id`,`user`.`name`,`user`.`mobile`,`user`.`status`,
+  `user_manu`.`name` AS `user_manu_name`,
+  `user_manu`.`short_name` AS `user_manu_short_name` ,
+  `user_manu`.`status` AS `user_manu_status`
+FROM `user` AS `user`
+LEFT JOIN `manu` AS `user_manu` ON `user_manu`.`id` = `user`.`manu_id`
+WHERE `user`.`status` = 'enabled'
+AND `user_manu`.`status` = 'enabled'
+AND (
+   `user`.`name` like '%Zhang San%' OR `user`.`name` like '%Li Si%'
+)
+ORDER BY `user`.`id` desc, `user_manu`.`name` asc
+LIMIT 2
+```
+
+</Detail>
+
+Data structure description:
+
+<Detail title="View Data Structure">
+
+**QueryParam**
+
+| Fields   | Type                             | Description                | Required Fields |
+| -------- | -------------------------------- | -------------------------- | --------------- |
+| select   | Array<String\>                   | Select field list          | No              |
+| wheres   | Array<Object Where\>             | query condition            | no              |
+| orders   | Array<Object Order\>             | Sort condition             | No              |
+| limit    | Integer                          | return record entry        | no              |
+| page     | Integer                          | Current page number        | No              |
+| pagesize | Integer                          | Number of records per page | No              |
+| withs    | `[key:String]:Object QueryParam` | read associated model      | no              |
+
+**Object Where**
+
+| Fields | Type                 | Description                                                                                 | Required Fields |
+| ------ | -------------------- | ------------------------------------------------------------------------------------------- | --------------- |
+| rel    | String               | If querying by the fields of the associated model, fill in the name of the associated model | No              |
+| column | String               | field name                                                                                  | no              |
+| method | String               | query method `where`, `orwhere` defaults to `where`                                         | no              |
+| op     | String               | match relation `eq`,`like`,`in`,`gt` etc. Default is `eq`                                   | ​​no            |
+| value  | Any                  | matches numeric value                                                                       | no              |
+| wheres | Array<Object Where\> | Group query                                                                                 | No              |
+
+| Query method | Description                                 |
+| ------------ | ------------------------------------------- |
+| where        | WHERE field = number, WHERE field >= number |
+| orwhere      | ... OR WHERE field = number                 |
+
+| Matching Relationship | Description                                    |
+| --------------------- | ---------------------------------------------- |
+| eq                    | default equals WHERE field = number            |
+| like                  | matches the WHERE field like value             |
+| match                 | Match WHERE field full text search value       |
+| gt                    | greater than WHERE field > numeric value       |
+| ge                    | greater than or equal to WHERE field >= number |
+| lt                    | less than WHERE field < number                 |
+| le                    | Less than or equal to WHERE field <= number    |
+| null                  | is empty WHERE field IS NULL                   |
+| notnull               | not null WHERE field IS NOT NULL               |
+| in                    | list contains WHERE field IN (numeric...)      |
+| ne                    | not equal to match value                       |
+
+**Object Order**
+
+| Fields | Type   | Description                                                                                | Required Fields |
+| ------ | ------ | ------------------------------------------------------------------------------------------ | --------------- |
+| rel    | String | If sorting by the fields of the associated model, fill in the name of the associated model | No              |
+| column | String | field name                                                                                 | no              |
+| option | String | Sort method, `desc`, `asc`, default is `asc`                                               | no              |
+
+</Detail>
+
+## Query using Query DSL
+
+Query DSL can be used in data streams, and is generally used for more complex scenarios such as data analysis and statistics.
+
+Analyze the data table `service` (see the table below) and count the highest scores in each industry.
+
+| id  | industries               | city     | score | created_at          | updated_at |
+| --- | ------------------------ | -------- | ----- | ------------------- | ---------- |
+| 1   | ["Tourism", "Education"] | Beijing  | 99    | 2021-10-03 13:40:52 | NULL       |
+| 2   | ["Tourism", "Education"] | Shanghai | 68    | 2021-10-03 13:40:52 | NULL       |
+| 3   | ["Tourism", "Education"] | Beijing  | 92    | 2021-10-03 13:40:52 | NULL       |
+| 4   | ["Tourism", "Education"] | Shanghai | 87    | 2021-10-03 13:40:52 | NULL       |
+| 5   | ["Tourism", "Education"] | Beijing  | 71    | 2021-10-03 13:46:06 | NULL       |
+
+Query DSL example:
+
+<Detail title="View source code">
+
+JSON description:
+
+```json
+{
+  "comment": "Statistics of the highest scores in each industry",
+  "select": ["industries@", "city", ":MAX(score) as high_score"],
+  "from": "service",
+  "wheres": [
+    { ":created_at": "created time", ">=": "2021-01-01" },
+    { ":created_at": "created time", "<=": "{'2021-12-31'}" },
+    { ":updated_at": "updated time", "is": "null" },
+    {
+      "wheres": [
+        { ":type": "type", "=": 1 },
+        { "or:type": "or type", "=": 2 }
+      ]
+    }
+  ],
+  "orders": "high_score desc",
+  "limit": 100,
+  "groups": ["industries@", "city"]
+}
+```
+
+The `SQL statement` parsed by the engine is (MySQL 8):
+
+```sql
+
+SELECT `@industries`.`industries`,`city`, MAX(`score`) AS `high_score`
+FROM `service`
+JOIN JSON_TABLE(`service`.`industries`, '$[*]' columns (`industries` varchar(50) path '$') ) as `@industries`
+WHERE `created_at` >= '2021-01-01'
+  AND `created_at` <= '2021-12-31'
+  AND `updated_at` IS NULL
+  AND ( `type` = 1 OR `type` = 2)
+GROUP BY `@industries`.`industries`, `city`
+ORDER BY `high_score` DESC
+
+```
+
+Return result:
+
+| industries | city     | high_score |
+| ---------- | -------- | ---------- |
+| Travel     | Beijing  | 99         |
+| Education  | Beijing  | 99         |
+| Travel     | Shanghai | 87         |
+| Education  | Shanghai | 87         |
+
+</Detail>
+
+## use in Flow
+
+In a data flow, you can use `{{$in}}` or `?:$in` to receive parameters, and `{{$res}}` or `?:$res` to refer to node query results.
+
+<Notice type="success">
+  Tip: Pass <strong>&#123;&#123;$xxx&#125;&#125;</strong> or
+  <strong> ?:$xxx </strong>
+  Equivalent to using variable notation.
+</Notice>
+
+### Using the model processor
+
+```json
+{
+  "label": "Query latest data",
+  "version": "1.0.0",
+  "description": "Query the latest data of the system",
+  "nodes": [
+    {
+      "name": "pet",
+      "process": "models.pet.Get",
+      "args": [
+        {
+          "select": ["id", "name", "kind", "created_at"],
+          "wheres": [{ "column": "kind", "value": "{{$in.0}}" }],
+          "orders": [{ "column": "created_at", "option": "desc" }],
+          "limit": 10
+        }
+      ]
+    }
+  ],
+  "output": "{{$res.pet}}"
+}
+```
+
+### Using the Query DSL
+
+```json
+{
+  "label": "Query latest data",
+  "version": "1.0.0",
+  "description": "Query the latest data of the system",
+  "nodes": [
+    {
+      "name": "pet",
+      "engine": "xiang",
+      "query": {
+        "select": ["id", "name", "kind", "created_at"],
+        "from": "$pet",
+        "wheres": [{ ":kind": "type", "=": "?:$in.0" }],
+        "orders": "created_at desc",
+        "limit": 10
+      }
+    }
+  ],
+  "output": "{{$res.pet}}"
+}
+```
+
+## use in script
+
+```javascript
+function test(id) {
+  var query = new Query();
+  var data = query.Get({
+    name: "pet",
+    engine: "xiang",
+    query: {
+      select: ["id", "name", "kind", "created_at"],
+      from: "$pet",
+      wheres: [{ ":kind": "type", "=": id }],
+      orders: "created_at desc",
+      limit: 10,
+    },
+  });
+}
+```
+
+## use in the data table
+
+In data tables, query parameters can be passed using `filter`. Query parameters are passed to the data table interface via `URL Query String`.
+
+Specify the query parameter name:
+
+```json
+{
+  "name": "pet",
+  "version": "1.0.0",
+  "decription": "Pet Management Form",
+  "bind": { "model": "pet" },
+  "apis": {},
+  "columns": {},
+  "filters": {
+    "Key words": {
+      "label": "Keyword",
+      "bind": "where.name.match",
+      "input": { "type": "input", "props": { "placeholder": "Please enter keywords" } }
+    }
+  },
+  "list": {
+      "filters": ["Keywords"],
+      ...
+  },
+  "edit": {}
+}
+```
+
+When clicking the search button on the interface, the system requests data from the form `search` API, and passes in the parameter name declared in `bind` and the value filled in by the user:
+
+```bash
+GET /api/xiang/table/pet?where.name.match=xxx
+```
+
+<Div style={{ display: "flex", justifyContent: "space-between" }}>
+  <Link
+    type="prev"
+    title="Data Model Association"
+    link="Advanced/Data Model Association"
+  ></Link>
+  <Link
+    type="next"
+    title="Use session data"
+    link="Advanced/Use session data"
+  ></Link>
+</Div>

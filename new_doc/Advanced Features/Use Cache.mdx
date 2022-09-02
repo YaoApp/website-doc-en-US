@@ -1,0 +1,56 @@
+# use cache
+
+Cache is an essential function of every system. We can use Yao's own cache function to store some temporary data.
+
+## example
+
+Store uses cache, add file `stores/cache.lru.json`:
+
+Application directory structure:
+
+```bash
+├── apis # Used to store interface description files
+│
+├── models # Used to store data model description files
+│
+├── db
+└── stores # is used to store the cache directory
+|
+└── app.json
+```
+
+Write the code `cache.lru.json`:
+
+```javascript
+{
+  "name": "LRU Cache",
+  "description": "LRU cache",
+  "type": "lru",
+  "option": { "size": 102400 }
+}
+
+```
+
+Use cache in any JS file, Set to set cache, Get to get cached data, create `scripts/test.js`
+
+```javascript
+function cacheOperation() {
+  var cache = new Store("cache");
+
+  cache.Set("key", "for bar .....");
+
+  var cache_info = cache.Get("key");
+  return cache_info;
+}
+```
+
+run `yao run scripts.test.cacheOperation`
+
+<Div style={{ display: "flex", justifyContent: "space-between" }}>
+  <Link
+    type="prev"
+    title="Use session data"
+    link="Advanced/Use session data"
+  ></Link>
+  <Link type="next" title="Data Import" link="Advanced/Data Import"></Link>
+</Div>

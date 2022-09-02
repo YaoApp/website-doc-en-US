@@ -1,0 +1,197 @@
+#Guard
+
+<Detail title="View source code">
+
+```json
+{
+  "name": "User API",
+  "version": "1.0.0",
+  "description": "User API",
+  "group": "user",
+  "guard": "bearer-jwt",
+  "paths": [
+    {
+      "path": "/captcha",
+      "method": "GET",
+      "guard": "-",
+      "process": "xiang.helper.Captcha",
+      "in": [":query"],
+      "out": {
+        "status": 200,
+        "type": "application/json"
+      }
+    },
+    {
+      "path": "/login",
+      "method": "POST",
+      "guard": "-",
+      "process": "flows.login.password",
+      "in": [":payload"],
+      "out": {
+        "status": 200,
+        "type": "application/json"
+      }
+    },
+    {
+      "path": "/inspect",
+      "method": "GET",
+      "process": "session.Get",
+      "in": ["user"],
+      "out": {
+        "status": 200,
+        "type": "application/json"
+      }
+    }
+  ]
+}
+```
+
+</Detail>
+
+Check out [Code Sample](https://github.com/YaoApp/demo-crm/blob/master/apis/user.http.json)
+
+Add guard to the API interface to filter some requests that do not meet the conditions, similar to the middleware of the PHP framework, so that the request comes in first to enter the guard to verify the data logic, or permissions
+
+## handler list
+
+The system comes with a guard processor
+
+| Processor  | Description        | Documentation |
+| ---------- | ------------------ | ------------- |
+| bearer-jwt | Login verification | -             |
+
+## Naming conventions
+
+The guard is defined in the `guard` attribute in the api. Each api can be defined separately or in the entire routing group. Use "," to separate multiple guards, and they will enter the judgment one by one when requesting. If you cancel the guard, just use "" -", the system will not judge
+
+### Defined in the `apis` directory
+
+| Fields      | Type                 | Description                                                                                                                    | Required Fields |
+| ----------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------------- |
+| name        | String               | API rendering name, used for development platform rendering                                                                    | yes             |
+| version     | String               | Version number, used for dependency check and development platform rendering                                                   | yes             |
+| description | String               | API introduction, used for development platform rendering                                                                      | no              |
+| group       | String               | API group name, used as the API route prefix directory when accessing. `/api/<group>/<path>`                                   | yes             |
+| guard       | String               | API global middleware, multiple separated by ",". Unless otherwise specified, all APIs in the group will use global middleware | no              |
+| paths       | Array\<Object Path\> | API list. Check the `Object Path` data structure for details                                                                   | yes             |
+
+### Code example defined in routing group
+
+```json
+{
+  "name": "User API",
+  "version": "1.0.0",
+  "description": "User API",
+  "group": "user",
+  "guard": "bearer-jwt",
+  "paths": [
+    {
+      "path": "/info",
+      "method": "GET",
+      "guard": "-",
+      "process": "xiang.user.info",
+      "in": [":query"],
+      "out": {
+        "status": 200,
+        "type": "application/json"
+      }
+    }
+  ]
+}
+```
+
+### guard defined in a separate interface
+
+```json
+{
+  "name": "User API",
+  "version": "1.0.0",
+  "description": "User API",
+  "group": "user",
+  "paths": [
+    {
+      "path": "/info",
+      "method": "GET",
+      "guard": "bearer-jwt",
+      "process": "xiang.user.info",
+      "in": [":query"],
+      "out": {
+        "status": 200,
+        "type": "application/json"
+      }
+    }
+  ]
+}
+```
+
+### guard defined in table data table
+
+```json
+{
+  "apis": {
+    "search": {
+      "process": "models.service.Paginate",
+      "guard": "bearer-jwt",
+      "default": [{}, null, 15]
+    },
+    "find": {
+      "guard": "bearer-jwt",
+      "process": "models.service.Find"
+    }
+  }
+}
+```
+
+### custom guard
+
+#### write `apis/test.http.json`
+
+```json
+{
+  "name": "Test guard",
+  "version": "1.0.0",
+  "description": "Test guard",
+  "guard": "scripts.test.Guard",
+  "group": "test",
+  "paths": [
+    {
+      "path": "/info",
+      "method": "GET",
+      "process": "scripts.test.Info",
+      "in": [],
+      "out": {
+        "status": 200,
+        "type": "application/json"
+      }
+    }
+  ]
+}
+```
+
+#### New `scripts/test.js`
+
+```javascript
+function Info(path, params, query, payload, headers) {
+  if (!payload.id) {
+    throw new Exception("id cannot be empty", 400);
+  }
+  console.log([path, params, query, payload, headers]);
+
+  return;
+}
+```
+
+#### Parameter Description
+
+| Fields  | Description                       | Required Fields |
+| ------- | --------------------------------- | --------------- |
+| path    | Get request path path             | yes             |
+| params  | Get the parameters of the request | yes             |
+| query   | Get query parameter               | yes             |
+| payload | get the parameters of the post    | yes             |
+| headers | get headers header                | yes             |
+
+<Div style={{ display: "flex", justifyContent: "space-between" }}>
+  <Link type="prev" title="API" link="Manual/Widgets/API"></Link>
+  <Link type="next" title="Table" link="Manual/Widgets/Flow"></Link>
+</Div>

@@ -1,0 +1,447 @@
+# Use Widgets
+
+Based on the flow-based programming idea, YAO encapsulates a series of atomic operations into processors; these processors can be called in YAO DSL or JavaScript scripts.
+
+According to business characteristics, YAO defines a set of YAO DSL to describe functional modules such as data structure, data flow, API interface, concurrent tasks, scheduled tasks, and Socket services. These functional modules are defined as Widgets.
+
+When the engine starts, it is parsed into a set of API interfaces and a set of handlers according to the Widget logic. In application development, by writing a Widget DSL to describe the differences, the corresponding functional modules can be implemented, thereby improving coding efficiency.
+
+YAO DSL and YAO Widget support the definition of extensions according to their own business characteristics, which makes it easier to build a low-code platform based on YAO that meets their own business characteristics.
+
+YAO abstracts common function modules into widgets, describes differences through YAO DSL, and quickly replicates various functions.
+
+During development, if you develop a similar function module, you need to copy and paste the existing functions and replace the differences in batches.
+
+YAO provides a new way to use DSL to describe the difference content and quickly "copy and paste" a function module to improve development efficiency.
+
+## Widget Model
+
+[View Documentation](../manual/Widgets/Model)
+
+### Add `models/ccategory.mod.json` file and write the following:
+
+<Detail title="View source code">
+
+```json
+{
+  "name": "Book Category",
+  "table": {
+    "name": "category",
+    "comment": "Book Category"
+  },
+  "columns": [
+    {
+      "label": "ID",
+      "name": "id",
+      "type": "ID",
+      "comment": "ID",
+      "primary": true
+    },
+    {
+      "label": "parent id",
+      "name": "parent_id",
+      "type": "integer",
+      "nullable": true
+    },
+    {
+      "label": "Classification Name",
+      "name": "name",
+      "type": "string",
+      "length": 128,
+      "index": true
+    }
+  ],
+  "relations": {
+    "book": {
+      "type": "hasMany",
+      "model": "book",
+      "key": "category_id",
+      "foreign": "id",
+      "query": {}
+    },
+    "parent": {
+      "type": "hasOne",
+      "model": "category",
+      "key": "id",
+      "foreign": "parent_id",
+      "query": {}
+    }
+  },
+  "option": {
+    "timestamps": true,
+    "soft_deletes": true
+  },
+  "values": [
+    {
+      "id": 1,
+      "parent_id": null,
+      "name": "Literature and History"
+    },
+    {
+      "id": 2,
+      "parent_id": 1,
+      "name": "History"
+    },
+    {
+      "id": 3,
+      "parent_id": 1,
+      "name": "Ancient Poem"
+    },
+    {
+      "id": 4,
+      "parent_id": null,
+      "name": "Science and Engineering"
+    },
+    {
+      "id": 5,
+      "parent_id": 4,
+      "name": "Math"
+    },
+    {
+      "id": 6,
+      "parent_id": 4,
+      "name": "Physical"
+    }
+  ]
+}
+```
+
+</Detail>
+
+Use `yao migrate -n category` to migrate data table files
+
+## Widget Table
+
+[View Documentation](../Manual/Widgets/Table)
+
+Create a new category table `tables/category.tab.json` code:
+
+<Detail title="View source code">
+
+```json
+{
+  "name": "Category List",
+  "version": "1.0.0",
+  "decription": "Classification List",
+  "bind": {
+    "model": "category",
+    "withs": {
+      "parent": {}
+    }
+  },
+  "apis": {},
+  "columns": {
+    "ID": {
+      "label": "ID",
+      "view": { "type": "label", "props": { "value": ":id" } }
+    },
+
+    "father": {
+      "label": "Parent class",
+      "view": {
+        "type": "label",
+        "props": {
+          "value": ":parent.name"
+        }
+      },
+      "edit": {
+        "type": "input",
+        "props": {
+          "value": ":parent_id"
+        }
+      }
+    },
+    "Category Name": {
+      "label": "Classification Name",
+      "view": {
+        "type": "label",
+        "props": {
+          "value": ":name"
+        }
+      },
+      "edit": {
+        "type": "input",
+        "props": {
+          "value": ":name"
+        }
+      }
+    }
+  },
+  "filters": {
+    "Category Name": {
+      "label": "Classification Name",
+      "bind": "where.name.match",
+      "input": {
+        "type": "input",
+        "props": { "placeholder": "Category Name" }
+      }
+    }
+  },
+  "list": {
+    "primary": "id",
+    "layout": {
+      "columns": [
+        { "name": "ID", "width": 80 },
+        { "name": "parent class", "width": 200 },
+        { "name": "category name", "width": 200 }
+      ],
+      "filters": [{ "name": "Classification Name" }]
+    },
+    "actions": {
+      "pagination": { "props": { "showTotal": true } },
+      "create": {
+        "props": { "label": "Add Category" }
+      }
+    },
+    "option": { "operation": { "unfold": true } }
+  },
+  "edit": {
+    "primary": "id",
+    "layout": {
+      "fieldset": [
+        {
+          "columns": [
+            { "name": "parent class", "width": 200 },
+            { "name": "category name", "width": 200 }
+          ]
+        }
+      ]
+    },
+    "actions": {
+      "cancel": {},
+      "save": {},
+      "delete": { "type": "button", "props": { "label": "Delete" } }
+    },
+    "option": { "dev": false }
+  }
+}
+```
+
+</Detail>
+
+## Widget Flows
+
+[View Documentation](../Manual/Widgets/Flow)
+
+New `flows/category.flow.json`
+
+```json
+{
+  "label": "Category Tree",
+  "version": "1.0.0",
+  "description": "Category Tree",
+  "nodes": [
+    {
+      "name": "Category",
+      "engine": "xiang",
+      "query": {
+        "select": ["id", "name", "name as label", "id as value", "parent_id"],
+        "wheres": [{ ":deleted_at": "deleted", "=": null }],
+        "from": "category",
+        "limit": 1000
+      }
+    },
+    {
+      "name": "Category Tree",
+      "process": "xiang.helper.ArrayTree",
+      "args": ["{{$res.category}}", { "parent": "parent_id" }]
+    }
+  ],
+  "output": "{{$res.category tree}}"
+}
+```
+
+##Widget API
+
+[View Documentation](../manual/Widgets/API)
+
+New `apis/select.http.json`
+
+```json
+{
+  "name": "Drop down search",
+  "version": "1.0.0",
+  "description": "Drop down search",
+  "guard": "bearer-jwt",
+  "group": "select",
+  "paths": [
+    {
+      "path": "/category",
+      "method": "GET",
+      "process": "flows.category",
+      "in": [],
+      "out": {
+        "status": 200,
+        "type": "application/json"
+      }
+    }
+  ]
+}
+```
+
+Run `yao start`, visit `127.0.0.1:5099/api/select/category`
+
+## Widget Task
+
+[View Documentation](../manual/Widgets/Task)
+
+- NewFile directory `/tasks/task.js`:
+
+```json
+{
+  "name": "Test task",
+  "worker_nums": 10,
+  "attempts": 3,
+  "attempt_after": 200,
+  "timeout": 2,
+  "size": 1000,
+  "process": "scripts.task.Send",
+  "event": {
+    "next": "scripts.task.NextID",
+    "add": "scripts.task.OnAdd",
+    "success": "scripts.task.OnSuccess",
+    "error": "scripts.task.OnError",
+    "progress": "scripts.task.OnProgress"
+  }
+}
+```
+
+| Parameters    | Meaning                                         | Description |
+| ------------- | ----------------------------------------------- | ----------- |
+| name          | Task name                                       |             |
+| worker_nums   | Specifies the number of processes               |             |
+| attempts      | Number of failed retries                        |             |
+| attempt_after | retry interval                                  |             |
+| timeout       | timeout period                                  |             |
+| process       | The processor bound to this task                |             |
+| next          | Generate task unique id                         |             |
+| add           | Method triggered when a task is added           |             |
+| success       | Trigger method after successful task processing |             |
+| error         | Trigger method after task failure               |             |
+| progress      | Called during task processing                   |             |
+
+New `scripts/task.js`
+
+<Detail title="View source code">
+
+```javascript
+var id = 1024;
+
+/**
+ * Generate job id
+ * @returns
+ */
+function NextID() {
+  id = id + 1;
+  console.log(`NextID: ${id}`);
+  return id;
+}
+
+function Send(id, message) {
+  console.log(message);
+}
+
+/**
+ * OnAdd add event
+ * @param {*} id
+ */
+function OnAdd(id) {
+  log.Error("Enter add");
+  console.log(`OnAdd: #${id}`);
+}
+
+/**
+ * OnProgress
+ * @param {*} id
+ * @param {*} current
+ * @param {*} total
+ * @param {*} message
+ */
+function OnProgress(id, current, total, message) {
+  console.log(`OnProgress: #${id} ${message} ${current}/${total} `);
+}
+
+function OnSuccess(id, res) {
+  console.log(`OnSuccess: #${id} ${JSON.stringify(res)}`);
+}
+
+function OnError(id, err) {
+  console.log(`OnError: #${id} ${err}`);
+}
+```
+
+</Detail>
+
+New route `apis/task.http.json`
+
+```json
+{
+  "name": "Task",
+  "version": "1.0.0",
+  "description": "Task",
+  "guard": "",
+  "group": "task",
+  "paths": [
+    {
+      "path": "/task",
+      "method": "GET",
+      "process": "scripts.test.task",
+      "in": [],
+      "out": {
+        "status": 200,
+        "type": "application/json"
+      }
+    }
+  ]
+}
+```
+
+New test function `scripts/test.js`
+
+```javascript
+function task() {
+  for (i = 1; i < 100; i++) {
+    Process("tasks.test.Add", "Enter task" + i);
+  }
+}
+```
+
+Run the project `yao start` and visit the url `127.0.0.1:5099/api/task/task` to see the print information
+
+## Widget Schedule
+
+[View Documentation](../Manual/Widgets/Schedule)
+
+- Create a new `/schedules/test.sch.json`, the writing method of the scheduled task is the same as the Linux crontab, the code:
+
+```json
+{
+  "name": "Called every minute",
+  "schedule": "*/1 * * * *",
+  "process": "scripts.schedules.Send",
+  "args": []
+}
+```
+
+- New `scripts/schedules.js` code:
+
+```javascript
+function Send() {
+  console.log("Enter the scheduled task!");
+}
+```
+
+Execute `yao start` and wait for 1 minute to see the print information
+
+<Div style={{ display: "flex", justifyContent: "space-between" }}>
+  <Link
+    type="prev"
+    title="Using Processors"
+    link="Basics/Using Processors"
+  ></Link>
+  <Link
+    type="next"
+    title="Application Language Pack"
+    link="Basic/Application Language Pack"
+  ></Link>
+</Div>

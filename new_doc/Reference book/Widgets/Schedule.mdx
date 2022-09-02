@@ -1,0 +1,70 @@
+# Schedule
+
+<Detail title="View source code">
+
+```json
+{
+  "name": "Called every minute",
+  "schedule": "*/1 * * * *",
+  "process": "scripts.schedules.Send",
+  "args": []
+}
+```
+
+</Detail>
+
+View [code example](#code example)
+
+Yao's scheduled task is a Widget function. Using the task scheduling function, any DSL script and Flows can be scheduled to run at a most convenient time. The task scheduler starts and runs in the background every time the system starts.
+When we need to execute some repetitive events on the server regularly, we can run the prepared DSL script through the task scheduler to run at a specific time.
+
+## Naming conventions
+
+```json
+{
+  "name": "Description of Scheduled Task",
+  "schedule": "Scheduled task time setting",
+  "process": "Specified processor",
+  "args": []
+}
+```
+
+## DSL structure
+
+| Field    | Description                  |
+| -------- | ---------------------------- |
+| name     | name                         |
+| schedule | Scheduled task time settings |
+| process  | specified processor          |
+
+## code example
+
+### Step 1: Create a new scheduled task
+
+- Create a new `/schedules/test.sch.json`, the writing method of the scheduled task is the same as the Linux crontab, the code:
+
+```json
+{
+  "name": "Called every minute",
+  "schedule": "*/1 * * * *",
+  "process": "scripts.schedules.Send",
+  "args": []
+}
+```
+
+### Step 2: Create processing logic
+
+- New `scripts/schedules.js` code:
+
+```javascript
+function Send() {
+  console.log("Enter the scheduled task!");
+}
+```
+
+Execute `yao start` and wait for 1 minute to see the print information
+
+<Div style={{ display: "flex", justifyContent: "space-between" }}>
+  <Link type="prev" title="Task" link="Manual/Widgets/Task"></Link>
+  <Link type="next" title="WebSocket" link="Manual/Widgets/WebSocket"></Link>
+</Div>

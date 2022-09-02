@@ -1,0 +1,136 @@
+# write the handler
+
+## Write the processor using Script
+
+### New `scripts/category.js`:
+
+```javascript
+function category() {
+  var data = Process("models.category.get", {
+    wheres: [{ column: "parent_id", value: null }],
+  });
+  return data;
+}
+
+// Call other processors in JS and call the category method above
+function getData() {
+  return Process("scripts.category.category");
+}
+```
+
+Running the command line call `yao run scripts.category.category` is equivalent to `yao run scripts.category.getData`
+
+## Write a processor with Flow
+
+### Create a new `models/category.mod.json` and write the following code:
+
+<Detail title="View source code">
+
+```json
+{
+  "name": "Material Classification",
+  "table": {
+    "name": "category",
+    "comment": "Material Classification"
+  },
+  "columns": [
+    {
+      "label": "ID",
+      "name": "id",
+      "type": "ID",
+      "comment": "ID",
+      "primary": true
+    },
+    {
+      "label": "parent id",
+      "name": "parent_id",
+      "type": "integer",
+      "nullable": true
+    },
+    {
+      "label": "Classification Name",
+      "name": "name",
+      "type": "string",
+      "length": 128,
+      "index": true
+    }
+  ],
+  "option": {
+    "timestamps": true,
+    "soft_deletes": true
+  },
+  "values": [
+    {
+      "id": 1,
+      "parent_id": null,
+      "name": "Primary Category"
+    },
+    {
+      "id": 2,
+      "parent_id": 1,
+      "name": "Secondary Category"
+    }
+  ]
+}
+```
+
+</Detail>
+
+Execute the command `yao migrate -n category` and you can see that the corresponding data table and data are generated in the database
+
+### Write `flows/category.flow.json` write the following code:
+
+```json
+{
+  "label": "Category Tree",
+  "version": "1.0.0",
+  "description": "Category Tree",
+  "nodes": [
+    {
+      "name": "Category",
+      "engine": "xiang",
+      "query": {
+        "select": ["id", "name", "name as label", "id as value", "parent_id"],
+        "wheres": [{ ":deleted_at": "deleted", "=": null }],
+        "from": "category",
+        "limit": 1000
+      }
+    },
+    {
+      "name": "Category Tree",
+      "process": "xiang.helper.ArrayTree",
+      "args": ["{{$res.category}}", { "parent": "parent_id" }]
+    }
+  ],
+  "output": "{{$res.category tree}}"
+}
+```
+
+Execute `yao run flows.category` to see the following output in the console:
+
+```json
+[
+  {
+    "children": [
+      {
+        "children": [],
+        "id": 2,
+        "label": "Secondary Classification",
+        "name": "Secondary Category",
+        "parent_id": 1,
+        "value": 2
+      }
+    ],
+    "id": 1,
+    "label": "First-class classification",
+    "name": "First-level classification",
+    "parent_id": null,
+    "value": 1
+  }
+]
+```
+
+<Div style={{ display: "flex", justifyContent: "right" }}>
+
+  <Link type="next" title="Data Model Association" link="Advanced/Data Model Association"></Link>
+</Div>

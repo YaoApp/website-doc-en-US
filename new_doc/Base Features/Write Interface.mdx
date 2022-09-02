@@ -1,0 +1,116 @@
+# write the interface
+
+<blockquote>
+  Write the API interface JSON description file, place it in the application
+  `apis` directory, run yao start When the command starts the service, the
+  engine will generate the RESTFul API interface as defined by the interface
+  description.
+</blockquote>
+
+## Interface description
+
+Write an interface description file `/apis/pet.http.json`, specify the interface path, request method and bound handler, and place it in the `apis` directory of the application.
+
+Description file content:
+
+```json
+{
+  "name": "pet",
+  "version": "1.0.0",
+  "description": "Pet interface",
+  "guard": "bearer-jwt",
+  "group": "pet",
+  "paths": [
+    {
+      "path": "/search",
+      "method": "GET",
+      "guard": "-",
+      "process": "models.pet.Paginate",
+      "in": [":query-param", "$query.page", "$query.pagesize"],
+      "out": {
+        "status": 200,
+        "type": "application/json"
+      }
+    },
+    {
+      "path": "/save",
+      "method": "POST",
+      "guard": "-",
+      "process": "models.pet.Save",
+      "in": [":payload"],
+      "out": {
+        "status": 200,
+        "type": "application/json"
+      }
+    },
+    {
+      "path": "/update/:id",
+      "method": "PATCH",
+      "guard": "-",
+      "process": "models.pet.Update",
+      "in": ["$params.id", ":payload"],
+      "out": {
+        "status": 200,
+        "type": "application/json"
+      }
+    },
+    {
+      "path": "/delete/:id",
+      "method": "DELETE",
+      "guard": "-",
+      "process": "models.pet.Delete",
+      "in": ["$params.id"],
+      "out": {
+        "status": 200,
+        "type": "application/json"
+      }
+    }
+  ]
+}
+```
+
+Application directory structure:
+
+```bash
+├── apis # Used to store interface description files
+│ └── pet.http.json
+├── models # Used to store data model description files
+│ └── pet.mod.json
+├── db
+└── ui
+└── app.json
+```
+
+## Start start the service
+
+```bash
+cd /data/app
+yao start
+```
+
+## Interface debugging
+
+Use `curl` or `Postman` and other interface tools to debug, access interface debugging.
+
+Paging query interface
+
+```bash
+ curl 'http://127.0.0.1:5099/api/pet/search?where.name.match=Cookie&page=1&pagesize=1'
+```
+
+save data interface
+
+```bash
+curl -X POST http://127.0.0.1:5099/api/pet/save
+   -H 'Content-Type: application/json'
+   -d '{"sn":"300001", "name":"Wangwang", "type":"dog", "desc":"new member"}'
+```
+
+<Div style={{ display: "flex", justifyContent: "space-between" }}>
+  <Link type="prev" title="Data Query" link="Basic/Data Query"></Link>
+  <Link
+    type="next"
+    title="Quick Start"
+    link="Basic/Development Business System"
+  ></Link>
+</Div>

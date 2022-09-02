@@ -1,0 +1,188 @@
+# Yao command
+
+```bash
+yao <command> [options] [args...]
+```
+
+| Command   | Description                                   |
+| --------- | --------------------------------------------- |
+| init      | Project initialization                        |
+| version   | Displays the current version number           |
+| inspect   | Display application configuration information |
+| migrate   | Update data table structure                   |
+| run       | run processor                                 |
+| start     | Start WEB service                             |
+| socket    | Establish Socket connection                   |
+| websocket | Establish a WebSocket connection              |
+| dump      | Export application data                       |
+| restore   | Import application data                       |
+
+Global options:
+
+| parameter | shorthand | description                       |
+| --------- | --------- | --------------------------------- |
+| --app     | -a        | Specify application path          |
+| --env     | -e        | Specify environment variable file |
+| --help    | -h        | Command help                      |
+
+## yao version
+
+Show Yao version number
+
+```bash
+yao version
+```
+
+## yao init
+
+Project initialization, creating files and directories such as app.json, data, models, etc.
+
+```bash
+cd /path/app
+yao init
+```
+
+## yao inspect
+
+Display application configuration information
+
+```bash
+cd /path/app
+yao inspect
+```
+
+## yao migrate
+
+Update the database structure and create the data tables defined under the application engine and models folder. By default, the data table associated with the data model under models is updated.
+
+<Notice type="warning">
+  Note: The `migrate --reset` command will clear the current data table, not
+  recommended in `production` mode is used.
+</Notice>
+
+Options:
+
+| parameter | shorthand | description                                  |
+| --------- | --------- | -------------------------------------------- |
+| --name    | -n        | Specify model name                           |
+| --reset   |           | Rebuild after forced deletion of data table  |
+| --force   |           | In production mode, force the use of migrate |
+
+```bash
+cd /path/app
+yao migrate
+```
+
+```bash
+cd /path/app
+yao migrate -n pet
+```
+
+## yao run
+
+To run the processor, the first parameter is the processor name, and the rest of the parameters are the processor parameter table.
+
+If you need to enter complex data structures, you can use the `::` prefix to declare the parameters in JSON format, for example: `'::{"foo":"bar"}'`
+
+```bash
+cd /path/app
+yao run scripts.day.NextDay 2020-01-02
+```
+
+```bash
+cd /path/app
+yao run xiang.flow.Return hello '::{"foo":"bar"}'
+```
+
+## yao start
+
+start web service
+
+Options:
+
+| parameter | shorthand | description                |
+| --------- | --------- | -------------------------- |
+| --alpha   |           | Enable closed beta feature |
+| --debug   |           | Start in development mode  |
+
+```bash
+cd /path/app
+yao start
+```
+
+```bash
+cd /path/app
+yao start --debug
+```
+
+## yao socket
+
+Establish a socket connection. [Establishing a Socket Connection Using the Socket Widget DSL](../manual/Widgets/Socket)
+
+```bash
+cd /path/app
+yao socket gate.g02
+```
+
+## yao websocket
+
+Establish a WebSocket connection. [Establishing a WebSocket Connection Using the Socket Widget DSL](../manual/Widgets/WebSocket)
+
+```bash
+cd /path/app
+yao websocket message
+```
+
+## yao dump
+
+Export app data
+
+```bash
+cd /path/app
+yao dump
+```
+
+## yao restore
+
+Import application data, the parameter is the application data package file exported using the `yao dump` command.
+
+```bash
+cd /path/app
+yao restore /backup/path/edge-20220827151641.zip
+```
+
+## Environment variables
+
+| variable             | description                                                                              | default value       | example                                                                      |
+| -------------------- | ---------------------------------------------------------------------------------------- | ------------------- | ---------------------------------------------------------------------------- |
+| YAO_LANG             | Command Line Language en-US English zh-CN Simplified Chinese                             | en-US               | zh-CN                                                                        |
+| YAO_ENV              | Running mode development development environment <br/> production production environment | production          | production                                                                   |
+| YAO_ROOT             | Application Directory                                                                    | Current Directory . | /data/app                                                                    |
+| YAO_HOST             | WEB service HOST                                                                         | 0.0.0.0             | 127.0.0.1                                                                    |
+| YAO_PORT             | WEB service port                                                                         | 5099                | 5099                                                                         |
+| YAO_LOG              | Application log file location                                                            | System stdout       | /data/app/logs/application.log                                               |
+| YAO_LOG_MODE         | Log format TEXT \| JSON                                                                  | TEXT                | JSON                                                                         |
+| YAO_JWT_SECRET       | JWT secret                                                                               | Empty by default    | bLp@bi!oqo-2U+hoTRUG                                                         |
+| YAO_DB_DRIVER        | database driver mysql \| sqlite3                                                         | sqlite3             | mysql                                                                        |
+| YAO_DB_PRIMARY       | Main database connection                                                                 | ./db/yao.db         | root:123456@tcp(db-server:3306)/yao?charset=utf8mb4&parseTime=True&loc=Local |
+| YAO_DB_PRIMARY       | Slave connection                                                                         | Empty               | root:123456@tcp(db-server:3306)/yao?charset=utf8mb4&parseTime=True&loc=Local |
+| YAO_DB_AESKEY        | Encrypted Field Key (MySQL Only)                                                         | Empty               | ZLX=T&f6refeCh-ro\*r@                                                        |
+| YAO_SESSION_STORE    | Session data storage mode memory \| redis                                                | memory              | redis                                                                        |
+| YAO_SESSION_HOST     | Redis server HOST (session storage is valid for redis)                                   | 127.0.0.1           | 127.0.0.1                                                                    |
+| YAO_SESSION_PORT     | Redis server port (session storage mode is valid for redis)                              | 6379                | 6379                                                                         |
+| YAO_SESSION_PASSWORD | Redis password (redis valid for session storage)                                         | empty               | 123456                                                                       |
+
+Tips: Environment variables can be set individually for applications. Add `.env` to the application root directory, and the environment variables declared in .env will be used preferentially when the service is started.
+
+<Div style={{ display: "flex", justifyContent: "space-between" }}>
+  <Link
+    type="prev"
+    title="How to get help"
+    link="Basics/How to get help"
+  ></Link>
+  <Link
+    type="next"
+    title="Application Directory Structure"
+    link="Basic/Application Directory Structure"
+  ></Link>
+</Div>

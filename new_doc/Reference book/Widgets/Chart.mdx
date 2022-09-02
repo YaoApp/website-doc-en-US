@@ -1,0 +1,531 @@
+# data chart
+
+<Detail title="View source code">
+
+```json
+{
+  "label": "Kanban",
+  "version": "1.0.0",
+  "description": "Kanban",
+  "nodes": [
+    {
+      "name": "Industries",
+      "process": "flows.chart.industries"
+    },
+    {
+      "name": "Fields",
+      "process": "flows.chart.fields"
+    },
+    {
+      "name": "Trails",
+      "process": "flows.chart.trail"
+    },
+    {
+      "name": "Projects",
+      "process": "flows.chart.project"
+    },
+    {
+      "name": "Tasks",
+      "process": "flows.chart.task"
+    }
+  ],
+  "output": {
+    "data": "{{$res}}",
+    "query": "{{$in}}"
+  },
+  "apis": {
+    "data": {
+      "default": [{ "from": "1980-01-02", "to": "2050-12-31" }]
+    }
+  },
+  "filters": {},
+  "page": {
+    "primary": "name",
+    "layout": {
+      "filters": [],
+      "charts": [
+        {
+          "name": "Industries",
+          "width": 9,
+          "type": "pie",
+          "props": {
+            "height": 240,
+            "x_key": "name",
+            "tooltip": {
+              "textStyle": { "color": "#a2a5b9", "fontSize": 12 },
+              "backgroundColor": "#232326",
+              "borderRadius": 6
+            },
+            "legend": {
+              "show": true
+            },
+            "series": [
+              {
+                "name": "CNT",
+                "type": "pie",
+                "roseType": "area",
+                "radius": [10, 100],
+                "center": ["50%", "50%"],
+                "itemStyle": { "borderRadius": 3 }
+              }
+            ]
+          }
+        },
+        {
+          "name": "Fields",
+          "width": 9,
+          "type": "bar",
+          "props": {
+            "height": 240,
+            "x_key": "name",
+            "tooltip": {
+              "textStyle": { "color": "#a2a5b9", "fontSize": 12 },
+              "backgroundColor": "#232326",
+              "borderRadius": 6
+            },
+            "legend": {
+              "show": true
+            },
+            "series": [
+              {
+                "name": "CNT",
+                "type": "bar",
+                "roseType": "area",
+                "radius": [10, 100],
+                "center": ["60%", "50%"],
+                "itemStyle": { "borderRadius": 3 }
+              }
+            ]
+          }
+        },
+        {
+          "name": "Tasks",
+          "width": 6,
+          "type": "table",
+          "props": {
+            "height": 240,
+            "columns": [
+              {
+                "title": "Task",
+                "dataIndex": "name"
+              },
+              {
+                "title": "Status",
+                "dataIndex": "status"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Trails",
+          "width": 24,
+          "type": "table",
+          "props": {
+            "height": 240,
+            "columns": [
+              {
+                "title": "Customer",
+                "dataIndex": "customer_name"
+              },
+              {
+                "title": "Project",
+                "dataIndex": "name"
+              },
+              {
+                "title": "Contact",
+                "dataIndex": "contact_name"
+              },
+              {
+                "title": "Mobile",
+                "dataIndex": "contact_mobile"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Projects",
+          "width": 24,
+          "type": "table",
+          "props": {
+            "height": 240,
+            "columns": [
+              {
+                "title": "Priority",
+                "dataIndex": "priority"
+              },
+              {
+                "title": "Project",
+                "dataIndex": "name"
+              },
+              {
+                "title": "Process",
+                "dataIndex": "process"
+              },
+              {
+                "title": "Customer",
+                "dataIndex": "customer_name"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Detail>
+
+Check out [Code Sample](https://github.com/YaoApp/demo-crm/blob/master/kanban/index.kan.json)
+
+Analysis chart (`Chart`) is mainly used to arrange data statistics analysis query logic, supports the use of JavaScript scripts to process the results of each query node, can directly view the analysis chart in the data management background, and can also be used as a processor (`process`), The reference method is `charts.<analytical chart name>`. Analysis chart (`Chart`) supports data analysis engines based on `ElasticSearch` and `MySQL` for various business scenarios.
+
+Data kanban and data big screen pages can also be written in the same way.
+
+## handler list
+
+Data kanban, analysis charts, data screen related processors.
+
+| Processor           | Description                                                                 | Documentation |
+| ------------------- | --------------------------------------------------------------------------- | ------------- |
+| xiang.chart.Data    | Returns chart query results.                                                | -             |
+| xiang.chart.Setting | Read data table configuration information for front-end interface rendering | -             |
+
+## API list
+
+| API                     | Description                                                                               | Documentation                                                                     |
+| ----------------------- | ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| xiang.chart.XXX.Data    | Request chart data                                                                        | [Documentation](https://github.com/YaoApp/yao/blob/main/yao/apis/chart.http.json) |
+| xiang.chart.XXX.Setting | Read and formulate data table configuration information for front-end interface rendering | [Documentation](https://github.com/YaoApp/yao/blob/main/yao/apis/chart.http.json) |
+
+## Naming conventions
+
+The analysis chart description file is a JSON text file named with **lowercase English letters** + `.chart.json` extension, `<name>.chart.json`;
+The result processing script file is a JavaScript script file named `<name>.<script>.js` with the extension of `Analysis chart name` + `.` + `script name` + `.js`.
+
+The extension of the data kanban is `.kan.json`, and the extension of the big data screen is `.scr.json`
+
+| Folder (relative to analytic graph root) | File name       | Analytic graph name  | Script name | Process (referenced in API/Flow) | API route address                                     |
+| ---------------------------------------- | --------------- | -------------------- | ----------- | -------------------------------- | ----------------------------------------------------- |
+| /                                        | name.chart.json | `name`               |             | `charts.name`                    | `/api/xiang/chart/name/query interface`               |
+| /                                        | name.count.js   | `name`               | `count`     | -                                | -                                                     |
+| /group                                   | name.chart.json | `group.name`         |             | `charts.group.name`              | `/api/xiang/chart/group.name/query interface`         |
+| /group                                   | name.count.js   | `gorup.name`         | `count`     | -                                | -                                                     |
+| /group1/group2                           | name.chart.json | `group1.group2.name` |             | `charts.group1.group2.name`      | `/api/xiang/chart/group1.group2.name/query interface` |
+| /group1/group2                           | name.count.js   | `group1.group2.name` | `count`     | -                                | -                                                     |
+
+## Document structure
+
+The analysis chart layout document consists of basic information, query nodes, output data, and analysis page rendering parameters.
+
+```json
+{
+  "lang": "gou",
+  "label": "Latest Information",
+  "version": "1.0.0",
+  "description": "Latest Information",
+  "nodes": [],
+  "output": {},
+  "apis": {},
+  "filters": {},
+  "page": {}
+}
+```
+
+| Fields      | Type                         | Description                                                                                                                                                                                                                         | Required Fields |
+| ----------- | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| lang        | String                       | Data query condition description language. The license value `gou` applies to a database-based data analysis engine. `tai` applies to the analysis engine implemented based on ElasticSearch (mounted separately). Default is `gou` | yes             |
+| label       | String                       | Analysis chart rendering name, used for development platform rendering                                                                                                                                                              | yes             |
+| version     | String                       | Version number, used for dependency check and development platform rendering                                                                                                                                                        | yes             |
+| description | String                       | Analysis chart introduction, used for development platform presentation                                                                                                                                                             | No              |
+| nodes       | Array<Object Node\>          | query node                                                                                                                                                                                                                          | yes             |
+| output      | Object \| `String`           | Definition of output result, same as business logic orchestration (`flow`) `output`                                                                                                                                                 | yes             |
+| apis        | \[key:String\]:Object API    | Analysis chart query API, you can set the same `key` settings to close the interface, set the authentication method and default value options.                                                                                      | No              |
+| filters     | \[key:String\]:Object Filter | Query filter settings. Same as data table (`talbe`) `fliters`.                                                                                                                                                                      | No              |
+| page        | Object Page                  | Analysis chart query page settings.                                                                                                                                                                                                 | yes             |
+
+## Example one:
+
+Write a data kanban description file pet.kan.json and place it in the application's kanban directory.
+
+**Description file content:**
+
+<Detail title="View source code">
+
+```json
+{
+  "label": "Pet Statistics",
+  "version": "1.0.0",
+  "description": "Pet Statistics",
+  "nodes": [
+    {
+      "name": "Type summary",
+      "engine": "xiang",
+      "query": {
+        "select": [":COUNT(id) as quantity", "kind as type"],
+        "groups": "Type",
+        "from": "$pet"
+      }
+    }
+  ],
+  "output": {
+    "data": {
+      "Pet Type Distribution": "{{$res.Type Summary}}"
+    }
+  },
+  "page": {
+    "primary": "kind",
+    "layout": {
+      "filters": [],
+      "charts": [
+        {
+          "name": "Pet Type Distribution",
+          "width": 24,
+          "type": "bar",
+          "props": {
+            "height": 240,
+            "x_key": "Type",
+            "axisLabel": {
+              "interval": 0,
+              "rotate": 45,
+              "textStyle": { "fontSize": 10 }
+            },
+            "tooltip": {
+              "textStyle": { "color": "#a2a5b9", "fontSize": 12 },
+              "backgroundColor": "#232326",
+              "borderRadius": 6
+            },
+            "series": [
+              {
+                "name": "Quantity",
+                "type": "bar",
+                "colorBy": "data",
+                "splitLine": { "show": false },
+                "label": { "show": true, "position": "top" },
+                "axisLabel": { "show": true }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Detail>
+
+**Application Directory Structure:**
+
+```bash
+├── apis # Used to store interface description files
+│ └── pet.http.json
+├── models # Used to store data model description files
+│ └── pet.mod.json
+├── tables # Used to store data table description files
+│ └── pet.tab.json
+├── kanban # Used to store data kanban description files
+│ └── pet.kan.json
+├── db
+└── ui
+└── app.json
+```
+
+**Access Kanban interface:**
+
+Page route: `/xiang/kanban/<Kanban Name>`
+
+1. Enter `https://127.0.0.1:5099/xiang/kanban/pet` in the address bar
+
+2. It is recommended to add the `/xiang/kanban/pet` route as a menu item.
+
+## Example 2
+
+```json
+{
+  "nodes": [
+    {
+      "name": "Industry Distribution",
+      "query": {
+        "model": "service",
+        "select": ["city", ":COUNT(id) as cnt", "@industries.$ as industry"],
+        "wheres": [
+          { "column": "created_at", "value": "{{$query.from}}", "op": "ge" },
+          { "column": "created_at", "value": "{{$query.to}}", "op": "le" }
+        ],
+        "order": ["cnt.desc"],
+        "limit": 100,
+        "group": ["@industries.$", "city"]
+      }
+    },
+    {
+      "name": "Billing method",
+      "query": {
+        "model": "service",
+        "select": ["city", ":COUNT(id) as cnt", "@price_options.$ as option"],
+        "wheres": [
+          { "column": "created_at", "value": "{{$query.from}}", "op": "ge" },
+          { "column": "created_at", "value": "{{$query.to}}", "op": "le" }
+        ],
+        "order": ["cnt.desc"],
+        "limit": 100,
+        "group": ["@price_options.$", "city"]
+      }
+    },
+    {
+      "name": "Merge result",
+      "process": "xiang.chart.MergeData",
+      "args": [
+        ["city", "industry", "billing"],
+        {
+          "Industry": {
+            "key": "city",
+            "values": "{{$res.Industry distribution[*].industry}}"
+          },
+          "Billing": {
+            "key": "city",
+            "values": "{{$res.Billing method[*].option}}"
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+An analysis chart query orchestration (`Chart`) can have multiple query nodes, each query node also writes and sets the `query` query parameters corresponding to the data engine, or calls a processor (`process`), which can specify the result Processing scripts and return values ​​can be used to reference contextual information in query nodes. The context data reference and result processing script are specifically consistent with the business logic orchestration (`Flow`).
+
+`Object Node` data structure
+
+| Fields  | Type           | Description                                                                                                                                                                             | Required Fields |
+| ------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| name    | String         | query node name                                                                                                                                                                         | yes             |
+| query   | Query DSL      | Query Language                                                                                                                                                                          | No              |
+| process | String         | Invoke the processor `process`, `query` or `process`. If also present ignore the `process` setting.                                                                                     | No              |
+| args    | Array<Any\>    | Processor argument list. Can refer to input/output or context data, same as `flow`.                                                                                                     | No              |
+| script  | String         | Result processing script, supports ES5, same as `flow`.                                                                                                                                 | No              |
+| outs    | Array<String\> | Query node result output. Use `{{$out}}` to refer to the processor to return the result, same as `flow`. If not set, the return value is equal to the result returned by the processor. | No              |
+| next    | Object Next    | Jump to the specified query node when the query result meets the set conditions (**Not yet implemented**)                                                                               | No              |
+
+### Analysis chart query interface `apis`
+
+The data and configuration query interface is enabled by default in the analysis chart. You can disable the interface, set the authentication method and default value options by setting the same `key` settings.
+
+```json
+{
+  "apis": {
+    "data": {
+      "disable": true,
+      "guard": "bearer-jwt",
+      "default": {}
+    },
+    "setting": {
+      "guard": "-",
+      "default": {}
+    }
+  }
+}
+```
+
+| Fields  | Type   | Description                                                                                                                                                     | Required Fields |
+| ------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| disable | Bool   | Disables the interface. `true` closes the interface                                                                                                             | no              |
+| guard   | String | Interface authentication middleware, multiple are separated by `,`, set to `-`, no authentication middleware is set, and no default authentication mode is set. | No              |
+| default | Object | Parameter table default value, `{"from":"2021-08-28"}`                                                                                                          | no              |
+
+#### Interface list
+
+| management interface (`key`) | request method | route (relative) | description                                                                     |
+| ---------------------------- | -------------- | ---------------- | ------------------------------------------------------------------------------- |
+| data                         | `GET`          | `/data`          | return query result                                                             |
+| setting                      | `GET`          | `/setting`       | Read analysis chart configuration information for front-end interface rendering |
+
+## complete example
+
+<Detail title="View source code">
+
+```json
+{
+  "lang": "gou",
+  "label": "Indicator comparison",
+  "version": "1.0.0",
+  "decription": "Indicator comparison",
+  "nodes": [
+    {
+      "name": "Industry Distribution",
+      "process": "models.service.get",
+      "query": {
+        "select": ["city", ":COUNT(id) as cnt", "@industries.$ as industry"],
+        "wheres": [
+          { "column": "created_at", "value": "{{$query.from}}", "op": "ge" },
+          { "column": "created_at", "value": "{{$query.to}}", "op": "le" }
+        ],
+        "order": ["cnt.desc"],
+        "limit": 100,
+        "group": ["@industries.$", "city"]
+      }
+    },
+    {
+      "name": "Billing method",
+      "process": "models.service.get",
+      "query": {
+        "select": ["city", ":COUNT(id) as cnt", "@price_options.$ as option"],
+        "wheres": [
+          { "column": "created_at", "value": "{{$query.from}}", "op": "ge" },
+          { "column": "created_at", "value": "{{$query.to}}", "op": "le" }
+        ],
+        "order": ["cnt.desc"],
+        "limit": 100,
+        "group": ["@price_options.$", "city"]
+      }
+    },
+    {
+      "name": "Merge result",
+      "process": "xiang.chart.MergeData",
+      "args": [
+        ["city", "industry", "billing"],
+        {
+          "Industry": {
+            "key": "city",
+            "values": "{{$res.Industry distribution[*].industry}}"
+          },
+          "Billing": {
+            "key": "city",
+            "values": "{{$res.Billing method[*].option}}"
+          }
+        }
+      ]
+    }
+  ],
+  "output": "{{$res.merge result}}",
+  "apis": {
+    "data": {
+      "guard": "-"
+    },
+    "setting": {
+      "guard": "-"
+    }
+  },
+  "filters": {},
+  "page": {
+    "primary": "City",
+    "layout": {
+      "filters": [
+        { "name": "start time", "width": 6 },
+        { "name": "end time", "width": 6 }
+      ],
+      "charts": [
+        { "type": "line", "props": {} },
+        { "type": "bar", "props": {} }
+      ]
+    }
+  }
+}
+```
+
+</Detail>
+
+<Div style={{ display: "flex", justifyContent: "space-between" }}>
+  <Link type="prev" title="Table" link="Manual/Widgets/Table"></Link>
+  <Link type="next" title="Import" link="Manual/Widgets/Import"></Link>
+</Div>

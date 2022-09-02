@@ -1,0 +1,801 @@
+# This chapter develops a library management system
+
+#tips : Before learning this tutorial, you have already set up the development environment by default
+
+## demo
+
+### Library Management System
+
+<Button className="mr_12" type="primary">
+  <a href="https://github.com/YaoApp/demo-lms" target="_blank">
+    The source code of this book
+  </a>
+</Button>
+
+GitHub: https://github.com/YaoApp/demo-lms
+
+Infra one-click deployment: https://letsinfra.com/openapp/demo-lms
+
+## Part I: Starting the project
+
+### Step 1: Initialize the project `yao init` The directory structure at this time is:
+
+```
+
+├─apis
+├─data
+├─db
+├─flows
+├─libs
+├─logs
+├─models
+├─scripts
+├─tables
+├─ui
+└─yao
+    └─icons
+```
+
+### Step 2: Configure the database file `.env` file:
+
+```
+# database configuration
+
+YAO_DB_AESKEY="KBPdcRn44LzykphsVM\*y"
+YAO_DB_DRIVER=mysql
+YAO_DB_PRIMARY="root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local" # Main library connection
+YAO_DB_SECONDARY="root:123456@tcp(127.0.0.1.100:3306)/test?charset=utf8mb4&parseTime=True&loc=Local" # Main library connection
+
+```
+
+Database field meaning: `YAO_DB_PRIMARY=username:password@tcp(database ip:port)/database name??charset=utf8mb4&parseTime=True&loc=Local`
+
+After the configuration modification is completed, execute `yao migrate` to see if an error is reported. If no error is reported, the connection is successful!
+
+## Part II: New Model
+
+### Step 1: Add the `models/ccategory.mod.json` file and write the following content:
+
+<Detail title="View source code">
+
+```json
+{
+  "name": "Book Category",
+  "table": {
+    "name": "category",
+    "comment": "Book Category"
+  },
+  "columns": [
+    {
+      "label": "ID",
+      "name": "id",
+      "type": "ID",
+      "comment": "ID",
+      "primary": true
+    },
+    {
+      "label": "parent id",
+      "name": "parent_id",
+      "type": "integer",
+      "nullable": true
+    },
+    {
+      "label": "Classification Name",
+      "name": "name",
+      "type": "string",
+      "length": 128,
+      "index": true
+    }
+  ],
+  "relations": {
+    "book": {
+      "type": "hasMany",
+      "model": "book",
+      "key": "category_id",
+      "foreign": "id",
+      "query": {}
+    },
+    "parent": {
+      "type": "hasOne",
+      "model": "category",
+      "key": "id",
+      "foreign": "parent_id",
+      "query": {}
+    }
+  },
+  "option": {
+    "timestamps": true,
+    "soft_deletes": true
+  },
+  "values": [
+    {
+      "id": 1,
+      "parent_id": null,
+      "name": "Literature and History"
+    },
+    {
+      "id": 2,
+      "parent_id": 1,
+      "name": "History"
+    },
+    {
+      "id": 3,
+      "parent_id": 1,
+      "name": "Ancient Poem"
+    },
+    {
+      "id": 4,
+      "parent_id": null,
+      "name": "Science and Engineering"
+    },
+    {
+      "id": 5,
+      "parent_id": 4,
+      "name": "Math"
+    },
+    {
+      "id": 6,
+      "parent_id": 4,
+      "name": "Physical"
+    }
+  ]
+}
+```
+
+</Detail>
+
+### Step 2: Add the `models/book.mod.json` model file and associate the model category `category`:
+
+<Detail title="View source code">
+
+```json
+{
+  "name": "Books",
+  "table": {
+    "name": "book",
+    "comment": "Books"
+  },
+  "columns": [
+    {
+      "label": "ID",
+      "name": "id",
+      "type": "ID",
+      "comment": "ID",
+      "primary": true
+    },
+    {
+      "label": "category id",
+      "name": "category_id",
+      "type": "integer",
+      "nullable": true
+    },
+    {
+      "label": "Book Name",
+      "name": "name",
+      "type": "string",
+      "length": 128,
+      "index": true
+    },
+    {
+      "label": "author",
+      "name": "author",
+      "type": "string",
+      "index": true
+    },
+    {
+      "label": "Publisher",
+      "name": "press",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "label": "price",
+      "name": "price",
+      "type": "decimal",
+      "default": 0
+    }
+  ],
+  "relations": {
+    "category": {
+      "type": "hasOne",
+      "model": "category",
+      "key": "id",
+      "foreign": "category_id",
+      "query": {}
+    }
+  },
+  "option": {
+    "timestamps": true,
+    "soft_deletes": true
+  },
+  "values": [
+    {
+      "id": 1,
+      "category_id": 2,
+      "name": "World History",
+      "author": "Zhang XX, Li XX",
+      "press": "XXX Press",
+      "price": 79
+    },
+    {
+      "id": 2,
+      "category_id": 2,
+      "name": "A Brief History of Time",
+      "author": "Stephen William Hawking",
+      "press": "XXX Press",
+      "price": 99
+    },
+    {
+      "id": 3,
+      "category_id": 5,
+      "name": ""Elementary School Mathematics"",
+      "author": "王XX",
+      "press": "XXX Press",
+      "price": 39
+    },
+    {
+      "id": 4,
+      "category_id": 5,
+      "name": ""High School Required Course One"",
+      "author": "王XX",
+      "press": "XXX Press",
+      "price": 60
+    }
+  ]
+}
+```
+
+</Detail>
+
+### Step 3: Execute the `yao migrate` command to migrate the data table, the following results appear, and you can see the corresponding data table in the database:
+
+```json
+Update schema model: category (category)
+Update schema model: xiang.user (xiang_user)
+Update schema model: xiang.menu (xiang_menu)
+Update schema model: xiang.workflow (xiang_workflow)
+Update schema model: book (book)
+✨DONE✨
+
+```
+
+## Part III: Menu Configuration
+
+### Step 1: Next, initialize the menu and create a new `/flows/menu.flow.json`:
+
+<Detail title="View source code">
+
+```json
+{
+  "label": "System Menu",
+  "version": "1.0.0",
+  "description": "Initialize system menu",
+  "nodes": [
+    {
+      "name": "Clean menu data",
+      "engine": "xiang",
+      "query": {
+        "sql": { "stmt": "delete from xiang_menu" }
+      }
+    },
+    {
+      "name": "Add new menu",
+      "process": "models.xiang.menu.Insert",
+      "args": [
+        [
+          "id",
+          "name",
+          "path",
+          "icon",
+          "rank",
+          "status",
+          "parent",
+          "visible_menu",
+          "blocks"
+        ],
+        [
+          [
+            1,
+            "Classification Management",
+            "/table/category",
+            "icon-grid",
+            1,
+            "enabled",
+            null,
+            0,
+            0
+          ],
+          [
+            2,
+            "Book List",
+            "/table/book",
+            "icon-database",
+            1,
+            "enabled",
+            null,
+            1,
+            0
+          ]
+        ]
+      ]
+    }
+  ],
+  "output": "done"
+}
+```
+
+</Detail>
+
+### Part 2: Execute the command `yao run flows.menu` and the following results appear, and you can see the corresponding data table in the database:
+
+```json
+Run: flows.menu
+--------------------------------------
+flows.menu Response
+--------------------------------------
+"done"
+--------------------------------------
+✨DONE✨
+
+```
+
+### Step 3: Modify the content in the `/app.json` file `"admin": "/table/book"`, and change the first menu displayed after login to the book list:
+
+```json
+{
+  "name": "Yao",
+  "short": "Yao",
+  "description": "Another yao app",
+  "option": {
+    "nav_user": "xiang.user",
+    "nav_menu": "xiang.menu",
+    "hide_user": false,
+    "hide_menu": false,
+    "login": {
+      "entry": {
+        "admin": "/table/book"
+      }
+    }
+  }
+}
+```
+
+## Part IV: New Form
+
+### Step 1: Create a new `tables/book.tab.json` The code is as follows:
+
+<Detail title="View source code">
+
+```json
+{
+  "name": "Book List",
+  "version": "1.0.0",
+  "decription": "Book List",
+  "bind": {
+    "model": "book",
+    "withs": {
+      "category": {}
+    }
+  },
+  "apis": {},
+  "columns": {
+    "ID": {
+      "label": "ID",
+      "view": { "type": "label", "props": { "value": ":id" } }
+    },
+
+    "Classification": {
+      "label": "Classification",
+      "view": {
+        "type": "label",
+        "props": {
+          "value": ":category.name"
+        }
+      },
+      "edit": {
+        "type": "input",
+        "props": {
+          "value": ":category_id"
+        }
+      }
+    },
+    "book name": {
+      "label": "Book Name",
+      "view": {
+        "type": "label",
+        "props": {
+          "value": ":name"
+        }
+      },
+      "edit": {
+        "type": "input",
+        "props": {
+          "value": ":name"
+        }
+      }
+    },
+    "author": {
+      "label": "author",
+      "view": {
+        "type": "label",
+        "props": {
+          "value": ":author"
+        }
+      },
+      "edit": {
+        "type": "input",
+        "props": {
+          "value": ":author"
+        }
+      }
+    },
+    "Publisher": {
+      "label": "Publisher",
+      "view": {
+        "type": "label",
+        "props": {
+          "value": ":press"
+        }
+      },
+      "edit": {
+        "type": "input",
+        "props": {
+          "value": ":press"
+        }
+      }
+    },
+    "price": {
+      "label": "price",
+      "view": {
+        "type": "label",
+        "props": {
+          "value": ":price"
+        }
+      },
+      "edit": {
+        "type": "input",
+        "props": {
+          "value": ":price"
+        }
+      }
+    }
+  },
+  "filters": {
+    "book name": {
+      "label": "Book Name",
+      "bind": "where.name.match",
+      "input": {
+        "type": "input",
+        "props": { "placeholder": "Book Name" }
+      }
+    }
+  },
+  "list": {
+    "primary": "id",
+    "layout": {
+      "columns": [
+        { "name": "ID", "width": 80 },
+        { "name": "category", "width": 200 },
+        { "name": "Book Name", "width": 200 },
+        { "name": "Publisher", "width": 200 },
+        { "name": "price", "width": 200 }
+      ],
+      "filters": [{ "name": "Book Name" }]
+    },
+    "actions": {
+      "pagination": { "props": { "showTotal": true } },
+      "create": {
+        "props": { "label": "Add Books" }
+      }
+    },
+    "option": { "operation": { "unfold": true } }
+  },
+  "edit": {
+    "primary": "id",
+    "layout": {
+      "fieldset": [
+        {
+          "columns": [
+            { "name": "category", "width": 200 },
+            { "name": "Book Name", "width": 200 },
+            { "name": "Publisher", "width": 200 },
+            { "name": "price", "width": 200 }
+          ]
+        }
+      ]
+    },
+    "actions": {
+      "cancel": {},
+      "save": {},
+      "delete": { "type": "button", "props": { "label": "Delete" } }
+    },
+    "option": { "dev": false }
+  }
+}
+```
+
+</Detail>
+
+### Step 2: Execute `yao start` to see that the project has started running:
+
+```json
+WebSocket(0)
+
+---------------------------------
+Yao development
+---------------------------------
+Root /mnt/shared/test
+Frontend http://127.0.0.1:5099/
+Dashboard http://127.0.0.1:5099/xiang/login/admin
+API http://127.0.0.1:5099/api
+Listening 127.0.0.1:5099
+
+Watching: /mnt/shared/test/models
+Watching: /mnt/shared/test/scripts
+Watching: /mnt/shared/test/apis
+Watching: /mnt/shared/test/libs
+✨LISTENING✨
+Watching: /mnt/shared/test/flows
+Watching: /mnt/shared/test/tables
+```
+
+Open the browser to visit: `http://127.0.0.1:5099/xiang/login/admin`
+
+Enter the default account `xiang@iqka.com` and password `A123456p+` to log in to the background to see the book list renderings:
+![Book List](https://release-sv-1252011659.cos.na-siliconvalley.myqcloud.com/docs/%E5%9F%BA%E7%A1%80/overview-search.png)
+
+### Step 3: Create a new book category table `tables/category.tab.json` code:
+
+<Detail title="View source code">
+
+```json
+{
+  "name": "Category List",
+  "version": "1.0.0",
+  "decription": "Classification List",
+  "bind": {
+    "model": "category",
+    "withs": {
+      "parent": {}
+    }
+  },
+  "apis": {},
+  "columns": {
+    "ID": {
+      "label": "ID",
+      "view": { "type": "label", "props": { "value": ":id" } }
+    },
+
+    "father": {
+      "label": "father",
+      "view": {
+        "type": "label",
+        "props": {
+          "value": ":parent.name"
+        }
+      },
+      "edit": {
+        "type": "input",
+        "props": {
+          "value": ":parent_id"
+        }
+      }
+    },
+    "Category Name": {
+      "label": "Classification Name",
+      "view": {
+        "type": "label",
+        "props": {
+          "value": ":name"
+        }
+      },
+      "edit": {
+        "type": "input",
+        "props": {
+          "value": ":name"
+        }
+      }
+    }
+  },
+  "filters": {
+    "Category Name": {
+      "label": "Classification Name",
+      "bind": "where.name.match",
+      "input": {
+        "type": "input",
+        "props": { "placeholder": "Category Name" }
+      }
+    }
+  },
+  "list": {
+    "primary": "id",
+    "layout": {
+      "columns": [
+        { "name": "ID", "width": 80 },
+        { "name": "parent class", "width": 200 },
+        { "name": "category name", "width": 200 }
+      ],
+      "filters": [{ "name": "Classification Name" }]
+    },
+    "actions": {
+      "pagination": { "props": { "showTotal": true } },
+      "create": {
+        "props": { "label": "Add Category" }
+      }
+    },
+    "option": { "operation": { "unfold": true } }
+  },
+  "edit": {
+    "primary": "id",
+    "layout": {
+      "fieldset": [
+        {
+          "columns": [
+            { "name": "parent class", "width": 200 },
+            { "name": "category name", "width": 200 }
+          ]
+        }
+      ]
+    },
+    "actions": {
+      "cancel": {},
+      "save": {},
+      "delete": { "type": "button", "props": { "label": "Delete" } }
+    },
+    "option": { "dev": false }
+  }
+}
+```
+
+</Detail>
+
+Use `ctrl+C` on the command line to stop the Yao service, then execute `yao start` to restart the service, open the browser to refresh the page, and click the category menu:
+![category](https://release-sv-1252011659.cos.na-siliconvalley.myqcloud.com/docs/%E5%9F%BA%E7%A1%80/overview-category.png)
+
+## Part V: Improvement issues
+
+- Change the book category to a drop-down list tree component [TreeSelect](https://yaoapps.com/components/%E6%95%B0%E6%8D%AE%E5%BD%95%E5%85%A5/ TreeSelect) search.
+
+### Step 1: Add a `apis/select.http.json`:
+
+```json
+{
+  "name": "Drop down search",
+  "version": "1.0.0",
+  "description": "Drop down search",
+  "guard": "bearer-jwt",
+  "group": "select",
+  "paths": [
+    {
+      "path": "/category",
+      "method": "GET",
+      "process": "flows.category",
+      "in": [],
+      "out": {
+        "status": 200,
+        "type": "application/json"
+      }
+    }
+  ]
+}
+```
+
+### Step 2: Create a new `flows/category.flow.json` file:
+
+```json
+{
+  "label": "Category Tree",
+  "version": "1.0.0",
+  "description": "Category Tree",
+  "nodes": [
+    {
+      "name": "Category",
+      "engine": "xiang",
+      "query": {
+        "select": ["id", "name", "name as label", "id as value", "parent_id"],
+        "wheres": [{ ":deleted_at": "deleted", "=": null }],
+        "from": "category",
+        "limit": 1000
+      }
+    },
+    {
+      "name": "Category Tree",
+      "process": "xiang.helper.ArrayTree",
+      "args": ["{{$res.category}}", { "parent": "parent_id" }]
+    }
+  ],
+  "output": "{{$res.category tree}}"
+}
+```
+
+### Step 3: Modify the columns category component of `tables/book.tab.json`, and adjust the layout of forms and add pages:
+
+<Detail title="View source code">
+
+```json
+...
+
+    "Classification": {
+      "label": "Classification",
+      "view": {
+        "name": "label",
+        "props": {
+          "value": ":category.name"
+        }
+      },
+      "edit": {
+        "type": "treeSelect",
+        "props": {
+          "value": ":category_id",
+          "allowClear": true,
+          "remote": {
+            "api": "/api/select/category",
+            "query": { "select": ["id", "name"] }
+          }
+        }
+      }
+    },
+
+ ...
+
+
+   "list": {
+    "primary": "id",
+    "layout": {
+      "columns": [
+        { "name": "ID", "width": 80 },
+        { "name": "category", "width": 200 },
+        { "name": "Book Name", "width": 200 },
+        { "name": "Publisher", "width": 200 },
+        { "name": "author", "width": 200 },
+        { "name": "price", "width": 200 }
+      ],
+      "filters": [{ "name": "Book Name" }]
+    },
+    "actions": {
+      "pagination": { "props": { "showTotal": true } },
+      "create": {
+        "props": { "label": "Add Books" }
+      }
+    },
+    "option": { "operation": { "unfold": true } }
+  },
+    "edit": {
+    "primary": "id",
+    "layout": {
+      "fieldset": [
+        {
+          "columns": [
+            { "name": "category", "width": 8 },
+            { "name": "Book Name", "width": 8 },
+            { "name": "Publisher", "width": 8 },
+            { "name": "price", "width": 8 },
+            { "name": "author", "width": 8 }
+          ]
+        }
+      ]
+    },
+    "actions": {
+      "cancel": {},
+      "save": {},
+      "delete": { "type": "button", "props": { "label": "Delete" } }
+    },
+    "option": { "dev": false }
+  }
+
+```
+
+</Detail>
+
+## Step 4: Stop the service, then restart the service, refresh the page, you can see the following renderings:
+
+![category](https://release-sv-1252011659.cos.na-siliconvalley.myqcloud.com/docs/%E5%9F%BA%E7%A1%80/overview-category-select.png)
+
+<Div style={{ display: "flex", justifyContent: "space-between" }}>
+  <Link type="prev" title="Write interface" link="Basic/Write interface"></Link>
+  <Link
+    type="next"
+    title="Using Processors"
+    link="Basics/Using Processors"
+  ></Link>
+</Div>

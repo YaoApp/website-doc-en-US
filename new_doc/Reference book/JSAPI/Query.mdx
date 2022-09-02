@@ -1,0 +1,20 @@
+# Query
+
+## Example
+
+Query uses SQL to construct a query, more query <a href="../advanced/complex data query">query data</a> document.
+
+```javascript
+var query = new Query();
+
+var result = query.Get({
+  select: [":COUNT(id) as number"],
+  wheres: [{ ":status": "status", "=": 2 }],
+  from: "foo_table",
+});
+```
+
+<Div style={{ display: "flex", justifyContent: "space-between" }}>
+  <Link type="prev" title="Exception" link="Manual/JSAPI/Exception"></Link>
+  <Link type="next" title="Store" link="Manual/JSAPI/Store"></Link>
+</Div>

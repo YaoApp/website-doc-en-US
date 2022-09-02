@@ -1,0 +1,155 @@
+# How to get help
+
+If you encounter problems during use, it is recommended to seek help in the following order:
+
+1. Document Search
+2. View the application source code
+3. View the engine source code
+4. Search in Issues
+5. Ask questions in Issues
+6. YAO development exchange group
+
+## Documentation search
+
+Go to the official documentation page, click the search box, enter the problem keyword, and press Enter
+
+![Search Map](https://release-sv-1252011659.cos.na-siliconvalley.myqcloud.com/docs/%E5%9F%BA%E7%A1%80/search.png)
+
+## View application source code
+
+We have prepared several applications of typical scenarios, you can refer to the source code of these applications.
+
+| Application | Type              | Warehouse Address                     |
+| ----------- | ----------------- | ------------------------------------- |
+| YAO WMS     | Business System   | https://github.com/yaoapp/yao-wms     |
+| LMS DEMO    | Business System   | https://github.com/yaoapp/demo-lms    |
+| CRM DEMO    | Business System   | https://github.com/YaoApp/demo-crm    |
+| AMS DEMO    | Business System   | https://github.com/YaoApp/demo-asset  |
+| Widget DEMO | Low-Code Platform | https://github.com/YaoApp/demo-widget |
+
+Component example:
+
+https://github.com/YaoApp/xiang-app/blob/main/tables/service.json
+
+## View engine source code
+
+We try our best to improve the relevant documents, but there are inevitably omissions and mistakes in the documents, and some newly added function documents will also be omitted.
+
+You can check the corresponding usage by reading the source code of [Yao](https://github.com/YaoApp/yao) or [Gou](https://github.com/YaoApp/gou).
+
+For example, to query the parameters of the processor `xiang.helper.PasswordValidate`, you can view the parameter list and return value by reading the unit test source code.
+
+[Source address](https://github.com/YaoApp/yao/blob/main/helper/password_test.go)
+
+```go
+func TestProcessPassword(t *testing.T) {
+pwd := "U123456p+"
+hash := "$2a$04$TS/rWBs66jADjQl8fa.w..ivkNAjH8d4sI1OPGvEB9Leed6EpzIF2"
+args := []interface{}{pwd, hash}
+process := gou.NewProcess("xiang.helper.PasswordValidate", args...)
+res := process.Run()
+assert.True(t, res.(bool))
+
+args = []interface{}{pwd, "123456"}
+process = gou.NewProcess("xiang.helper.PasswordValidate", args...)
+assert.Panics(t, func() {
+process.Run()
+})
+}
+```
+
+By testing the code, we can see that the processor `xiang.helper.PasswordValidate`
+
+Parameters Table:
+
+| parameter | type   | example                                                        |
+| --------- | ------ | -------------------------------------------------------------- |
+| args[0]   | string | `U123456p+`                                                    |
+| args[1]   | string | `$2a$04$TS/rWBs66jADjQl8fa.w..ivkNAjH8d4sI1OPGvEB9Leed6EpzIF2` |
+
+return value:
+
+`bool` returns `true` for correct password, `false` for incorrect password
+
+### Use in dataflow:
+
+Create a test data flow `flows/validate.flow.json`
+
+```json
+{
+  "label": "Validate Test",
+  "version": "1.0.0",
+  "description": "Test",
+  "nodes": [
+    {
+      "name": "test",
+      "process": "xiang.helper.PasswordValidate",
+      "args": [
+        "{{$in.0}}",
+        "$2a$04$TS/rWBs66jADjQl8fa.w..ivkNAjH8d4sI1OPGvEB9Leed6EpzIF2"
+      ]
+    }
+  ],
+  "output": "{{$res.test}}"
+}
+```
+
+test:
+
+```bash
+yao run flows.validate "U123456p+"
+```
+
+### Use in scripts
+
+Create a test script `scripts/test.js`
+
+```javascript
+function Validate(password) {
+  let hash = "$2a$04$TS/rWBs66jADjQl8fa.w..ivkNAjH8d4sI1OPGvEB9Leed6EpzIF2";
+  return Process("xiang.helper.PasswordValidate", password, hash);
+}
+```
+
+test:
+
+```bash
+yao run scripts.test.Validate "U123456p+"
+```
+
+## Search in Issues
+
+Enter the YAO project repository Issues, enter the issue keyword in the search box, and press Enter
+
+![Issues search](https://release-sv-1252011659.cos.na-siliconvalley.myqcloud.com/docs/%E5%9F%BA%E7%A1%80/Issues-search.png)
+
+## Ask questions in Issues
+
+Enter the YAO project repository Issues, click the New issue button, and ask a question
+
+![Issues question](https://release-sv-1252011659.cos.na-siliconvalley.myqcloud.com/docs/%E5%9F%BA%E7%A1%80/Issues-new.png)
+
+Enter the subject and content of the question.
+
+In order to get a better reply faster, it is recommended to state in the problem description:
+
+1. YAO version number (use the yao version command to query)
+2. Application error message
+3. Application error log (default log file logs/application.log )
+
+## YAO development exchange group
+
+Join the YAO development exchange group and ask questions in the WeChat group.
+
+Add `17192175099` as a friend on WeChat, note (YAO development exchange)
+
+![Add WeChat](https://raw.githubusercontent.com/YaoApp/yao/main/docs/wechat.jpg)
+
+<Div style={{ display: "flex", justifyContent: "space-between" }}>
+  <Link
+    type="prev"
+    title="YAO Programming Fundamentals"
+    link="Basics/YAO Programming Fundamentals"
+  ></Link>
+  <Link type="next" title="YAO Command" link="Basic/YAO Command"></Link>
+</Div>

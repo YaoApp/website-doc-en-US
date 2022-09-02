@@ -1,0 +1,194 @@
+# data model
+
+<blockquote>
+  A data model corresponds to a data table in the database. The structure of the
+  data table is described through a JSON file and placed in the models
+  directory. Use the yao migrate command to create/update the data table
+  structure design.
+</blockquote>
+
+## handler list
+
+| Processor                                | Description                                                                                                       | Documentation                         |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| models.<model name\>.Find                | Query a single record                                                                                             | [View](./process/Find)                |
+| models.<model name\>.Get                 | Query by condition, no pagination                                                                                 | [View](./process/Get)                 |
+| models.<model name\>.Paginate            | query by condition, pagination                                                                                    | [view](./process/Paginate)            |
+| models.<model name\>.Create              | Creates a single record, returns the ID of the newly created record                                               | [View](./process/Create)              |
+| models.<model name\>.Update              | update a single record                                                                                            | [view](./process/Update)              |
+| models.<model name\>.Save                | save a single record, no create record exists, update record exists, return record ID                             | [view](./process/Save)                |
+| models.<model name\>.Delete              | delete a single record (mark delete)                                                                              | [view](./process/Delete)              |
+| models.<model name\>.Destroy             | delete a single record (true delete)                                                                              | [view](./process/Destroy)             |
+| models.<model name\>.Insert              | Insert multiple records, return the number of inserted rows                                                       | [View](./process/Insert)              |
+| models.<model name\>.UpdateWhere         | Update records conditionally, returns the number of updated rows                                                  | [View](./process/UpdateWhere)         |
+| models.<model name\>.DeleteWhere         | Delete data by condition, return the number of rows deleted (mark delete)                                         | [View](./process/DeleteWhere)         |
+| models.<model name\>.DestroyWhere        | Delete data by condition, return the number of rows deleted (true delete)                                         | [View](./process/DestroyWhere)        |
+| models.<model name\>.EachSave            | save multiple records, no create record exists, update record exists, return record ID collection                 | [view](./process/EachSave)            |
+| models.<model name\>.EachSaveAfterDelete | Save multiple records after deleting a set of records with a given ID, no create, no update, return ID collection | [view](./process/EachSaveAfterDelete) |
+
+## sample code
+
+Write a data model description file `pet.mod.json` and place it in the `models` directory of the application.
+
+Description file content:
+
+<Detail title="View source code">
+
+```json
+{
+  "name": "Pet Model",
+  "table": { "name": "pet", "comment": "pet model" },
+  "columns": [
+    {
+      "label": "ID",
+      "name": "id",
+      "type": "ID",
+      "comment": "ID",
+      "primary": true
+    },
+    {
+      "label": "date",
+      "name": "day",
+      "type": "datetime",
+      "index": true
+    },
+    {
+      "label": "Name",
+      "name": "name",
+      "type": "string",
+      "length": 128,
+      "index": true
+    },
+    {
+      "label": "Status",
+      "name": "status",
+      "type": "enum",
+      "default": "enabled",
+      "option": ["enabled", "disabled"],
+      "comment": "Status: enabled on, disabled off",
+      "index": true
+    },
+    {
+      "label": "userid",
+      "name": "user_id",
+      "type": "integer",
+      "index": true
+    },
+    {
+      "label": "Total Amount",
+      "name": "amount",
+      "type": "decimal",
+      "index": true
+    },
+    {
+      "label": "Notes",
+      "name": "remark",
+      "type": "text",
+      "nullable": true
+    }
+  ],
+  "values": [],
+  "relations": {
+    "users": {
+      "type": "hasOne",
+      "model": "user",
+      "key": "id",
+      "foreign": "user_-id",
+      "query": {}
+    }
+  },
+  "option": { "timestamps": true, "soft_deletes": true }
+}
+```
+
+</Detail>
+
+<Notice type="success">
+  Tip: <strong>option.timestamps</strong> is true, automatically created The{" "}
+  <strong>created_at</strong> and <strong>updated_at</strong> fields hold the
+  creation time and update time of the data record.
+  <strong>option.soft_deletes</strong> is true, automatically created
+  <strong>deleted_at</strong> field, which is used to mark deleted records.
+  Refer to the data model documentation for details.
+</Notice>
+
+Application directory structure:
+
+```bash
+├── models # Used to store data model description files
+│ └── pet.mod.json
+├── db
+└── ui
+└── app.json
+```
+
+## Migrate create/update data table
+
+Run `Migrate` in the project root directory to create/update the data table structure and insert default data.
+
+```bash
+cd /data/app
+yao migrate -n pet
+```
+
+<Notice type="warning">
+  Note: The migrate command will delete the data table with the same name in the
+  database and recreate it, please pay attention to data backup.
+</Notice>
+
+Extended reading:
+
+## data query
+
+List query
+
+```bash
+yao run models.pet.Get '::{}'
+```
+
+Query data by primary key
+
+```bash
+yao run models.pet.Find 1
+```
+
+delete a piece of data
+
+```bash
+yao run models.pet.Delete 1
+```
+
+add a piece of data
+
+```bash
+yao run models.pet.Create '::{"name":"cat", "day":"2022-01-01 08:00:00", "status":"enabled", "user_id":1, "amount":1000,"remark":"cat....."}'
+```
+
+update a piece of data
+
+```bash
+yao run models.pet.Update 1 '::{"remark":"A cute tricolor cat"}'
+```
+
+Save a piece of data, specify the primary key to update, do not specify create and create.
+
+```bash
+yao run models.pet.Save '::{"name":"cat", "day":"2022-01-01 08:00:00", "status":"enabled", "user_id":1, "amount":1000,"remark":"cat....."}'
+```
+
+```bash
+yao run models.pet.Save '::{"id":1,"remark":"A cute tricolor cat"}'
+```
+
+<Div style={{ display: "flex", justifyContent: "space-between" }}>
+  <Link
+    type="prev"
+    title="Application Engine"
+    link="Manual/Processor/Application Engine"
+  ></Link>
+  <Link
+    type="next"
+    title="Network Requests"
+    link="Manual/Processor/Network Requests"
+  ></Link>
+</Div>

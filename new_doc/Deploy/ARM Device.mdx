@@ -1,0 +1,92 @@
+# Install and deploy on cloud host/physical machine
+
+## System Requirements
+
+### Minimum configuration
+
+|                  |               |
+| ---------------- | ------------- |
+| CPU              | 1 core arm64  |
+| Memory           | 512M          |
+| Disk             | 32G           |
+| Operating System | Linux/Android |
+
+### Recommended configuration
+
+Can be expanded on demand according to business needs
+
+|                  |               |
+| ---------------- | ------------- |
+| CPU              | 2 core arm64  |
+| Memory           | 2G            |
+| Disk             | 128G          |
+| Operating System | Linux/Android |
+
+## connect device
+
+### Install ADB
+
+ADB, the full name of Android Debug Bridge, is a command-line debugging tool for Android.
+
+[Download and install ADB](https://developer.android.com/studio/releases/platform-tools)
+
+### Common commands
+
+#### Device List
+
+List all connected devices
+
+```bash
+adb devices
+```
+
+#### upload files
+
+Copy local files to device
+
+```bash
+adb push <local file path> <device file path>
+```
+
+#### download file
+
+Copy local files to device
+
+```bash
+adb pull <device file path> <local file path>
+```
+
+#### device shell
+
+Enter the device shell environment
+
+```bash
+adb shell
+
+```
+
+## install Yao
+
+The download system is the product whose Linux architecture is arm64, and copy it to the bin directory. [Download address](https://yaoapps.com/release)
+
+Connect your device to your computer using USB/Type-C
+
+```bash
+adb push yao-0.10.1-linux-arm64 /usr/bin/yao
+```
+
+Run adb shell locally, enter the device to configure
+
+```bash
+adb shell
+```
+
+Run on device, add executable permission
+
+```bash
+chmod +x /usr/bin/yao
+yao version
+
+```
+
+Other configuration references [Installing and deploying documents on cloud hosts/physical machines](%E4%BA%91%E4%B8%BB%E6%9C%BA.md)

@@ -1,0 +1,153 @@
+# Write Widget
+
+YAO abstracts common function modules into widgets, describes differences through YAO DSL, and quickly replicates various functions.
+During development, if you develop a similar function module, you need to copy and paste the existing functions and replace the differences in batches.
+
+**YAO has a built-in set of Widgets** covering most of the common functions of application development.
+
+Widget supports customization. When the service starts, the application engine parses it into a set of API interfaces and a set of handlers according to the widget logic. This article describes how to use JavaScript scripts to add widgets.
+
+| **Built-in Widget** | **Function**            |
+| ------------------- | ----------------------- |
+| model               | Data Structure Modeling |
+| flow                | Data logic arrangement  |
+| api                 | RESTFul API             |
+| table               | table CURD              |
+| chart               | data chart              |
+| login               | User login              |
+| register            | User registration       |
+| task                | Concurrent tasks        |
+| schedule            | Scheduled tasks         |
+| socket              | Socket                  |
+| websocket           | WebSocket               |
+
+Related tutorials: [Use YAO Widget to build a cloud table] (../Tutorial/Use %20YAO%20Widget%20 to build a cloud table)
+
+## Step 1: Design the Widge DSL data structure
+
+Design the DSL structure according to the business logic features. In this example, the differences between different tables are table fields, searchers, and table names.
+
+Example:
+
+```json
+{
+  "name": "TEST",
+  "decription": "A TEST DYFORM",
+  "columns": [
+    {
+      "title": "First Name",
+      "name": "name",
+      "type": "input",
+      "search": true,
+      "props": {
+        "placeholder": "Please input your first name"
+      }
+    },
+    {
+      "title": "Amount",
+      "name": "amount",
+      "type": "input",
+      "search": true,
+      "props": {
+        "placeholder": "Please input amount"
+      }
+    },
+    {
+      "title": "Description",
+      "name": "desc",
+      "type": "textArea",
+      "props": {
+        "placeholder": "Please input Description"
+      }
+    }
+  ]
+}
+```
+
+## Step 2: Create Widget
+
+Take dyform as an example to create a widget:
+
+```bash
+cd /your/project/root
+mkdir -p widgets/dyform
+
+# create widget file
+touch widgets/dyform/widget.json # Widget basic information
+touch widgets/dyform/compile.js # dyform DSL compiler
+touch widgets/dyform/process.js # dyform handler
+touch widgets/dyform/export.js # dyform exports built-in widget definitions
+```
+
+Tip: YAO custom widgets are placed in the widgets directory, which needs to be created manually.
+
+Use an editor to open **dyform/widget.json** and fill in the basic information of the dyform widget
+
+```json
+{
+  "label": "Dynamic Form",
+  "description": "A form widget. users can design forms online",
+  "version": "0.1.0",
+  "root": "dyforms",
+  "extension": ".form.json",
+  "modules": ["Models", "Tables"]
+}
+```
+
+**Field Description: **
+
+| **Configuration Items** | **Description**                                                                                                                                                                                                           |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| label                   | Widget name, displayed in the visual editor.                                                                                                                                                                              |
+| description             | Widget introduction, displayed in the visual editor.                                                                                                                                                                      |
+| version                 | version number                                                                                                                                                                                                            |
+| root                    | DSL file save path (relative to the project root directory)                                                                                                                                                               |
+| extension               | DSL file extension                                                                                                                                                                                                        |
+| modules                 | Modules that need to be exported. According to the DSL description in export.js, the converted YAO built-in widgets. Such as model, table, etc. These widgets are equivalent to DSL files saved in the project directory. |
+
+## Step 3: Write the handler
+
+Write **dyform/process.js ** script, implement **Model, Table ** processor, convert custom DSL into YAO data model widget and table widget.
+
+Write the Export function, declare the processor to be exported, [View source](https://github.com/YaoApp/demo-widget/blob/main/widgets/dyform/process.js#L311)
+
+```javascript
+function Export() {
+  return { Model: "Model", Table: "Table" };
+}
+```
+
+Implement Model & Table processor logic
+
+| **Processor** | **Description**                                                                                                       | **Source link**                                                                               |
+| ------------- | --------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Model         | Convert dyform DSL to model DSL, which is equivalent to manually writing a xxx.mod.json DSL file in the models folder | [View source](https://github.com/YaoApp/demo-widget/blob/ main/widgets/dyform/process.js#L11) |
+| Table         | Convert dyform DSL to table DSL, which is equivalent to manually writing a xxx..json DSL file in the tables folder    | [View source](https://github.com/YaoApp/demo-widget/blob/main /widgets/dyform/process.js#L27) |
+
+Tip: It is recommended to use the yao run command to debug the processor, refer to the source code comment documentation.
+
+## Step 4: Export as Model & Table widget
+
+Write **dyform/export.js** script, implement Models, Tables functions, export as YAO model & table widgets.
+
+| **Export function** | **Description**                                                                                                       | **Source code link**                                                                              |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Models              | Call the Model processor to export the Yao model widget, the data structure is {MODEL_NAME:String: Model_DSL:Object}  | [View source code](https://github.com/YaoApp/demo-widget/blob/main/widgets/dyform/export.js#L10)  |
+| Tables              | Call the Table processor, export it as Yao table widget, the data structure is: {TABLE_NAME:String: Table_DSL:Object} | [View source code](https://github.com/YaoApp/demo-widget/blob/main /widgets/dyform/export.js#L24) |
+
+## Effect preview
+
+In the dyforms folder, add the **xxx.form.json ** file and write the dyform DSL description file to quickly create a set of form management modules, form APIs, form processors and model processors.
+
+![demo.png](https://release-sv-1252011659.cos.na-siliconvalley.myqcloud.com/docs/%E4%B8%93%E5%AE%B6/demo%20%281%29. png)
+
+Use the **yao migrate** command to create the data table structure, the **yao start** command to start the service, and log in to the management interface to use the table management function.
+Routing address: http://127.0.0.1:5099/xiang/table/dyform.xxx
+
+<Div style={{ display: "flex", justifyContent: "right" }}>
+  <Link
+    type="next"
+    title="Source code compilation"
+    link="Expert/Source code compilation"
+  ></Link>
+</Div>

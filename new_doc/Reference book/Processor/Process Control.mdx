@@ -1,0 +1,72 @@
+# flow control
+
+<blockquote>
+  <p>
+    The data flow is used to arrange the calling logic of the processor, and supports the use of flows
+    For query node data processing, JS data stream processing is suitable for more complex business logic.
+  </p>
+  <p>
+   The `flows` processor provides us with complete data stream processing, which can provide a set of processes for data processors. Data streams can be used as processors. The namespace is
+    <strong>flows.&lt;Processor name&gt;</strong>; Query nodes can reference data flows other than themselves.
+  </p>
+
+</blockquote>
+
+## context data reference
+
+- You can use the `{{$in}}` variable globally to access the incoming parameters when calling;
+- The return value of each point can be accessed globally using the `{{$res}}` variable;
+- You can use the `{{$out}}` variable to access the return value of the processor in the node; `outs` is used to declare the return value of the current node, if not the return value of the processor.
+- The `output` field is used to declare the output results of the data flow, if not declared to return the running results of all nodes.
+
+| variable   | type               | description                                                                                                                                                                                                 | scope of use                               | example                                                        |
+| ---------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ | -------------------------------------------------------------- |
+| `{{$in}}`  | array<any\>        | As the parameter list passed in when the handler is called, it supports accessing specified parameters using array subscripts, for example: `{{$in.0}}` 1 argument, `{{$in.1}}` 2nd argument,               | `nodes[*].args`, `nodes[*].outs`, `output` | `{{$in}}` , `{{$in.0}}`,`{{$in.0.name}}`                       |
+| `{{$res}}` | \[key:string\]:any | Query node return value (`nodes[*].outs`) mapping table, support using the query node name to access the return value of a specific query node. For example `{{$res.node1.0}}` first return value of node1. | `nodes[*].args`, `nodes[*].outs`, `output` | `{{$res}}`, `{{$res.node1.0.name}}`, `{{ $res.node2.manu_id}}` |
+| `{{$out}}` | any                | Query the return value of the node's processor (`process`), support using `.` to access Object/Array values ​​                                                                                              | `nodes[*].outs`                            | `{{out} }`, `{{out.name}}`, `{{out.0}}`                        |
+
+## Built-in flow control handler
+
+| Processor         | Description                            |
+| ----------------- | -------------------------------------- |
+| xiang.flow.For    | Traverse data                          |
+| xiang.flow.Each   | Traverse data                          |
+| xiang.flow.Case   | Case Flow Control                      |
+| xiang.flow.IF     | IF flow control                        |
+| xiang.flow.Return | Return input data                      |
+| xiang.flow.Throw  | Throw an exception and end the program |
+
+## Sample code:
+
+### Use `xiang.flow.IF` in `flows`
+
+```json
+{
+  "label": "Test flows",
+  "version": "1.0.0",
+  "description": "Test flows",
+  "nodes": [
+    {
+      "name": "Check Data",
+      "process": "xiang.flow.IF",
+      "args": [
+        {
+          "name": "Ignore Processing",
+          "when": [{ "Ignore processing": "{{$res}}", "is": "notnull" }],
+          "process": "xiang.flow.Throw",
+          "args": ["Ignore processing", 400]
+        }
+      ]
+    }
+  ]
+}
+```
+
+<Div style={{ display: "flex", justifyContent: "space-between" }}>
+  <Link
+    type="prev"
+    title="Encryption and Decryption"
+    link="Manual/Processor/Encryption and Decryption"
+  ></Link>
+  <Link type="next" title="Array" link="Manual/Processor/Array"></Link>
+</Div>

@@ -1,0 +1,1228 @@
+# data table
+
+<Detail title="View source code">
+
+```json
+{
+  "name": "Category List",
+  "version": "1.0.0",
+  "decription": "Classification List",
+  "bind": {
+    "model": "category",
+    "withs": {
+      "parent": {}
+    }
+  },
+  "apis": {},
+  "columns": {
+    "ID": {
+      "label": "ID",
+      "view": { "type": "label", "props": { "value": ":id" } }
+    },
+
+    "father": {
+      "label": "Parent class",
+      "view": {
+        "type": "label",
+        "props": {
+          "value": ":parent.name"
+        }
+      },
+      "edit": {
+        "type": "input",
+        "props": {
+          "value": ":parent_id"
+        }
+      }
+    },
+    "Category Name": {
+      "label": "Classification Name",
+      "view": {
+        "type": "label",
+        "props": {
+          "value": ":name"
+        }
+      },
+      "edit": {
+        "type": "input",
+        "props": {
+          "value": ":name"
+        }
+      }
+    }
+  },
+  "filters": {
+    "Category Name": {
+      "label": "Classification Name",
+      "bind": "where.name.match",
+      "input": {
+        "type": "input",
+        "props": { "placeholder": "Category Name" }
+      }
+    }
+  },
+  "list": {
+    "primary": "id",
+    "layout": {
+      "columns": [
+        { "name": "ID", "width": 80 },
+        { "name": "parent class", "width": 200 },
+        { "name": "category name", "width": 200 }
+      ],
+      "filters": [{ "name": "Classification Name" }]
+    },
+    "actions": {
+      "pagination": { "props": { "showTotal": true } },
+      "create": {
+        "props": { "label": "Add Category" }
+      }
+    },
+    "option": { "operation": { "unfold": true } }
+  },
+  "edit": {
+    "primary": "id",
+    "layout": {
+      "fieldset": [
+        {
+          "columns": [
+            { "name": "parent class", "width": 200 },
+            { "name": "category name", "width": 200 }
+          ]
+        }
+      ]
+    },
+    "actions": {
+      "cancel": {},
+      "save": {},
+      "delete": { "type": "button", "props": { "label": "Delete" } }
+    },
+    "option": { "dev": false }
+  }
+}
+```
+
+</Detail>
+
+View [code example](#complete example)
+
+<blockquote>
+  Write a JSON page description and place it in `tables` In the directory, a set
+  of interfaces for data list, data display and data editing can be realized.
+</blockquote>
+
+In a similar way, it is also possible to describe the analytical chart interface (`charts` directory), the dashboard interface (
+`kanban` directory) and data screen interface (`screens` directory).
+
+For special pages, you can write HTML
+The page, placed in the `ui` directory, can be displayed as a stand-alone interface or embedded in the management system through an `iframe`.
+
+## handler list
+
+| Processor               | Documentation                                                                           | Instructions                                                                                      |
+| ----------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| xiang.table.Search      | [Code Example](https://github.com/YaoApp/docs-yao/blob/main/table/apis/search.md)       | Query by criteria, pagination.                                                                    |
+| xiang.table.Find        | [Code Example](https://github.com/YaoApp/docs-yao/blob/main/table/apis/find.md)         | Query a single record by primary key.                                                             |
+| xiang.table.Save        | [Code Example](https://github.com/YaoApp/docs-yao/blob/main/table/apis/save.md)         | Save a single record, there is a primary key update, but there is no primary key create.          |
+| xiang.table.Delete      | [Code Example](https://github.com/YaoApp/docs-yao/blob/main/table/apis/delete.md)       | Delete a single record by primary key.                                                            |
+| xiang.table.Insert      | [Code Example](https://github.com/YaoApp/docs-yao/blob/main/table/apis/insert.md)       | Add records in batches.                                                                           |
+| xiang.table.DeleteWhere | [Code Example](https://github.com/YaoApp/docs-yao/blob/main/table/apis/delete-where.md) | Batch delete records that meet the conditions.                                                    |
+| xiang.table.DeleteIn    | [Code Example](https://github.com/YaoApp/docs-yao/blob/main/table/apis/delete-in.md)    | Batch delete data of a specified set of primary keys Record.                                      |
+| xiang.table.UpdateWhere | [Code Sample](https://github.com/YaoApp/docs-yao/blob/main/table/apis/update-where.md)  | Batch update eligible records.                                                                    |
+| xiang.table.UpdateIn    | [Code Example](https://github.com/YaoApp/docs-yao/blob/main/table/apis/update-in.md)    | Batch update data of a specified set of primary keys Record.                                      |
+| xiang.table.QuickSave   | [Code Example](https://github.com/YaoApp/docs-yao/blob/main/table/apis/quicksave.md)    | Save multiple records, there is a primary key update, but it does not exist Primary key creation. |
+| xiang.table.Setting     | [Code example](https://github.com/YaoApp/docs-yao/blob/main/table/apis/setting.md)      | Read data table configuration information for front-end interface rendering                       |
+| xiang.table.Select      |                                                                                         | Read data table configuration information for front-end interface rendering                       |
+| xiang.table.Export      |                                                                                         | for data import                                                                                   |
+
+## API list
+
+The data table provides a set of RESTFul APIs, and the data management interface calls these APIs to realize functional interaction such as adding, deleting, modifying, and querying data forms.
+
+| API          | Request Method | Routing                                      | Description                                                                             |
+| ------------ | -------------- | -------------------------------------------- | --------------------------------------------------------------------------------------- |
+| search       | `GET`          | `/api/xiang/table/<table name>/search`       | Query by criteria, pagination.                                                          |
+| select       | `GET`          | `/api/xiang/table/<table name>/select`       | List query, return the data format agreed by the select component.                      |
+| find         | `GET`          | `/api/xiang/table/<table name>/find/:id`     | Query a single record by primary key.                                                   |
+| save         | `POST`         | `/api/xiang/table/<table name>/save`         | Save a single record, there is a primary key update, there is no primary key creation.  |
+| delete       | `POST`         | `/api/xiang/table/<table name>/delete/:id`   | Delete a single record by primary key.                                                  |
+| insert       | `POST`         | `/api/xiang/table/<table name>/insert`       | Batch add records.                                                                      |
+| delete-where | `POST`         | `/api/xiang/table/<table name>/delete/where` | Batch delete eligible records.                                                          |
+| delete-in    | `POST`         | `/api/xiang/table/<table name>/delete/in`    | Batch delete data records with a specified set of primary keys.                         |
+| update-where | `POST`         | `/api/xiang/table/<table name>/update/where` | Batch update eligible records.                                                          |
+| update-in    | `POST`         | `/api/xiang/table/<table name>/update/in`    | Batch update data records with a specified set of primary keys.                         |
+| quicksave    | `POST`         | `/api/xiang/table/<table name>/quicksave`    | Save multiple records, there is a primary key update, there is no primary key creation. |
+| setting      | `GET`          | `/api/xiang/table/<table name>/setting`      | Read data table configuration information for front-end interface rendering             |
+
+## Naming conventions
+
+The data table description file is a JSON text file named **lowercase English letters** `<name>.tab.json`
+
+| Folder (relative to application model root directory) | File name     | Table name           | API routing address                                   |
+| ----------------------------------------------------- | ------------- | -------------------- | ----------------------------------------------------- |
+| /                                                     | name.tab.json | `name`               | `/api/xiang/table/name/admin interface`               |
+| /group/                                               | name.tab.json | `gorup.name`         | `/api/xiang/table/group.name/admin interface`         |
+| /group1/group2/                                       | name.tab.json | `gorup1.gorup2.name` | `/api/xiang/table/group1.group2.name/admin interface` |
+
+## Document structure
+
+The data table document consists of basic table information, data model binding, business structure mapping table, field mapping table, filter mapping table, list page, edit page, batch insert page and detail page.
+
+```json
+{
+  "name": "Cloud Service Library",
+  "version": "1.0.0",
+  "bind": {},
+  "apis": {},
+  "columns": {},
+  "filters": {},
+  "list": {},
+  "edit": {},
+  "view": {},
+  "insert": {}
+}
+```
+
+| Fields  | Type                         | Description                                                                                                                                                                                                                                                                                                         | Required Fields |
+| ------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| name    | String                       | data table name                                                                                                                                                                                                                                                                                                     | yes             |
+| version | String                       | Version number, used for dependency check and development platform rendering                                                                                                                                                                                                                                        | yes             |
+| bind    | Object Bind                  | Bind the data model.                                                                                                                                                                                                                                                                                                | No              |
+| hooks   | \[key:String\]:String        | Data table Hook                                                                                                                                                                                                                                                                                                     | No              |
+| apis    | \[key:String\]:Object API    | Data management API settings. For example, if the binding data model is set, the data management API will be automatically generated according to the model information, and the automatically generated API can be overwritten by setting the configuration information of the same `key`.                         | No              |
+| columns | \[key:String\]:Object Column | Field rendering settings. If the binding data model is set, the associated components are automatically set according to the field type information, and the automatically generated associated component information can be overwritten by setting the configuration information of the same `key`.                | No              |
+| filters | \[key:String\]:Object Filter | Query filter settings. For example, if the binding data model is set, the associated components are automatically set according to the index and field information, and the automatically generated associated component information can be overwritten by setting the configuration information of the same `key`. | No              |
+| list    | Object Page                  | List page settings.                                                                                                                                                                                                                                                                                                 | yes             |
+| edit    | Object Page                  | Edit page settings.                                                                                                                                                                                                                                                                                                 | yes             |
+| view    | Object Page                  | View page settings.                                                                                                                                                                                                                                                                                                 | No              |
+| insert  | Object Page                  | Batch input page settings.                                                                                                                                                                                                                                                                                          | No              |
+
+### basic information
+
+```json
+{
+  "name": "User",
+  "title": "Trusted Cloud Cloud Service Library | Data Management",
+  "decription": "trusted cloud cloud service library"
+}
+```
+
+| Fields     | Type   | Description                                                                             | Required Fields |
+| ---------- | ------ | --------------------------------------------------------------------------------------- | --------------- |
+| name       | String | The name of the data table, which can be used for rendering in the development platform | yes             |
+| title      | String | The title of the page rendered by the browser bar when the data table page is opened    | no              |
+| decription | String | Data table introduction, can be used for rendering in the development platform          | No              |
+
+### Binding data model `bind`
+
+You can bind the data table to the data model by setting `model` and `withs`. After binding, the application engine will generate `apis`, `columns` and `fliters` configurations according to the data model definition. If you need special declarations, you can add special configuration information with the same `key`. You can also add fields in `columns`, `fliters` for rendering on each page.
+
+```json
+{
+  "bind": {
+    "model": "service",
+    "withs": {
+      "manu": {
+        "query": {
+          "select": ["id", "name", "short_name", "status"]
+        }
+      },
+      "kind": {
+        "query": {
+          "select": ["id", "name"]
+        }
+      }
+    }
+  }
+}
+```
+
+| Fields | Type                       | Description                           | Required Fields |
+| ------ | -------------------------- | ------------------------------------- | --------------- |
+| model  | String                     | Binding data model name               | yes             |
+| withs  | \[key:String\]:Object With | Data model associated query settings. | No              |
+
+## handler list
+
+### Data table management interface `apis`
+
+The data table will provide interfaces such as adding, deleting, modifying and checking, and completing data management operations through these interfaces. For example, if the binding data model is set, the data management API will be automatically generated according to the model information. By setting the configuration information of the same `key`, the automatically generated API can be overwritten. The API input and output data structure must be consistent with the original interface.
+
+#### Object API data structure
+
+```json
+{
+  "apis": {
+    "search": {
+      "process": "models.service.Paginate",
+      "guard": "bearer-jwt",
+      "default": [
+        {
+          "withs": {
+            "manu": {
+              "query": {
+                "select": ["id", "name", "short_name", "status"]
+              }
+            }
+          }
+        },
+        null,
+        15
+      ]
+    },
+    "find": {
+      "process": "models.service.Find",
+      "default": [
+        null,
+        {
+          "withs": {
+            "manu": {
+              "query": {
+                "select": ["id", "name", "short_name", "status"]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "Management interface(key)": {
+      "process": "Processor name",
+      "guard": "-",
+      "default": []
+    }
+  }
+}
+```
+
+| Fields  | Type        | Description                                                                                                                                                     | Required Fields |
+| ------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| process | String      | Binding processor (`process`) input and output data structures must be consistent with the original interface                                                   | yes             |
+| guard   | String      | Interface authentication middleware, multiple are separated by `,`, set to `-`, no authentication middleware is set, and no default authentication mode is set. | No              |
+| default | Array<Any\> | The default value of the parameter table, if there is no default value, it can be set to `null`, such as `[null, null, 15]`                                     | No              |
+
+### Field rendering `columns`
+
+It is possible to set the presentation method of fields in list rendering (`view`), list editing (`edit`) and edit form (`form`). Fields can be added freely and can be used in the rendering settings of each page. For example, if the binding data model is set, the corresponding presentation is automatically generated according to the field name and field type of the data model, and the automatically generated presentation information can be overwritten by setting the configuration information of the same `key`. Field rendering mapping table, which can be read from the `setting` interface.
+
+```json
+{
+  "columns": {
+    "name": {
+      "label": "Service Name",
+      "view": {
+        "type": "label",
+        "props": {
+          "value": ":name"
+        }
+      },
+      "edit": {
+        "type": "input",
+        "props": {
+          "value": ":name"
+        }
+      },
+      "form": {
+        "type": "input",
+        "props": {
+          "value": ":name"
+        }
+      }
+    },
+    "manu.name": {
+      "label": "Manufacturer name",
+      "view": {
+        "type": "label",
+        "props": {
+          "value": ":manu.name"
+        }
+      }
+    },
+    "Manufacturer": {
+      "label": "Manufacturer",
+      "view": {
+        "name": "label",
+        "props": {
+          "value": ":manu.short_name"
+        }
+      },
+      "edit": {
+        "type": "select",
+        "props": {
+          "value": ":manu.id",
+          "searchable": true,
+          "remote": {
+            "api": "/api/manu/get",
+            "query": {
+              "select": ["id", "name"],
+              "keyword": "where_name_like"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+#### Object Column data structure
+
+| Fields | Type          | Description                                                                                          | Required Fields |
+| ------ | ------------- | ---------------------------------------------------------------------------------------------------- | --------------- |
+| label  | String        | Field name of field rendering                                                                        | yes             |
+| view   | Object Render | List or view page, the components and properties used when reading the state, the default is `label` | no              |
+| edit   | Object Render | List or view page, the components and properties used when editing the state, the default is `input` | no              |
+| form   | Object Render | Edit page, components and properties used, default is `input`                                        | no              |
+
+### query filter `fliters`
+
+You can add data query conditions to display by setting query filters. Query filters are freely added and can be used in listing page rendering settings. For example, if the binding data model is set, the corresponding configuration is automatically generated according to the data model index name and field information, and the automatically generated configuration information can be overwritten by setting the configuration information of the same `key`. Query filter mapping table, which can be read from the `setting` interface.
+
+```json
+{
+  "filters": {
+    "Key words": {
+      "label": "Keyword",
+      "bind": "where.name.like",
+      "input": {
+        "type": "input",
+        "props": {
+          "placeholder": "Please enter a keyword"
+        }
+      }
+    },
+    "Manufacturer": {
+      "label": "Manufacturer",
+      "bind": "where.manu_id.in",
+      "input": {
+        "type": "select",
+        "props": {
+          "searchable": true,
+          "multiple": true,
+          "placeholder": "Please select the manufacturer",
+          "remote": {
+            "api": "/api/manu/get",
+            "query": {
+              "select": ["id", "name"],
+              "keyword": "where.name.like",
+              "limit": 500
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+#### Object Filter data structure
+
+| Fields | Type          | Description                                                                                                            | Required Fields |
+| ------ | ------------- | ---------------------------------------------------------------------------------------------------------------------- | --------------- |
+| label  | String        | filter display name                                                                                                    | yes             |
+| bind   | String        | Binding query condition URL Query String Field name, such as `where.manu_id.in` (used as `search` API query parameter) | yes             |
+| input  | Object Render | query content input component, default is `input`                                                                      | no              |
+
+### 2.6 List page `list`
+
+.
+
+```json
+{
+  "list": {
+    "primary": "id",
+    "layout": {
+      "columns": [
+        { "name": "Service Name", "width": 6 },
+        { "name": "Manufacturer", "width": 6 },
+        { "name": "Service Type", "width": 4 }
+      ],
+      "filters": [
+        { "name": "keyword", "width": 6 },
+        { "name": "Manufacturer", "width": 6 }
+      ]
+    },
+    "actions": {
+      "create": {
+        "type": "button",
+        "props": {
+          "label": "New Service"
+        }
+      },
+      "view": {},
+      "edit": {},
+      "import": {},
+      "update": {},
+      "delete": {},
+      "insert": {},
+      "updateWhere": {},
+      "deleteWhere": {},
+      "updateSelect": {},
+      "deleteSelect": {},
+      "pagination": {
+        "type": "",
+        "props": {
+          "pages": true,
+          "prev": true,
+          "next": true
+        }
+      },
+      "setting": {}
+    }
+  }
+}
+```
+
+#### layout (`layout`)
+
+| Field     | Type                                     | Description                           |
+| --------- | ---------------------------------------- | ------------------------------------- |
+| `columns` | Array<Object ColumnInstance \| String \> | Columns that the data list can render |
+| `filters` | Array<Object FilterInstance \| String \> | renderable query filters              |
+
+##### Object ColumnInstance data structure
+
+| Fields | Type    | Description                                                                | Required Fields |
+| ------ | ------- | -------------------------------------------------------------------------- | --------------- |
+| name   | String  | Field name. Must have been defined in field rendering (`columns`).         | yes             |
+| width  | Integer | Column width. Use grid system, valid values ​​are `1`-`24`. Default is `6` | no              |
+
+##### Object FilterInstance data structure
+
+| Fields | Type    | Description                                                                | Required Fields |
+| ------ | ------- | -------------------------------------------------------------------------- | --------------- |
+| name   | String  | Field name. Must have been defined in query filter mode (`filters`).       | yes             |
+| width  | Integer | Column width. Use grid system, valid values ​​are `1`-`24`. Default is `6` | no              |
+
+#### Functions (`actions`)
+
+| Name           | Description                                  |
+| -------------- | -------------------------------------------- |
+| `create`       | New data record button                       |
+| `view`         | View data record details button              |
+| `edit`         | Edit data record form button                 |
+| `import`       | Import data record button                    |
+| `export`       | Export data record button                    |
+| `update`       | Update a single field button                 |
+| `delete`       | Delete a single record button                |
+| `insert`       | Bulk insert button                           |
+| `deleteWhere`  | Batch delete button by condition             |
+| `updateWhere`  | Batch update button by condition             |
+| `deleteSelect` | Batch delete the selected data record button |
+| `updateSelect` | Batch update selected data record button     |
+| `pagination`   | Pagination                                   |
+| `setting`      | Data table configuration button              |
+
+### Edit page `edit`
+
+```json
+{
+  "edit": {
+    "primary": "id",
+    "layout": {
+      "groups": [
+        {
+          "title": "Basic Information",
+          "description": "",
+          "columns": [
+            { "name": "Service Name", "width": 6 },
+            { "name": "Manufacturer", "width": 6 },
+            { "name": "Service Type", "width": 6 },
+            { "name": "state", "width": 6 },
+            { "name": "rank", "width": 6 }
+          ]
+        },
+        {
+          "title": "Data Label",
+          "description": "",
+          "columns": ["Service Field", "Billing Method", "Industry Coverage"]
+        }
+      ]
+    },
+    "actions": {
+      "cancel": {},
+      "save": {
+        "type": "button",
+        "props": {
+          "label": "Save"
+        }
+      },
+      "delete": {}
+    }
+  }
+}
+```
+
+#### layout (`layout`)
+
+| Fields   | Type                 | Description                   | Required Fields |
+| -------- | -------------------- | ----------------------------- | --------------- |
+| `groups` | Array<Object Group\> | Edit form field grouping list | Yes             |
+
+**Object Group data structure**
+
+| Fields        | Type                                     | Description                                                                                                       | Required Fields |
+| ------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | --------------- |
+| `title`       | String                                   | group name                                                                                                        | no              |
+| `description` | String                                   | Group introduction                                                                                                | no              |
+| `columns`     | Array<Object ColumnInstance \| String \> | Columns that the data list can render [ColumnInstance data structure](#Object%20ColumnInstance%20 data structure) | yes             |
+
+#### Functions (`actions`)
+
+| Name     | Description        |
+| -------- | ------------------ |
+| `cancel` | Cancel edit button |
+| `save`   | Save data button   |
+| `delete` | delete data button |
+
+### View page `view`
+
+Not implemented in this version
+
+### Batch entry page `insert`
+
+Not implemented in this version
+
+## Object Render data structure
+
+```json
+{
+  "type": "select",
+  "props": {
+    "value": "{{manu_id}}",
+    "searchable": true,
+    "remote": {
+      "api": "/api/manu/get",
+      "query": {
+        "select": ["id", "name"],
+        "keyword": "where.name.like"
+      }
+    }
+  }
+}
+```
+
+| Fields     | Type         | Description                                                                                                                                            | Required Fields |
+| ---------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------- |
+| type       | String       | Component name used [View supported components](https://yaoapps.com/components)                                                                        | yes             |
+| props      | Object<Any\> | Component properties, see the corresponding component documentation for details. `String`, `Number` and `Variable` can be used in property parameters. | No              |
+| components | Array<Any\>  | Composite component, referencing an atomic component name or description. `["Billing method", "Industry coverage", {"name":"Name", "props":{}}]`       | No              |
+
+**Using variables in properties (`props`)**
+
+CanIn properties (`props`), you can use `{{field name}}` or `:field name` to refer to the current record data, support using `.` to access `Object` or `Array` type data, such as `{{ field name.foo.bar}}`, `{{fieldname.0.foo}}`, `:fieldname.foo.bar`, `:fieldname.0.foo`
+
+## Object Page data structure
+
+```json
+{
+  "edit": {
+    "primary": "id",
+    "layout": {
+      "groups": [
+        {
+          "title": "Data Label",
+          "description": "",
+          "columns": ["Service Field", "Billing Method", "Industry Coverage"]
+        }
+      ]
+    },
+    "actions": {
+      "cancel": {},
+      "save": {
+        "type": "button",
+        "props": {
+          "label": "Save"
+        }
+      },
+      "delete": {}
+    }
+  }
+}
+```
+
+| Fields  | Type                                        | Description                                                                                                                          | Required Fields |
+| ------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | --------------- |
+| primary | String                                      | primary key field name                                                                                                               | yes             |
+| layout  | \[key:String\]:Any                          | Optional configuration items for page layout, which are different for each page and are defined in specific pages.                   | yes             |
+| actions | \[key:String\]:\[key:String\]:Object Render | The mapping table of available page function rendering methods, which are different for each page and are defined in specific pages. | No              |
+| option  | \[key:String\]:Any                          | Page configuration information, freely define as needed. API Setting is returned as is.                                              | No              |
+
+### Write a table preprocessor, using Hooks
+
+Table API input and output data can be processed using Hooks. Hooks are divided into two categories: `before` and `after`. Before hook, which runs before the API call, can be used to process incoming parameters, and after hook, which runs after the API call and can be used to process query results.
+
+When describing the data table, in the `hooks` field, declare the handler associated with the **Hook**, for example:
+
+```json
+{
+  "name": "Category",
+  "version": "1.0.0",
+  "decription": "Category",
+  "bind": { "model": "category" },
+  "hooks": {
+    "before:find": "flows.hooks.before_find",
+    "after:find": "flows.hooks.after_find",
+    "before:search": "flows.hooks.before_search",
+    "after:search": "flows.hooks.after_search",
+    "before:save": "flows.hooks.before_save",
+    "after:save": "flows.hooks.after_save"
+  },
+  "apis": {},
+  "columns": {}
+}
+```
+
+### Hooks List
+
+| Hook          | Description                        | Input                                                                 | Output Specification                                                             |
+| ------------- | ---------------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| before:find   | Called before the Find handler     | The Find interface is passed in data                                  | The output result is used as the input parameter of the Find correlation handler |
+| after:find    | Called after the Find handler      | Find interface associated with the handler execution result           | Custom (output result as the final output of the Find handler)                   |
+| before:search | Called before the Search processor | Pass in data through the Search interface                             | Output results as input parameters of the Search correlation processor           |
+| after:search  | Called after the Search handler    | Search interface associated with the handler execution result         | Custom (the output result is the final output of the Search handler)             |
+| before:save   | Called before the Save handler     | The Save interface is passed in data                                  | The output result is used as the input parameter of the Save associated handler  |
+| after:save    | Called after the Save handler      | Save interface is associated with the execution result of the handler | Custom (the output result is the final output of the Save interface)             |
+
+## complete example
+
+<Detail title="View source code">
+
+```json
+{
+  "name": "Cloud Service Library",
+  "version": "1.0.0",
+  "decription": "Trusted Cloud Service Library",
+  "bind": {
+    "model": "service",
+    "withs": {
+      "manu": {
+        "query": {
+          "select": ["id", "name", "short_name", "status"]
+        }
+      },
+      "kind": {
+        "query": {
+          "select": ["id", "name"]
+        }
+      }
+    }
+  },
+  "apis": {
+    "search": {
+      "process": "models.service.Paginate",
+      "default": [
+        {
+          "withs": {
+            "manu": {
+              "query": {
+                "select": ["id", "name", "short_name", "status"]
+              }
+            },
+            "kind": {
+              "query": {
+                "select": ["id", "name"]
+              }
+            }
+          },
+          "wheres": [{ "column": "status", "value": "enabled" }]
+        },
+        null,
+        15
+      ]
+    },
+    "find": {
+      "process": "models.service.Find",
+      "default": [
+        null,
+        {
+          "withs": {
+            "manu": {
+              "query": {
+                "select": ["id", "name", "short_name", "status"]
+              }
+            },
+            "kind": {
+              "query": {
+                "select": ["id", "name"]
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "columns": {
+    "service name": {
+      "label": "Service Name",
+      "view": {
+        "type": "label",
+        "props": {
+          "value": ":name"
+        }
+      },
+      "edit": {
+        "type": "input",
+        "props": {
+          "value": ":name"
+        }
+      }
+    },
+    "Manufacturer": {
+      "label": "Manufacturer",
+      "view": {
+        "name": "label",
+        "props": {
+          "value": ":manu.short_name"
+        }
+      },
+      "edit": {
+        "type": "select",
+        "props": {
+          "value": ":manu.id",
+          "searchable": true,
+          "remote": {
+            "api": "/api/manu/get",
+            "query": {
+              "select": ["id", "name"],
+              "keyword": "where_name_like"
+            }
+          }
+        }
+      }
+    },
+    "Service type": {
+      "label": "Service Type",
+      "view": {
+        "name": "label",
+        "props": {
+          "value": ":kind.name"
+        }
+      },
+      "edit": {
+        "type": "select",
+        "props": {
+          "value": ":kind.id",
+          "tree": true,
+          "searchable": true,
+          "remote": {
+            "api": "/api/kind/tree",
+            "query": {
+              "select": ["id", "name"],
+              "keyword": "where_name_like"
+            }
+          }
+        }
+      }
+    },
+    "Service Domain": {
+      "label": "Service Area",
+      "view": {
+        "name": "tags",
+        "props": {
+          "value": ":fields"
+        }
+      },
+      "edit": {
+        "type": "select",
+        "props": {
+          "value": ":fields",
+          "searchable": true,
+          "inputable": true,
+          "multiple": true,
+          "options": [
+            { "label": "video conference", "value": "video conference" },
+            { "label": "IM", "value": "IM" },
+            {
+              "label": "Customer Service Management",
+              "value": "Customer Service Management"
+            },
+            {
+              "label": "Financial Management",
+              "value": "Financial Management"
+            },
+            {
+              "label": "Customer Relationship Management",
+              "value": "Customer Relationship Management"
+            },
+            {
+              "label": "Marketing Management",
+              "value": "Marketing Management"
+            },
+            { "label": "Office Automation", "value": "Office Automation" },
+            { "label": "ERP", "value": "ERP" },
+            { "label": "manpower", "value": "manpower" },
+            { "label": "Purchase", "value": "Purchase" },
+            { "label": "Supply Chain", "value": "Supply Chain" },
+            {
+              "label": "Enterprise Network Disk",
+              "value": "Enterprise Network Disk"
+            },
+            { "label": "Mail Service", "value": "Mail Service" },
+            { "label": "Electronic Contract", "value": "Electronic Contract" },
+            { "label": "Security Tools", "value": "Security Tools" },
+            {
+              "label": "Public opinion analysis",
+              "value": "Public opinion analysis"
+            },
+            {
+              "label": "Industry application",
+              "value": "Industry application"
+            },
+            { "label": "other", "value": "other" }
+          ]
+        }
+      }
+    },
+    "Billing method": {
+      "label": "Billing method",
+      "view": {
+        "name": "tags",
+        "props": {
+          "value": ":fields"
+        }
+      },
+      "edit": {
+        "type": "select",
+        "props": {
+          "value": ":price_options",
+          "multiple": true,
+          "options": [
+            { "label": "Annual subscription", "value": "Annual subscription" },
+            {
+              "label": "Monthly subscription",
+              "value": "Monthly subscription"
+            },
+            { "label": "Pay-As-You-Go", "value": "Pay-As-You-Go" },
+            { "label": "Private Deployment", "value": "Private Deployment" },
+            { "label": "other", "value": "other" }
+          ]
+        }
+      }
+    },
+    "industry coverage": {
+      "label": "Industry coverage",
+      "view": {
+        "name": "tags",
+        "props": {
+          "value": ":industries"
+        }
+      },
+      "edit": {
+        "type": "select",
+        "props": {
+          "value": ":industries",
+          "inputable": true,
+          "multiple": true,
+          "options": [
+            { "label": "real estate", "value": "real estate" },
+            { "label": "tourism", "value": "tourism" },
+            { "label": "Education", "value": "Education" },
+            { "label": "Internet", "value": "Internet" },
+            { "label": "other", "value": "other" }
+          ]
+        }
+      }
+    },
+    "state": {
+      "label": "Status",
+      "view": {
+        "name": "tags",
+        "props": {
+          "value": ":status",
+          "options": [
+            { "label": "enabled", "value": "enabled", "color": "primary" },
+            { "label": "off", "value": "disabled", "color": "danger" }
+          ]
+        }
+      },
+      "edit": {
+        "type": "select",
+        "props": {
+          "value": ":status",
+          "options": [
+            { "label": "enabled", "value": "enabled" },
+            { "label": "off", "value": "disabled" }
+          ]
+        }
+      }
+    },
+    "creation time": {
+      "label": "Created Time",
+      "view": {
+        "name": "label",
+        "props": {
+          "value": ":created_at",
+          "datetime-format": "YYYY MM DD @hh:mm:ss"
+        }
+      }
+    },
+    "update time": {
+      "label": "Update time",
+      "view": {
+        "name": "label",
+        "props": {
+          "value": ":update_at",
+          "datetime-format": "YYYY MM DD @hh:mm:ss"
+        }
+      }
+    },
+    "Query Sort": {
+      "label": "Query Sort",
+      "view": {
+        "type": "label",
+        "props": {
+          "value": ":rank"
+        }
+      },
+      "edit": {
+        "type": "input",
+        "props": {
+          "value": ":rank",
+          "type": "number"
+        }
+      }
+    }
+  },
+  "filters": {
+    "Key words": {
+      "label": "Keyword",
+      "bind": "where.name.like",
+      "input": {
+        "type": "input",
+        "props": {
+          "placeholder": "Please enter a keyword"
+        }
+      }
+    },
+    "Manufacturer": {
+      "label": "Manufacturer",
+      "bind": "where.manu_id.in",
+      "input": {
+        "type": "select",
+        "props": {
+          "searchable": true,
+          "multiple": true,
+          "placeholder": "Please select the manufacturer",
+          "remote": {
+            "api": "/api/manu/get",
+            "query": {
+              "select": ["id", "name"],
+              "keyword": "where_name_like"
+            }
+          }
+        }
+      }
+    },
+    "Service type": {
+      "label": "Type",
+      "bind": "where.kind_id.in",
+      "input": {
+        "type": "select",
+        "props": {
+          "tree": true,
+          "searchable": true,
+          "multiple": true,
+          "placeholder": "Please select a type",
+          "remote": {
+            "api": "/api/kind/tree",
+            "query": {
+              "select": ["id", "name"],
+              "keyword": "where_name_like"
+            }
+          }
+        }
+      }
+    }
+  },
+  "list": {
+    "primary": "id",
+    "layout": {
+      "columns": [
+        { "name": "Service Name", "width": 6 },
+        { "name": "Manufacturer", "width": 6 },
+        { "name": "Service Type", "width": 4 },
+        { "name": "state", "width": 4 },
+        { "name": "Service Domain", "width": 4 },
+        { "name": "Billing method", "width": 4 },
+        { "name": "creation time", "width": 6 },
+        { "name": "update time", "width": 6 }
+      ],
+      "filters": [
+        { "name": "keyword", "width": 6 },
+        { "name": "Manufacturer", "width": 6 },
+        { "name": "Service Type", "width": 4 }
+      ]
+    },
+    "actions": {
+      "create": {
+        "type": "button",
+        "props": {
+          "label": "New Service",
+          "icon": "fas fa-plus"
+        }
+      },
+      "view": {},
+      "edit": {},
+      "import": {},
+      "update": {},
+      "delete": {},
+      "insert": {},
+      "updateWhere": {},
+      "deleteWhere": {},
+      "updateSelect": {},
+      "deleteSelect": {},
+      "pagination": ["pages", "prev", "next"],
+      "setting": {}
+    }
+  },
+  "edit": {
+    "primary": "id",
+    "layout": {
+      "fieldset": [
+        {
+          "title": "Basic Information",
+          "description": "",
+          "columns": [
+            { "name": "Service Name", "width": 6 },
+            { "name": "Manufacturer", "width": 6 },
+            { "name": "Service Type", "width": 6 },
+            { "name": "state", "width": 6 },
+            { "name": "rank", "width": 6 }
+          ]
+        },
+        {
+          "title": "Data Label",
+          "description": "",
+          "columns": ["Service Field", "Billing Method", "Industry Coverage"]
+        }
+      ]
+    },
+    "actions": {
+      "cancel": {},
+      "save": {
+        "type": "button",
+        "props": {
+          "label": "Save"
+        }
+      },
+      "delete": {}
+    }
+  },
+  "insert": {},
+  "view": {}
+}
+```
+
+</Detail>
+
+## Example 2
+
+### Create a new book category table `tables/category.tab.json` code:
+
+<Detail title="View source code">
+
+```json
+{
+  "name": "Category List",
+  "version": "1.0.0",
+  "decription": "Classification List",
+  "bind": {
+    "model": "category",
+    "withs": {
+      "parent": {}
+    }
+  },
+  "hooks": {},
+  "apis": {},
+  "columns": {
+    "ID": {
+      "label": "ID",
+      "view": { "type": "label", "props": { "value": ":id" } }
+    },
+
+    "father": {
+      "label": "Parent class",
+      "view": {
+        "type": "label",
+        "props": {
+          "value": ":parent.name"
+        }
+      },
+      "edit": {
+        "type": "input",
+        "props": {
+          "value": ":parent_id"
+        }
+      }
+    },
+    "Category Name": {
+      "label": "Classification Name",
+      "view": {
+        "type": "label",
+        "props": {
+          "value": ":name"
+        }
+      },
+      "edit": {
+        "type": "input",
+        "props": {
+          "value": ":name"
+        }
+      }
+    }
+  },
+  "filters": {
+    "Category Name": {
+      "label": "Classification Name",
+      "bind": "where.name.match",
+      "input": {
+        "type": "input",
+        "props": { "placeholder": "Category Name" }
+      }
+    }
+  },
+  "list": {
+    "primary": "id",
+    "layout": {
+      "columns": [
+        { "name": "ID", "width": 80 },
+        { "name": "parent class", "width": 200 },
+        { "name": "category name", "width": 200 }
+      ],
+      "filters": [{ "name": "Classification Name" }]
+    },
+    "actions": {
+      "pagination": { "props": { "showTotal": true } },
+      "create": {
+        "props": { "label": "Add Category" }
+      }
+    },
+    "option": { "operation": { "unfold": true } }
+  },
+  "edit": {
+    "primary": "id",
+    "layout": {
+      "fieldset": [
+        {
+          "columns": [
+            { "name": "parent class", "width": 200 },
+            { "name": "category name", "width": 200 }
+          ]
+        }
+      ]
+    },
+    "actions": {
+      "cancel": {},
+      "save": {},
+      "delete": { "type": "button", "props": { "label": "Delete" } }
+    },
+    "option": { "dev": false }
+  }
+}
+```
+
+</Detail>
+
+<Div style={{ display: "flex", justifyContent: "space-between" }}>
+  <Link type="prev" title="Flow" link="Manual/Widgets/Flow"></Link>
+  <Link type="next" title="Chart" link="Manual/Widgets/Chart"></Link>
+</Div>

@@ -1,0 +1,66 @@
+# network request
+
+YAO integrates many Http requests, and quickly requests various URLs through the network processor.
+
+## The network request contains a list of handlers
+
+| Processor              | Description                                            |
+| ---------------------- | ------------------------------------------------------ |
+| xiang.network.IP       | Query server IP information                            |
+| xiang.network.Get      | Send HTTP GET request                                  |
+| xiang.network.Post     | Send HTTP POST request                                 |
+| xiang.network.PostJSON | Send HTTP POST request, payload is JSON format data    |
+| xiang.network.Put      | Send HTTP PUT request                                  |
+| xiang.network.PostJSON | Send HTTP PUT request, the payload is JSON format data |
+| xiang.network.Send     | Send any request, the payload is JSON format data      |
+
+## Sample code:
+
+Example of sending a GET request: `xiang.network.Get`
+
+```javascript
+var response = Process("xiang.network.Get", url, params, {
+  "Content-Type": "application/json",
+  Auth: "token",
+});
+```
+
+Example of sending a POST request: `xiang.network.PostJSON`
+
+```javascript
+let response = Process("xiang.network.PostJSON", url, data, {
+  "Content-Type": "application/json",
+  Auth: "token",
+});
+```
+
+Example of sending a PATCH request: `xiang.network.Send`
+
+```javascript
+let response = Process("xiang.network.Send", "PATCH", url, {}, body, {
+  "Content-Type": "application/json",
+  Auth: "token",
+});
+```
+
+Send DELETTE request example: `xiang.network.Send`
+
+```javascript
+let response = Process("xiang.network.Send", "DELETE", url, {}, body, {
+  "Content-Type": "application/json",
+  Auth: "token",
+});
+```
+
+<Div style={{ display: "flex", justifyContent: "space-between" }}>
+  <Link
+    type="prev"
+    title="Data Model"
+    link="Manual/Processor/Data Model"
+  ></Link>
+  <Link
+    type="next"
+    title="File Operations"
+    link="Manual/Processor/File Operations"
+  ></Link>
+</Div>

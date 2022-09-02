@@ -1,0 +1,134 @@
+# Install and deploy on cloud host/physical machine
+
+## System Requirements
+
+### Minimum configuration
+
+|                  |              |
+| ---------------- | ------------ |
+| CPU              | 1 Core       |
+| Memory           | 1G           |
+| Disk             | 128G         |
+| Operating System | Linux 64-bit |
+
+### Recommended configuration
+
+Can be expanded on demand according to business needs
+
+|                  |              |
+| ---------------- | ------------ |
+| CPU              | 2 cores      |
+| Memory           | 2G           |
+| Disk             | 128G         |
+| Operating System | Linux 64-bit |
+
+## installation steps
+
+### Step 1: Install Yao
+
+Method 1: Run the installation script
+
+```bash
+curl -fsSL https://website.yaoapps.com/install.sh | bash
+```
+
+Method 2: Manually download the product
+
+Download the product whose Linux architecture is amd64 and copy it to the bin directory. [Download address](https://yaoapps.com/release)
+
+```bash
+cp yao-0.10.1-linux-amd64 /usr/bin/yao
+chmod +x /usr/bin/yao
+yao version
+```
+
+Method 3: Source code compilation
+
+Refer to the [source code compilation](../expert/%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91.mdx) document to compile the product. Copy the artifact to the /usr/bin/ directory and add executable permissions.
+
+### Step 2: Add User
+
+Add user
+
+```bash
+useradd yao
+```
+
+Create application folder
+
+```bash
+mkdir /yaoapps
+```
+
+### Step 3: Deploy the code
+
+Copy the app code to the app directory, e.g.
+
+```bash
+git clone https://github.com/YaoApp/demo-crm.git /yaoapps/demo-crm
+```
+
+<Notice type="warning">
+  Note: In a production environment, set the launch mode to{" "}
+  <strong>production</strong>
+  Disable the migrate command in production mode to prevent changes to the data table
+  structure due to misoperation
+</Notice>
+
+### Step 4: Configure the service
+
+Use `pm2` , `supervisor` and other service process management tools.
+
+Supervisor configuration example:
+
+```bash
+[program:demo-crm-server]
+directory=/yaoapps/demo-crm
+command=/usr/local/bin/yao start
+process_name=demo-crm-server
+numprocs=1
+autostart=true
+autorestart=true
+user=yao
+group=yao
+redirect_stderr=true
+stdout_logfile=/yaoapps/demo-crm/supervisor.log
+
+```
+
+<Notice type="warning">Note: Do not use root user to start services. </Notice>
+
+Start the service:
+
+```bash
+supervisor start
+```
+
+Check service status:
+
+```bash
+curl http://127.0.0.1:<Port>/api/xiang/ping
+```
+
+## proxy server
+
+If you need to use HTTPS or if you have multiple applications installed on one machine, you can use a proxy server such as `Nginx`, `traefik`.
+
+`traefik` configuration example
+
+```bash
+[[tls.certificates]]
+  certFile = "/data/certs/star.yaoapps.com.crt"
+  keyFile = "/data/certs/star.yaoapps.com.key"
+
+[http.routers.demo-crm]
+  tls=true
+  rule = "Host(`demo-crm.yaoapps.com`)"
+  service = "demo-crm@file"
+
+[http.services]
+  [http.services.demo-crm.loadBalancer]
+    [[http.services.demo-crm.loadBalancer.servers]]
+      url = "http://127.0.0.1:<port>/"
+
+```

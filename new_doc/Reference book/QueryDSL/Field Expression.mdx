@@ -1,0 +1,97 @@
+# field expression
+
+## Field Expression `Field Expression`
+
+Field expressions can be used in `select`, `wheres`, `order`, `group` and other scenarios; the data type of field expressions is `String`, which can be main table field names, associated table field names, constants, functions, etc. .
+
+### Main table fields
+
+| Types                      | Expression Syntax                                                                                                                                                          |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| main table field           | `field name`                                                                                                                                                               |
+| AES encrypted field        | `*field name`                                                                                                                                                              |
+| JSON Object field          | `$fieldname`, `$fieldname.key`                                                                                                                                             |
+| JSON Array field           | `@field name`, `@field name[n]` n is the subscript of the array                                                                                                            |
+| JSON Array\<Object\> field | `@FieldName`, `$FieldName[n]` n is the array subscript, `@FieldName[n].key` n is the array subscript, `@FieldName [*].key` returns a one-dimensional array of `Object.Key` |
+
+### Associate table fields
+
+| Types                      | Expression Syntax                                                                                                                                                                                                                                                                                                           |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Association table field    | `Association table name (or alias).Field name`                                                                                                                                                                                                                                                                              |
+| AES encrypted field        | `Association table name (or alias).*Field name`                                                                                                                                                                                                                                                                             |
+| JSON Object field          | `Association table name (or alias).$FieldName`, `Association table name (or alias).$FieldName.key`                                                                                                                                                                                                                          |
+| JSON Array field           | `Association table name (or alias).@FieldName`, `Association table name (or alias).@FieldName[n]` n is an array subscript                                                                                                                                                                                                   |
+| JSON Array\<Object\> field | `Association table name (or alias).@Field name`, `Association table name (or alias).@Field name[n]` n is an array subscript, `Association table name (or alias).@FieldName[n].key` n is the subscript of the array, `Associative table name (or alias).@FieldName[*].key` Returns the one-dimensional array of `Object.Key` |
+
+### functions
+
+| Types    | Expression Syntax                                                    |
+| -------- | -------------------------------------------------------------------- |
+| function | `:function name (parameter list...)` parameter is `field expression` |
+
+### Constants
+
+| Types            | Expression Syntax |
+| ---------------- | ----------------- |
+| Integer constant | `Integer value`   |
+| float constant   | `float value`     |
+| string constant  | `'string value'`  |
+
+### Aliases
+
+| Type              | Expression Syntax                     | Return Value    |
+| ----------------- | ------------------------------------- | --------------- |
+| main table        | `field name as alias`                 | `{"alias":...}` |
+| Association table | `Data table name.Field name as alias` | `{"alias":...}` |
+
+**illustrate**
+
+- Fields can be main table field names, associated table field names, constants, functions, etc. For associated table fields, you need to specify the associated table name `associated table name.field name`.
+- Use the `$` identifier to specify `JSON Object` fields.
+- Use the `@` identifier to specify a `JSON Array` field.
+- Use the `*` identifier to specify the `AES encryption` field.
+- Use the `:` identifier to call the query function provided by the database.
+- Integer and floating point constants can be used directly; eg `1`, `0.618`.
+- Use `'` to declare the selection field as a string, such as the string contains `'`, `"` or `\`, use the escape character `\` to escape; for example, `Beijing` is written as `'Beijing'`, ` Beijing'"\Tongzhou District` is written as `'Beijing\'\"\\Tongzhou District'`.
+- You can use `as` to set an alias, the alias supports Chinese, such as setting an alias `select` query results use the alias as the key value, `wheres`, `order`, etc. can be used as the main table field. Such as `name as name`, `short_name as short`, `0.618 as golden section`.
+
+## Expression example
+
+| Example                            | Record Value                                                        | Return Value                    | Description                                                                                                                                                           |
+| ---------------------------------- | ------------------------------------------------------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `"name"`                           | `{"name":"Yundao Tiancheng"}`                                       | `{"name":"Yundao Tiancheng"}`   | Select the `name` field                                                                                                                                               |
+| `"short_name as short"`            | `{"short_name":"Zheng Zhuanzhi"}`                                   | `{"short":"Xiangzhuan wisdom"}` | Select the `short_name` field, the return value field is named `short `                                                                                               |
+| `"*mobile"`                        | `{"mobile":"B3FE5501344A312773A88160297C34C4"}`                     | `{"mobile":"13111119999"}`      | Select `AES encryption` field `mobile`, return the decrypted value** field Type must be ASE Encrypted**                                                               |
+| `"$extra"`                         | `{"extra":{"sex":"male"}}`                                          | `{"extra":{"sex":"male"}}`      | select the `JSON Object` field `extra`, returns the parsed Object **field type must be JSON**                                                                         |
+| `"$extra.sexas sex"`               | `{"extra":{"sex":"male"}}`                                          | `{"sex":"male"}`                | select `JSON Object` field `extra` key = `sex` Numeric, return value field named `sex` **Field type must be JSON**                                                    |
+| `"@prices"`                        | `{"prices":[100,200,300]}`                                          | `{"prices":[100,200,300]}`      | Select the `JSON Array` field `prices`, return the parsed Array ** field Type must be JSON**                                                                          |
+| `"@prices[0] as price"`            | `{"prices":[100,200,300]}`                                          | `{"price":100}`                 | select the value of `JSON Array` field `prices` index = 0, The return value field is named `price` **Field type must be JSON**                                        |
+| `"@addresses[0].id as address_id"` | `{"addresses":[{id:1,"city":"Beijing"},{id:2,"city":"Shanghai"}] }` | `{"address_id":1}`              | Select the value of the `JSON Array<Object>` field `addresses` index = 0, key = `id`, the return value field is named `address_id` **The field type must be as JSON** |
+
+### Association table example
+
+| Example                               | Record Value (Data Table t2)                                        | Return Value                       | Description                                                                                                                                                |
+| ------------------------------------- | ------------------------------------------------------------------- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `"t2.name"`                           | `{"name":"Xiang Chuan Gaoxin"}`                                     | `{"name":"Xiang Chuan Gaoxin"}`    | Select join table (`join`) `t2`'s ` name` field                                                                                                            |
+| `"t2.*mobile"`                        | `{"mobile":"B3FE5501344A312773A88160297C34C4"}`                     | `{"mobile":"13111119999"}`         | Select `t2`'s `AES encryption` field `mobile`, return decryption The numeric value after **field type must be ASE encrypted**                              |
+| `"t2.short_name as short"`            | `{"short_name":"Zone transfer engine"}`                             | `{"short":"Zone transfer engine"}` | Select join table (`join`) ` t2`, the return value field is named `short`                                                                                  |
+| `"t2.$extra.sex as sex"`              | `{"extra":{"sex":"male"}}`                                          | `{"sex":"male"}`                   | select table `t2` `JSON Object` field `extra` key = the value of `sex`, the return value field is named `sex` **The field type must be JSON**              |
+| `"t2.@prices[0] as price"`            | `{"prices":[100,200,300]}`                                          | `{"price":100}`                    | Select the `JSON Array` field `prices' of the table `t2` ` The value of index = 0, the return value field is named `price` **The field type must be JSON** |
+| `"t2.@addresses[0].id as address_id"` | `{"addresses":[{id:1,"city":"Beijing"},{id:2,"city":"Shanghai" }]}` | `{"address_id":1}`                 | Select table `t2`'s `JSON Array<Object>` field `addresses` index = 0, key = `id` value, return value field named ` address_id` **Field type must be JSON** |
+
+## function example
+
+| Example                       | Record Value                    | Return Value         | Description                                                                                                            |
+| ----------------------------- | ------------------------------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `":MAX(score) as high_score"` | `{"score":100},{"score":99}...` | `{"high_score":100}` | Use function `MAX` for statistics The maximum value of the `score` field, the return value field is named `high_score` |
+
+## Constant example
+
+| Example                           | Record Value | Return Value                     | Description                                                                                                    |
+| --------------------------------- | ------------ | -------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `"1 as price"`                    | -            | `{"price":1}`                    | select integer constant `1`, return value named `price`                                                        |
+| `"0.618 as price"`                | -            | `{"price":0.618}`                | Select floating point constant `0.618`, return value named `price`                                             |
+| `"'Beijing' as city"`             | -            | `{"city":"Beijing"}`             | Select the string constant `Beijing`, the return value is named `city`                                         |
+| `"'Beijing\"\'Tongzhou' as town"` | -            | `{"town":"Beijing\"\'Tongzhou"}` | Select string constants `Beijing''Tongzhou`, `"` and `'` is escaped with `\`. The return value is named `town` |
+| `"'0.618' as str"`                | -            | `{"str":"0.618"}`                | Select string constant `0.618`, return value named `str`                                                       |
