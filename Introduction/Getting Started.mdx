@@ -1,41 +1,38 @@
 # Getting Started
 
 <blockquote>
-  Yao is a <strong>Go</strong> language-driven low-code application engine that
-  writes JSON by Description can quickly create <strong>API interface</strong>,
-  <strong>Data management system</strong> ,<strong>Command Line Tools</strong>
-  and other applications, applications can run on-premises, in the cloud, and on
-  IoT devices.
+  YAO is an open source application engine using Golang Write, only a command
+  line tool, download and use. Suitable for developing business system,
+  website/APP API Interface, management background, self-built low-code
+  platform, etc.
 </blockquote>
 
-## Introduce
+## introduce
 
 Yao is based on the **flow-based** programming idea, developed in the **Go** language, and supports multiple ways to expand the data stream processor. This makes Yao extremely versatile, which can replace programming languages ​​in most scenarios, and is 10 times more efficient than traditional programming languages ​​in terms of reusability and coding efficiency; application performance and resource ratio Better than **PHP**, **JAVA** and other languages.
 
 Yao has a built-in data management system. By writing **JSON** to describe the interface layout, 90% of the common interface interaction functions can be realized. It is especially suitable for quickly making various management background, CRM, ERP and other internal enterprise systems. Special interactive functions can also be implemented by writing extension components or HTML pages. The built-in management system is not coupled with Yao, and any front-end technologies such as **VUE** and **React** can be used to implement the management interface.
 
-Yao's name is derived from the Chinese character **yao (yáo)**, the basic symbol that makes up the Eight Trigrams. The Eight Trigrams is a symbol system created by the ancient god Fuxi after observing and summarizing the laws of nature, which can refer to everything. Yao has two states of yin and yang, like 0 and 1. The transformation of yin and yang of Yao drives the replacement of Eight Trigrams, so as to summarize and record the development law of things.
+Yao's name is derived from the Chinese character **yao (yáo)**, the basic symbol that makes up the Eight Trigrams. The gossip is a symbol system created by the ancient god Fuxi after observing and summarizing the laws of nature, which can refer to everything. Yao has two states of yin and yang, like 0 and 1. The transformation of yin and yang of Yao drives the replacement of gossip, so as to summarize and record the development law of things.
 
-## Demo
+## demo
 
 ### Customer Relationship Management System
 
-A Customer Relationship Management System developed by Yao.
+A universal CRM management system
 
 <Button className="mr_12" type="primary">
   <a
     href="https://demo-crm.yaoapps.com/xiang/login/admin?autoLogin=true"
     target="_blank"
   >
-    Demo
+    demo
   </a>
 </Button>
 
-<Button>
-  <a href="https://github.com/yaoapp/demo-crm" target="_blank">
-    Source Code
-  </a>
-</Button>
+GitHub: https://github.com/YaoApp/demo-crm
+
+Infra one-click deployment: https://letsinfra.com/openapp/crm
 
 ### Intelligent warehouse management system
 
@@ -46,17 +43,15 @@ An example of cloud + edge IoT application, an unattended intelligent warehouse 
     href="https://demo-wms.yaoapps.com/xiang/login/admin?autoLogin=true"
     target="_blank"
   >
-    Demo
+    demo
   </a>
 </Button>
 
-<Button>
-  <a href="https://github.com/yaoapp/demo-wms" target="_blank">
-    Source Code
-  </a>
-</Button>
+GitHub: https://github.com/YaoApp/yao-wms
 
-## Steps
+Infra one-click deployment: https://letsinfra.com/openapp/wms
+
+## Getting started
 
 <Notice type="warning">
   Note: You need to understand JSON, RESTFul before starting Basic concepts and
@@ -64,6 +59,8 @@ An example of cloud + edge IoT application, an unattended intelligent warehouse 
   handle very complex business logic, you need to master the JavaScript
   language.
 </Notice>
+
+Reference document: [YAO programming basics](../Base Features/YAO Programming Basics)
 
 ### Preparation: Install Yao
 
@@ -78,7 +75,7 @@ For Windows users, please refer to the Installation and Debugging chapter:
 <Extend
   title="Installation and debugging"
   desc="Learn how to create a Yao development and debugging environment locally"
-  link="a.Introduction/b.Install"
+  link="Introduction/Installation and debugging"
 ></Extend>
 
 ### Step 1: Create a project
@@ -118,9 +115,9 @@ yao run flows.setmenu
 Extended reading:
 
 <Extend
-  title="Create Data Model"
-  desc="Learn how to use Yao to create a data table to store data"
-  link="b.Basic%20Features/a.Create%20Database"
+  title="Use Widgets"
+  desc="Learn how to use Yao Model Widget to create a data table to store data"
+  link="Basics/Using Widgets"
 ></Extend>
 
 ### Step 3: Start the service
@@ -135,26 +132,20 @@ yao start
 
 2. Enter the default username: `xiang@iqka.com`, password: `A123456p+`
 
-## Recommended
+## related information
 
 Next, it is recommended to study the following chapters:
 
 <Extend
-  title="Create Data Model"
-  desc="Learn how to use Yao to create a data table to store data"
-  link="b.Basic%20Features/a.Create%20Database"
-></Extend>
-
-<Extend
-  title="Why choose Yao"
+  title="Why Choose Yao"
   desc="Learn about some features of Yao and its advantages over other development methods"
-  link="a.Introduction/c.Why%20Yao"
+  link="Why Choose Yao"
 ></Extend>
 
 <Div style={{ display: "flex", justifyContent: "right" }}>
   <Link
     type="next"
-    title="Installation and debugging"
-    link="a.Introduction/b.Install"
+    title="Install&Debug"
+    link="Introduction/Install&Debug"
   ></Link>
 </Div>

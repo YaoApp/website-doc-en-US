@@ -1,15 +1,14 @@
-# complex data query
+# Complex Data Query
 
 <blockquote>
-  This chapter details the data model based processor and Gou Query DSL has two
-  data query methods. It is recommended to learn the basics of relational
-  databases and understand SQL syntax before reading , you can write basic SQL
-  statements.
+	This chapter details the data model based processor and Gou Query DSL has two data query
+	methods. It is recommended to learn the basics of relational databases and understand SQL
+	syntax before reading , you can write basic SQL statements.
 </blockquote>
 
-## Query using the Model processor
+## Data Model Process
 
-Data model processors `Find`, `Get`, `Paginate`, `UpdateWhere`, `DeleteWhere`, `DestroyWhere` all support the incoming query parameter `Object QueryParam` to limit the scope of reading records.
+Data model processes `Find`, `Get`, `Paginate`, `UpdateWhere`, `DeleteWhere`, `DestroyWhere` all support the incoming query parameter `Object QueryParam` to limit the scope of reading records.
 
 Object QueryParam:
 
@@ -19,31 +18,31 @@ JSON description:
 
 ```json
 {
-  "select": ["id", "name", "mobile", "status"],
-  "withs": {
-    "manu": { "select": ["name", "short_name", "status"] },
-    "addresses": {}
-  },
-  "wheres": [
-    { "column": "status", "value": "enabled" },
-    { "rel": "manu", "column": "status", "value": "enabled" },
-    {
-      "wheres": [
-        { "column": "name", "value": "%Zhangsan%", "op": "like" },
-        {
-          "method": "orwhere",
-          "column": "name",
-          "value": "%Lisi%",
-          "op": "like"
-        }
-      ]
-    }
-  ],
-  "orders": [
-    { "column": "id", "option": "desc" },
-    { "rel": "manu", "column": "name" }
-  ],
-  "limit": 2
+	"select": ["id", "name", "mobile", "status"],
+	"withs": {
+		"manu": { "select": ["name", "short_name", "status"] },
+		"addresses": {}
+	},
+	"wheres": [
+		{ "column": "status", "value": "enabled" },
+		{ "rel": "manu", "column": "status", "value": "enabled" },
+		{
+			"wheres": [
+				{ "column": "name", "value": "%Zhangsan%", "op": "like" },
+				{
+					"method": "orwhere",
+					"column": "name",
+					"value": "%Lisi%",
+					"op": "like"
+				}
+			]
+		}
+	],
+	"orders": [
+		{ "column": "id", "option": "desc" },
+		{ "rel": "manu", "column": "name" }
+	],
+	"limit": 2
 }
 ```
 
@@ -112,7 +111,6 @@ Data structure description:
 | null                  | is empty WHERE field IS NULL                   |
 | notnull               | not null WHERE field IS NOT NULL               |
 | in                    | list contains WHERE field IN (numeric...)      |
-| ne                    | not equal to match value                       |
 
 **Object Order**
 
@@ -124,9 +122,17 @@ Data structure description:
 
 </Detail>
 
-## Query using Query DSL
+Recommended reading:
 
-Query DSL can be used in data streams, and is generally used for more complex scenarios such as data analysis and statistics.
+<Extend
+	title='Pass query parameters via URL Query String'
+	desc='Learn how to bind with the API and pass query parameters through URL Query String'
+	link='f.API%20Reference/g.Table'
+></Extend>
+
+## Gou Query DSL
+
+Gou Query DSL can be used in data streams, and is generally used for more complex scenarios such as data analysis and statistics.
 
 Analyze the data table `service` (see the table below) and count the highest scores in each industry.
 
@@ -138,7 +144,7 @@ Analyze the data table `service` (see the table below) and count the highest sco
 | 4   | ["Tourism", "Education"] | Shanghai | 87    | 2021-10-03 13:40:52 | NULL       |
 | 5   | ["Tourism", "Education"] | Beijing  | 71    | 2021-10-03 13:46:06 | NULL       |
 
-Query DSL example:
+Gou Query DSL example:
 
 <Detail title="View source code">
 
@@ -146,23 +152,23 @@ JSON description:
 
 ```json
 {
-  "comment": "Statistics of the highest scores in each industry",
-  "select": ["industries@", "city", ":MAX(score) as high_score"],
-  "from": "service",
-  "wheres": [
-    { ":created_at": "created time", ">=": "2021-01-01" },
-    { ":created_at": "created time", "<=": "{'2021-12-31'}" },
-    { ":updated_at": "updated time", "is": "null" },
-    {
-      "wheres": [
-        { ":type": "type", "=": 1 },
-        { "or:type": "or type", "=": 2 }
-      ]
-    }
-  ],
-  "orders": "high_score desc",
-  "limit": 100,
-  "groups": ["industries@", "city"]
+	"comment": "Statistics of the highest scores in each industry",
+	"select": ["industries@", "city", ":MAX(score) as high_score"],
+	"from": "service",
+	"wheres": [
+		{ ":created_at": "created time", ">=": "2021-01-01" },
+		{ ":created_at": "created time", "<=": "{'2021-12-31'}" },
+		{ ":updated_at": "updated time", "is": "null" },
+		{
+			"wheres": [
+				{ ":type": "type", "=": 1 },
+				{ "or:type": "or type", "=": 2 }
+			]
+		}
+	],
+	"orders": "high_score desc",
+	"limit": 100,
+	"groups": ["industries@", "city"]
 }
 ```
 
@@ -193,85 +199,74 @@ Return result:
 
 </Detail>
 
-## use in Flow
+Extended reading:
+
+<Extend
+	title='Query DSL Manual'
+	desc='Learn how to use Query DSL in detail'
+	link='f.API%20Reference/e.Query%20DSL'
+></Extend>
+
+## Use In Dataflow
 
 In a data flow, you can use `{{$in}}` or `?:$in` to receive parameters, and `{{$res}}` or `?:$res` to refer to node query results.
 
-<Notice type="success">
-  Tip: Pass <strong>&#123;&#123;$xxx&#125;&#125;</strong> or
-  <strong> ?:$xxx </strong>
-  Equivalent to using variable notation.
+<Notice type='success'>
+	Tip: Pass <strong>&#123;&#123;$xxx&#125;&#125;</strong> or
+	<strong> ?:$xxx </strong>
+	Equivalent to using variable notation.
 </Notice>
 
-### Using the model processor
+### Use Model Process
 
 ```json
 {
-  "label": "Query latest data",
-  "version": "1.0.0",
-  "description": "Query the latest data of the system",
-  "nodes": [
-    {
-      "name": "pet",
-      "process": "models.pet.Get",
-      "args": [
-        {
-          "select": ["id", "name", "kind", "created_at"],
-          "wheres": [{ "column": "kind", "value": "{{$in.0}}" }],
-          "orders": [{ "column": "created_at", "option": "desc" }],
-          "limit": 10
-        }
-      ]
-    }
-  ],
-  "output": "{{$res.pet}}"
+	"label": "Query latest data",
+	"version": "1.0.0",
+	"description": "Query the latest data of the system",
+	"nodes": [
+		{
+			"name": "pet",
+			"process": "models.pet.Get",
+			"args": [
+				{
+					"select": ["id", "name", "kind", "created_at"],
+					"wheres": [{ "column": "kind", "value": "{{$in.0}}" }],
+					"orders": [{ "column": "created_at", "option": "desc" }],
+					"limit": 10
+				}
+			]
+		}
+	],
+	"output": "{{$res.pet}}"
 }
 ```
 
-### Using the Query DSL
+### Use Gou Query DSL
 
 ```json
 {
-  "label": "Query latest data",
-  "version": "1.0.0",
-  "description": "Query the latest data of the system",
-  "nodes": [
-    {
-      "name": "pet",
-      "engine": "xiang",
-      "query": {
-        "select": ["id", "name", "kind", "created_at"],
-        "from": "$pet",
-        "wheres": [{ ":kind": "type", "=": "?:$in.0" }],
-        "orders": "created_at desc",
-        "limit": 10
-      }
-    }
-  ],
-  "output": "{{$res.pet}}"
+	"label": "Query latest data",
+	"version": "1.0.0",
+	"description": "Query the latest data of the system",
+	"nodes": [
+		{
+			"name": "pet",
+			"engine": "xiang",
+			"query": {
+				"select": ["id", "name", "kind", "created_at"],
+				"from": "$pet",
+				"wheres": [{ ":kind": "type", "=": "?:$in.0" }],
+				"orders": "created_at desc",
+				"limit": 10
+			}
+		}
+	],
+	"output": "{{$res.pet}}"
 }
 ```
 
-## use in script
-
-```javascript
-function test(id) {
-  var query = new Query();
-  var data = query.Get({
-    name: "pet",
-    engine: "xiang",
-    query: {
-      select: ["id", "name", "kind", "created_at"],
-      from: "$pet",
-      wheres: [{ ":kind": "type", "=": id }],
-      orders: "created_at desc",
-      limit: 10,
-    },
-  });
-}
-```
-
-## use in the data table
+## Use In Table
 
 In data tables, query parameters can be passed using `filter`. Query parameters are passed to the data table interface via `URL Query String`.
 
@@ -306,15 +301,15 @@ When clicking the search button on the interface, the system requests data from 
 GET /api/xiang/table/pet?where.name.match=xxx
 ```
 
-<Div style={{ display: "flex", justifyContent: "space-between" }}>
-  <Link
-    type="prev"
-    title="Data Model Association"
-    link="Advanced Features/Data Model Association"
-  ></Link>
-  <Link
-    type="next"
-    title="Use Session Data"
-    link="Advanced Features/Use Session Data"
-  ></Link>
+<Div style={{ display: 'flex', justifyContent: 'space-between' }}>
+	<Link
+		type='prev'
+		title='Data flow using JS'
+		link='c.Advanced%20Features/b.Relation%20of%20Models'
+	></Link>
+	<Link
+		type='next'
+		title='Write a processor with JS'
+		link='c.Advanced%20Features/d.Write%20A%20Process%20In%20JS'
+	></Link>
 </Div>
