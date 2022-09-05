@@ -208,53 +208,51 @@ A model can contain multiple field definitions, each field definition contains `
 
 #### Field Type
 
-| Type       | Description  | Optional Parameters | MySQL Field Type   |
-| ---------- | ------------ | ------------------- | ------------------ |
-| string     | string       | `length`            | VARCHAR(`length` ) |
-| char       | character    | `length`            | CHAR (`length` )   |
-| text       | Text         |                     | TEXT               |
-| mediumText | Chinese text |                     | MEDIUMTEXT         |
-| longText   | long text    |                     | LONGTEXT           |
-| binary     | binary data  |                     | VARBINARY          |
-
-|
-| date | date | | DATE |
-| datetime | datetime | `length` | DATETIME |
-| datetimeTz | datetime with time zone | `length` | DATETIME |
-| time | time | `length` | TIME |
-| timeTz | time with time zone | `length` | TIME |
-| timestamp | timestamp | `length` | TIMESTAMP |
-| timestampTz | timestamp with time zone | `length` | TIMESTAMP |
-| tinyInteger | Tiny Integer | | TINYINT |
-| tinyIncrements | Unsigned micro integer + auto increment | | TINYINT UNSIGNED AUTO_INCREMENT |
-| unsignedTinyInteger | Unsigned Tiny Integer | | TINYINT UNSIGNED |
-| smallInteger | Small Integer | | SMALLINT |
-| smallIncrements | unsigned small integer + auto increment | | SMALLINT UNSIGNED AUTO_INCREMENT |
-| unsignedSmallInteger | Unsigned Small Integer | | SMALLINT UNSIGNED |
-| integer | Integer | | INT |
-| increments | Unsigned integer + auto increment | | INT UNSIGNED AUTO_INCREMENT |
-| unsignedInteger | unsigned integer type | | INT UNSIGNED |
-| bigInteger | Long | | BIGINT |
-| bigIncrements | unsigned long + auto increment | | BIGINT UNSIGNED AUTO_INCREMENT |
-| unsignedBigInteger | unsigned long | | BIGINT UNSIGNED |
-| id | long + auto increment | | BIGINT UNSIGNED AUTO_INCREMENT |
-| ID | Long + auto increment (same as id) | | BIGINT UNSIGNED AUTO_INCREMENT |
-| decimal | decimal (usually used to store currency) | `precision`, `scale` | DECIMAL(`precision`,`scale`) |
-| unsignedDecimal | unsigned decimal (generally used to store currency) | `precision`, `scale` | DECIMAL (`precision`,`scale`) UNSIGNED |
-| float | float | `precision`, `scale` | FLOAT (`precision`,`scale`) |
-| unsignedFloat | unsigned floating point number | `precision`, `scale` | FLOAT (`precision`,`scale`) UNSIGNED |
-| double | double | `precision`, `scale` | DOUBLE (`precision`,`scale`) |
-| unsignedDouble | unsigned double | `precision`, `scale` | DOUBLE (`precision`,`scale`) UNSIGNED |
-| boolean | boolean | | BOOLEAN |
-| enum | enum type | `option` | ENUM(`option...`) |
-| json | JSON text | | JSON |
-| JSON | JSON text (same as json) | | JSON |
-| jsonb | JSON (binary format storage) | | JSON |
-| JSONB | JSON (binary format storage same as jsonb) | | JSON |
-| uuid | UUID format string | | VARCHAR(36) |
-| ipAddress | IP address | | INT |
-| macAddress | MAC address | | BIGINT |
-| year | year | | SMALLINT |
+| Type                 | Description                                         | Optional Parameters  | MySQL Field Type                       |
+| -------------------- | --------------------------------------------------- | -------------------- | -------------------------------------- |
+| string               | string                                              | `length`             | VARCHAR(`length` )                     |
+| char                 | character                                           | `length`             | CHAR (`length` )                       |
+| text                 | Text                                                |                      | TEXT                                   |
+| mediumText           | Chinese text                                        |                      | MEDIUMTEXT                             |
+| longText             | long text                                           |                      | LONGTEXT                               |
+| binary               | binary data                                         |                      | VARBINARY                              |
+| date                 | date                                                |                      | DATE                                   |
+| datetime             | datetime                                            | `length`             | DATETIME                               |
+| datetimeTz           | datetime with time zone                             | `length`             | DATETIME                               |
+| time                 | time                                                | `length`             | TIME                                   |
+| timeTz               | time with time zone                                 | `length`             | TIME                                   |
+| timestamp            | timestamp                                           | `length`             | TIMESTAMP                              |
+| timestampTz          | timestamp with time zone                            | `length`             | TIMESTAMP                              |
+| tinyInteger          | Tiny Integer                                        |                      | TINYINT                                |
+| tinyIncrements       | Unsigned micro integer + auto increment             |                      | TINYINT UNSIGNED AUTO_INCREMENT        |
+| unsignedTinyInteger  | Unsigned Tiny Integer                               |                      | TINYINT UNSIGNED                       |
+| smallInteger         | Small Integer                                       |                      | SMALLINT                               |
+| smallIncrements      | unsigned small integer + auto increment             |                      | SMALLINT UNSIGNED AUTO_INCREMENT       |
+| unsignedSmallInteger | Unsigned Small Integer                              |                      | SMALLINT UNSIGNED                      |
+| integer              | Integer                                             |                      | INT                                    |
+| increments           | Unsigned integer + auto increment                   |                      | INT UNSIGNED AUTO_INCREMENT            |
+| unsignedInteger      | unsigned integer type                               |                      | INT UNSIGNED                           |
+| bigInteger           | Long                                                |                      | BIGINT                                 |
+| bigIncrements        | unsigned long + auto increment                      |                      | BIGINT UNSIGNED AUTO_INCREMENT         |
+| unsignedBigInteger   | unsigned long                                       |                      | BIGINT UNSIGNED                        |
+| id                   | long + auto increment                               |                      | BIGINT UNSIGNED AUTO_INCREMENT         |
+| ID                   | Long + auto increment (same as id)                  |                      | BIGINT UNSIGNED AUTO_INCREMENT         |
+| decimal              | decimal (usually used to store currency)            | `precision`, `scale` | DECIMAL(`precision`,`scale`)           |
+| unsignedDecimal      | unsigned decimal (generally used to store currency) | `precision`, `scale` | DECIMAL (`precision`,`scale`) UNSIGNED |
+| float                | float                                               | `precision`, `scale` | FLOAT (`precision`,`scale`)            |
+| unsignedFloat        | unsigned floating point number                      | `precision`, `scale` | FLOAT (`precision`,`scale`) UNSIGNED   |
+| double               | double                                              | `precision`, `scale` | DOUBLE (`precision`,`scale`)           |
+| unsignedDouble       | unsigned double                                     | `precision`, `scale` | DOUBLE (`precision`,`scale`) UNSIGNED  |
+| boolean              | boolean                                             |                      | BOOLEAN                                |
+| enum                 | enum type                                           | `option`             | ENUM(`option...`)                      |
+| json                 | JSON text                                           |                      | JSON                                   |
+| JSON                 | JSON text (same as json)                            |                      | JSON                                   |
+| jsonb                | JSON (binary format storage)                        |                      | JSON                                   |
+| JSONB                | JSON (binary format storage same as jsonb)          |                      | JSON                                   |
+| uuid                 | UUID format string                                  |                      | VARCHAR(36)                            |
+| ipAddress            | IP address                                          |                      | INT                                    |
+| macAddress           | MAC address                                         |                      | BIGINT                                 |
+| year                 | year                                                |                      | SMALLINT                               |
 
 #### Check method
 
