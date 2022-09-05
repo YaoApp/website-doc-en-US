@@ -2,16 +2,16 @@
 
 ## API list:
 
-| Interface                                      | Description                                |
-| ---------------------------------------------- | ------------------------------------------ |
-| /api/xiang/import/<table name>/setting         | Get the Setting of the table               |
-| /api/xiang/import/<table name>/mapping         | Get the mapping field of the table         |
+| Interface | Description |
+| -------------------------------------------- | ---- ---------------------- |
+| /api/xiang/import/<table name>/setting | Get the Setting of the table |
+| /api/xiang/import/<table name>/mapping | Get the mapping field of the table |
 | /api/xiang/import/<table name>/mapping/setting | Get the mapping field setting of the table |
-| /api/xiang/import/<table name>/data            | Get data                                   |
-| /api/xiang/import/<table name>/data/setting    | setting to get data                        |
-| /api/xiang/import/<table name>                 | Import data interface                      |
+| /api/xiang/import/<table name>/data | Get data |
+| /api/xiang/import/<table name>/data/setting | setting to get data |
+| /api/xiang/import/<table name> | Import data interface |
 
-```json
+````json
 {
   "setting": "/api/xiang/import/ticket/setting",
   "mapping": "/api/xiang/import/ticket/mapping",
@@ -20,7 +20,7 @@
   "preview_setting": "/api/xiang/import/ticket/data/setting",
   "import": "/api/xiang/import/ticket"
 }
-```
+````
 
 ## Code example:
 
@@ -28,7 +28,7 @@ Add the models directory file `/models/ticket.mod.json`:
 
 <Detail title="View source code">
 
-```json
+````json
 {
   "name": "Ticket table",
   "table": {
@@ -74,7 +74,7 @@ Add the models directory file `/models/ticket.mod.json`:
   },
   "values": []
 }
-```
+````
 
 </Detail>
 
@@ -82,7 +82,7 @@ Add the table directory file `/tables/ticket.tab.json`:
 
 <Detail title="View source code">
 
-```json
+````json
 {
   "name": "Ticket List",
   "version": "1.0.0",
@@ -116,7 +116,7 @@ Add the table directory file `/tables/ticket.tab.json`:
   "edit": {},
   "view": {}
 }
-```
+````
 
 </Detail>
 
@@ -142,13 +142,13 @@ Application directory structure:
 |
 |
 └── app.json
-```
+````
 
 Write the code `ticket.imp.json`:
 
 <Detail title="View source code">
 
-```json
+````json
 {
   "title": "Import Ticket",
   "process": "scripts.imports.ticket.Import",
@@ -189,13 +189,13 @@ Write the code `ticket.imp.json`:
   },
   "rules": {}
 }
-```
+````
 
 </Detail>
 
 Write the code `/scripts/imports/ticket.js`:
 
-```javascript
+````javascript
 function Import(columns, data) {
   // todo handles import logic
 
@@ -214,7 +214,7 @@ function Output(data) {
   // todo handles the logic after import, this function will be called automatically after import: "output": "scripts.imports.ticket.Output",
   return data;
 }
-```
+````
 
 The import method is divided into three steps:
 
@@ -227,14 +227,14 @@ The import method is divided into three steps:
 ##### Parameters
 
 | Parameter Name | Required | Type | Description |
-| :------------- | :------- | :--- | ----------- |
-| file           | yes      | file | file name   |
+| :----- | :--- | :--- | -------- |
+| file | yes | file | file name |
 
 ##### Return to example
 
-```
+````
  "20220411/0C3A5E7FCA0FE897710DE2CA00240FFE.xlsx"
-```
+````
 
 - Step 2: Get the mapping relationship
 
@@ -244,9 +244,9 @@ The import method is divided into three steps:
 
 ##### Parameters
 
-| Parameter Name | Required | Type   | Description   |
-| :------------- | :------- | :----- | ------------- |
-| file           | yes      | string | file name url |
+| Parameter Name | Required | Type | Description |
+| :----- | :--- | :----- | ------------ |
+| file | yes | string | file name url |
 
 - Step 3: Pass all the data
 
@@ -256,16 +256,16 @@ The import method is divided into three steps:
 
 ##### Parameters
 
-| Parameter Name | Required | Type   | Description                       |
-| :------------- | :------- | :----- | --------------------------------- |
-| file           | yes      | string | file name                         |
-| mapping        | yes      | string | mapping relation returns all data |
+| Parameter Name | Required | Type | Description |
+| :------ | :--- | :----- | ---------------------- |
+| file | yes | string | file name |
+| mapping | yes | string | mapping relation returns all data |
 
 #### Request parameter example
 
 <Detail title="View source code">
 
-```json
+````json
 {
   "file": "20220407/BB9DDF196D0B5DF9319EA8ADB5C914D3.xlsx",
   "mapping": {
@@ -310,15 +310,11 @@ The import method is divided into three steps:
     "templateMatching": false
   }
 }
-```
+````
 
 </Detail>
 
 <Div style={{ display: "flex", justifyContent: "space-between" }}>
   <Link type="prev" title="Use Cache" link="Advanced Features/Use Cache"></Link>
-  <Link
-    type="next"
-    title="Data Export"
-    link="Advanced Features/Data Export"
-  ></Link>
+  <Link type="next" title="Data Export" link="Advanced Features/Data Export"></Link>
 </Div>

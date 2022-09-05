@@ -2,7 +2,7 @@
 
 <Detail title="View source code">
 
-```json
+````json
 {
   "name": "Ticket List",
   "version": "1.0.0",
@@ -36,7 +36,7 @@
   "edit": {},
   "view": {}
 }
-```
+````
 
 </Detail>
 
@@ -57,27 +57,27 @@ View [code example](#sample code)
 
 ## handler list
 
-| Processor                   | Description                                |
-| --------------------------- | ------------------------------------------ |
-| xiang.import.Run            | Start running the import function          |
-| xiang.import.Data           | Get table data                             |
-| xiang.import.Setting        | Get the mapping field setting of the table |
-| xiang.import.DataSetting    | Get mapping data                           |
-| xiang.import.Mapping        | Get Mapping                                |
-| xiang.import.MappingSetting | Get mapping data                           |
+| Processor | Description |
+| ------------------------------------- | --------------------- ----- |
+| xiang.import.Run | Start running the import function |
+| xiang.import.Data | Get table data |
+| xiang.import.Setting | Get the mapping field setting of the table |
+| xiang.import.DataSetting | Get mapping data |
+| xiang.import.Mapping | Get Mapping |
+| xiang.import.MappingSetting | Get mapping data |
 
 ## API list
 
-| Interface                                      | Description                                |
-| ---------------------------------------------- | ------------------------------------------ |
-| /api/xiang/import/<table name>/setting         | Get the Setting of the table               |
-| /api/xiang/import/<table name>/mapping         | Get the mapping field of the table         |
+| Interface | Description |
+| -------------------------------------------- | ---- ---------------------- |
+| /api/xiang/import/<table name>/setting | Get the Setting of the table |
+| /api/xiang/import/<table name>/mapping | Get the mapping field of the table |
 | /api/xiang/import/<table name>/mapping/setting | Get the mapping field setting of the table |
-| /api/xiang/import/<table name>/data            | Get data                                   |
-| /api/xiang/import/<table name>/data/setting    | setting to get data                        |
-| /api/xiang/import/<table name>                 | Import data interface                      |
+| /api/xiang/import/<table name>/data | Get data |
+| /api/xiang/import/<table name>/data/setting | setting to get data |
+| /api/xiang/import/<table name> | Import data interface |
 
-```json
+````json
 {
   "setting": "/api/xiang/import/ticket/setting",
   "mapping": "/api/xiang/import/ticket/mapping",
@@ -86,7 +86,7 @@ View [code example](#sample code)
   "preview_setting": "/api/xiang/import/ticket/data/setting",
   "import": "/api/xiang/import/ticket"
 }
-```
+````
 
 ## sample code
 
@@ -94,7 +94,7 @@ View [code example](#sample code)
 
 <Detail title="View source code">
 
-```json
+````json
 {
   "name": "Ticket table",
   "table": {
@@ -140,7 +140,7 @@ View [code example](#sample code)
   },
   "values": []
 }
-```
+````
 
 </Detail>
 
@@ -148,7 +148,7 @@ Add the table directory file `/tables/ticket.tab.json`:
 
 <Detail title="View source code">
 
-```json
+````json
 {
   "name": "Ticket List",
   "version": "1.0.0",
@@ -182,7 +182,7 @@ Add the table directory file `/tables/ticket.tab.json`:
   "edit": {},
   "view": {}
 }
-```
+````
 
 </Detail>
 
@@ -208,13 +208,13 @@ Application directory structure:
 |
 |
 └── app.json
-```
+````
 
 Write the code `ticket.imp.json`:
 
 <Detail title="View source code">
 
-```json
+````json
 {
   "title": "Import Ticket",
   "process": "scripts.imports.ticket.Import",
@@ -241,7 +241,7 @@ Write the code `ticket.imp.json`:
     {
       "label": "Region",
       "name": "area",
-      "match": ["region", "region", "area"],
+      "match": ["region", "region","area"],
       "rules": []
     }
   ],
@@ -255,13 +255,13 @@ Write the code `ticket.imp.json`:
   },
   "rules": {}
 }
-```
+````
 
 </Detail>
 
 Write the code `/scripts/imports/ticket.js`:
 
-```javascript
+````javascript
 function Import(columns, data) {
   // todo handles import logic
 
@@ -280,7 +280,7 @@ function Output(data) {
   // todo handles the logic after import, this function will be called automatically after import: "output": "scripts.imports.ticket.Output",
   return data;
 }
-```
+````
 
 ### Step 3: Get the file url
 
@@ -291,14 +291,14 @@ function Output(data) {
 #### parameters
 
 | Parameter Name | Required | Type | Description |
-| :------------- | :------- | :--- | ----------- |
-| file           | yes      | file | file name   |
+| :----- | :--- | :--- | -------- |
+| file | yes | file | file name |
 
 #### return example
 
-```
+````
  "20220411/0C3A5E7FCA0FE897710DE2CA00240FFE.xlsx"
-```
+````
 
 ### Step 4: Get the mapping relationship
 
@@ -308,9 +308,9 @@ function Output(data) {
 
 #### parameters
 
-| Parameter Name | Required | Type   | Description   |
-| :------------- | :------- | :----- | ------------- |
-| file           | yes      | string | file name url |
+| Parameter Name | Required | Type | Description |
+| :----- | :--- | :----- | ------------ |
+| file | yes | string | file name url |
 
 ### Step 5: Pass all the data
 
@@ -320,16 +320,16 @@ function Output(data) {
 
 #### parameters
 
-| Parameter Name | Required | Type   | Description                       |
-| :------------- | :------- | :----- | --------------------------------- |
-| file           | yes      | string | file name                         |
-| mapping        | yes      | string | mapping relation returns all data |
+| Parameter Name | Required | Type | Description |
+| :------ | :--- | :----- | ---------------------- |
+| file | yes | string | file name |
+| mapping | yes | string | mapping relation returns all data |
 
 #### Request parameter example
 
 <Detail title="View source code">
 
-```json
+````json
 {
   "file": "20220407/BB9DDF196D0B5DF9319EA8ADB5C914D3.xlsx",
   "mapping": {
@@ -374,7 +374,7 @@ function Output(data) {
     "templateMatching": false
   }
 }
-```
+````
 
 </Detail>
 
