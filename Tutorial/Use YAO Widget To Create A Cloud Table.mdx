@@ -16,7 +16,7 @@ Through the form editor, online design and production of form function modules. 
 
 ### YAO open source application engine
 
-![yao-arch-white.png](https://release-sv-1252011659.cos.na-siliconvalley.myqcloud.com/docs/%E6%95%99%E7%A8%8B/yao-arch- white.png)
+![yao-arch-white.png](https://release-sv-1252011659.cos.na-siliconvalley.myqcloud.com/docs/%E6%95%99%E7%A8%8B/yao-arch-white.png)
 YAO is an open source application engine, written in Golang, in the form of a command-line tool that can be downloaded and used immediately. It is suitable for building business systems, website/APP API interfaces, management background and other applications.
 
 YAO adopts the flow-based programming mode, and realizes various functions by writing YAO DSL (Logical Description in JSON format) or JavaScript processor. The YAO DSL can be written in several ways:
@@ -189,10 +189,10 @@ function Export() {
 
 Implement Model & Table processor logic
 
-| **Processor** | **Description**                                                                                                       | **Source link**                                                                           |
-| ------------- | --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| Model         | Convert dyform DSL to model DSL, which is equivalent to manually writing a xxx.mod.json DSL file in the models folder | [View source](https://github.com/YaoApp/demo-widget/blob/ main/widgets/dyform/process.js) |
-| Table         | Convert dyform DSL to table DSL, which is equivalent to manually writing a xxx..json DSL file in the tables folder    | [View source](https://github.com/YaoApp/demo-widget/blob/main /widgets/dyform/process.js) |
+| **Processor** | **Description**                                                                                                       | **Source link**                                                                              |
+| ------------- | --------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Model         | Convert dyform DSL to model DSL, which is equivalent to manually writing a xxx.mod.json DSL file in the models folder | [View source](https://github.com/YaoApp/demo-widget/blob/main/widgets/dyform/process.js#L11) |
+| Table         | Convert dyform DSL to table DSL, which is equivalent to manually writing a xxx..json DSL file in the tables folder    | [View source](https://github.com/YaoApp/demo-widget/blob/main/widgets/dyform/process.js#L27) |
 
 Tip: It is recommended to use the yao run command to debug the processor, refer to the source code comment documentation.
 
@@ -200,10 +200,10 @@ Tip: It is recommended to use the yao run command to debug the processor, refer 
 
 Write **dyform/export.js** script, implement Models, Tables functions, export as YAO model & table widgets.
 
-| **Export function** | **Description**                                                                                                       | **Source code link**                                                                          |
-| ------------------- | --------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| Models              | Call the Model processor to export the Yao model widget, the data structure is {MODEL_NAME:String: Model_DSL:Object}  | [View source code](https://github.com/YaoApp/demo-widget/blob/main/widgets /dyform/export.js) |
-| Tables              | Call the Table processor, export it as Yao table widget, the data structure is: {TABLE_NAME:String: Table_DSL:Object} | [View source code](https://github.com/YaoApp/demo-widget/blob/main /widgets/dyform/export.js) |
+| **Export function** | **Description**                                                                                                       | **Source code link**                                                                             |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Models              | Call the Model processor to export the Yao model widget, the data structure is {MODEL_NAME:String: Model_DSL:Object}  | [View source code](https://github.com/YaoApp/demo-widget/blob/main/widgets/dyform/export.js#L10) |
+| Tables              | Call the Table processor, export it as Yao table widget, the data structure is: {TABLE_NAME:String: Table_DSL:Object} | [View source code](https://github.com/YaoApp/demo-widget/blob/main/widgets/dyform/export.js#L24) |
 
 ### Effect preview
 
@@ -329,7 +329,7 @@ Log in to the management background and dynamically add dyform DSL to dynamicall
 ## Part III: Visual Form Editor
 
 The form DSL can be generated using the form authoring tool. There are many excellent open source form editors to choose from, such as [XXXX](https://github.com/xxxx/xxx). In order to demonstrate the effect, XGEN quickly implements a DEMO-level editor component, and the product-level implementation will Available when XGEN-NEXT (official version) is released.
-Source address: [https://github.com/YaoApp/xgen/tree/main/src/cloud/components/form/FormPrinter](https://github.com/YaoApp/xgen/tree/main/src/cloud /components/form/FormPrinter)
+Source address:[https://github.com/YaoApp/xgen/tree/main/src/cloud/components/form/FormPrinter](https://github.com/YaoApp/xgen/tree/main/src/cloud/components/form/FormPrinter)
 ![image.png](https://release-sv-1252011659.cos.na-siliconvalley.myqcloud.com/docs/%E6%95%99%E7%A8%8B/overview-4.png)
 
 ### Step 1: Adapt the editor component input and output
