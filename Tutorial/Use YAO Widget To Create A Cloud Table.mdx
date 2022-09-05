@@ -61,7 +61,7 @@ YAO provides a new way to use DSL to describe the difference content and quickly
 ### Preparation: Install the YAO command
 
 To read the following content, you need to have basic programming ability, familiar with RESTFul API, relational database, JavaScript language and other programming common sense.
-Reference Document [Getting Started Guide](https://yaoapps.com/doc/a.%E4%BB%8B%E7%BB%8D/a.%E5%85%A5%E9%97%A8%E6%8C %87%E5%8D%97), install the YAO command (version: v0.10.1) locally, and be familiar with the basic usage.
+Reference Document [Getting Started Guide](../Introduction/Getting Started), install the YAO command (version: v0.10.1) locally, and be familiar with the basic usage.
 **Create an app locally: **
 
 ```bash
@@ -179,7 +179,7 @@ Use an editor to open **dyform/widget.json** and fill in the basic information o
 
 Write **dyform/process.js ** script, implement **Model, Table ** processor, convert custom DSL into YAO data model widget and table widget.
 
-Write the Export function, declare the processor to be exported, [View source](https://github.com/YaoApp/demo-widget/blob/main/widgets/dyform/process.js#L311)
+Write the Export function, declare the processor to be exported, [View source](https://github.com/YaoApp/demo-widget/blob/main/widgets/dyform/process.js)
 
 ```javascript
 function Export() {
@@ -189,10 +189,10 @@ function Export() {
 
 Implement Model & Table processor logic
 
-| **Processor** | **Description**                                                                                                       | **Source link**                                                                               |
-| ------------- | --------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| Model         | Convert dyform DSL to model DSL, which is equivalent to manually writing a xxx.mod.json DSL file in the models folder | [View source](https://github.com/YaoApp/demo-widget/blob/ main/widgets/dyform/process.js#L11) |
-| Table         | Convert dyform DSL to table DSL, which is equivalent to manually writing a xxx..json DSL file in the tables folder    | [View source](https://github.com/YaoApp/demo-widget/blob/main /widgets/dyform/process.js#L27) |
+| **Processor** | **Description**                                                                                                       | **Source link**                                                                           |
+| ------------- | --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Model         | Convert dyform DSL to model DSL, which is equivalent to manually writing a xxx.mod.json DSL file in the models folder | [View source](https://github.com/YaoApp/demo-widget/blob/ main/widgets/dyform/process.js) |
+| Table         | Convert dyform DSL to table DSL, which is equivalent to manually writing a xxx..json DSL file in the tables folder    | [View source](https://github.com/YaoApp/demo-widget/blob/main /widgets/dyform/process.js) |
 
 Tip: It is recommended to use the yao run command to debug the processor, refer to the source code comment documentation.
 
@@ -200,10 +200,10 @@ Tip: It is recommended to use the yao run command to debug the processor, refer 
 
 Write **dyform/export.js** script, implement Models, Tables functions, export as YAO model & table widgets.
 
-| **Export function** | **Description**                                                                                                       | **Source code link**                                                                              |
-| ------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| Models              | Call the Model processor to export the Yao model widget, the data structure is {MODEL_NAME:String: Model_DSL:Object}  | [View source code](https://github.com/YaoApp/demo-widget/blob/main/widgets /dyform/export.js#L10) |
-| Tables              | Call the Table processor, export it as Yao table widget, the data structure is: {TABLE_NAME:String: Table_DSL:Object} | [View source code](https://github.com/YaoApp/demo-widget/blob/main /widgets/dyform/export.js#L24) |
+| **Export function** | **Description**                                                                                                       | **Source code link**                                                                          |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Models              | Call the Model processor to export the Yao model widget, the data structure is {MODEL_NAME:String: Model_DSL:Object}  | [View source code](https://github.com/YaoApp/demo-widget/blob/main/widgets /dyform/export.js) |
+| Tables              | Call the Table processor, export it as Yao table widget, the data structure is: {TABLE_NAME:String: Table_DSL:Object} | [View source code](https://github.com/YaoApp/demo-widget/blob/main /widgets/dyform/export.js) |
 
 ### Effect preview
 
@@ -220,7 +220,7 @@ If you want to open the form making function to the user, and the code directory
 
 ### Step 1: Create a template model to store the dyform DSL
 
-How to create and use data models models/template.mod.json and manage tables tables/template.tab.json, refer to [Model documentation](https://yaoapps.com/doc/b.%E5%9F%BA%E7% A1%80%E7%89%B9%E6%80%A7/a.%E5%88%9B%E5%BB%BA%E6%95%B0%E6%8D%AE%E6%A8%A1%E5 %9E%8B) and [Table Documentation](https://yaoapps.com/doc/b.%E5%9F%BA%E7%A1%80%E7%89%B9%E6%80%A7/c. %E6%8F%8F%E8%BF%B0%E7%95%8C%E9%9D%A2#%E6%95%B0%E6%8D%AE%E8%A1%A8%E6%A0%BC)
+How to create and use data models models/template.mod.json and manage tables tables/template.tab.json, refer to [Model documentation](../Base%20Features/Create%20Data%20Model.mdx) and [Table Documentation](../Manual/Processor/Data%20Table)
 **models/template.mod.json is as follows**
 
 ```json
@@ -437,7 +437,7 @@ function AfterFind(template, id) {
 ### Step 2: Update the components bound by the DSL
 
 Edit the `tables/template.tab.json` file and set the DSL field editing component to FormPrinter.
-Source address: [https://github.com/YaoApp/demo-widget/blob/main/tables/template.tab.json](https://github.com/YaoApp/demo-widget/blob/main/tables /template.tab.json)
+Source address: [https://github.com/YaoApp/demo-widget/blob/main/tables/template.tab.json](https://github.com/YaoApp/demo-widget/blob/main/tables/template.tab.json)
 
 ```json
 {
@@ -484,7 +484,7 @@ Add a `GET /page/form/setting/:name` API, under the apis folder, add a page.http
 }
 ```
 
-Source address: [https://github.com/YaoApp/demo-widget/blob/main/apis/page.http.json](https://github.com/YaoApp/demo-widget/blob/main/apis /page.http.json)
+Source address: [https://github.com/YaoApp/demo-widget/blob/main/apis/page.http.json](https://github.com/YaoApp/demo-widget/blob/main/apis/page.http.json)
 
 ### Step 2: During SETUP, request to configure the interface to obtain configuration information.
 
@@ -519,7 +519,7 @@ response
   });
 ```
 
-Source address: [https://github.com/YaoApp/demo-widget-front/blob/main/vue3/src/App.vue](https://github.com/YaoApp/demo-widget-front/blob /main/vue3/src/App.vue)
+Source address: [https://github.com/YaoApp/demo-widget-front/blob/main/vue3/src/App.vue](https://github.com/YaoApp/demo-widget-front/blob/main/vue3/src/App.vue)
 
 ### Step 3: Dynamically render the form
 
@@ -546,7 +546,7 @@ Use the `component` component to render the form according to the configuration
 </template>
 ```
 
-Source address: [https://github.com/YaoApp/demo-widget-front/blob/main/vue3/src/App.vue](https://github.com/YaoApp/demo-widget-front/blob /main/vue3/src/App.vue)
+Source address: [https://github.com/YaoApp/demo-widget-front/blob/main/vue3/src/App.vue](https://github.com/YaoApp/demo-widget-front/blob/main/vue3/src/App.vue)
 
 ### Step 4: Copy artifacts to UI directory
 
