@@ -34,28 +34,28 @@ The business interface description file is a JSON text file named with **lowerca
 
 ```json
 {
-	"name": "System Interface",
-	"version": "1.0.0",
-	"description": "System Interface API",
-	"group": "system",
-	"guard": "bearer-jwt",
-	"paths": [
-		{
-			"path": "/info",
-			"method": "GET",
-			"guard": "-",
-			"process": "models.user.Find",
-			"in": ["$param.id", ":params"],
-			"out": {
-				"status": 200,
-				"type": "application/json"
-			}
-		}
-	]
+  "name": "System Interface",
+  "version": "1.0.0",
+  "description": "System Interface API",
+  "group": "system",
+  "guard": "bearer-jwt",
+  "paths": [
+    {
+      "path": "/info",
+      "method": "GET",
+      "guard": "-",
+      "process": "models.user.Find",
+      "in": ["$param.id", ":params"],
+      "out": {
+        "status": 200,
+        "type": "application/json"
+      }
+    }
+  ]
 }
 ```
 
-An interface (`API`) document of the `http` protocol, which can define a set of APIs, and can bind a processor (`process`) to each API, and the system automatically calls the processor and returns the result of the processor call;
+An interface (`API`) document of the `http` protocol, which can define a set of APIs, and can bind a process (`process`) to each API, and the system automatically calls the process and returns the result of the process call;
 
 | Fields      | Type                 | Description                                                                                                                    | Required Fields |
 | ----------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------------- |
@@ -68,14 +68,14 @@ An interface (`API`) document of the `http` protocol, which can define a set of 
 
 ### `Object Path` data structure
 
-The API will be accessed through the route `/api/<group>/<path>`, the request succeeds and responds to the status code, Content-Type and the return value of the processor (`process`) defined in `out`, and the request fails and responds to the exception status code and error messages in JSON format [see exception specification] (#4 - exception specification).
+The API will be accessed through the route `/api/<group>/<path>`, the request succeeds and responds to the status code, Content-Type and the return value of the process (`process`) defined in `out`, and the request fails and responds to the exception status code and error messages in JSON format [see exception specification] (#4 - exception specification).
 
 | Fields  | Type            | Description                                                                                                                                                                                        | Required Fields |
 | ------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
 | path    | String          | API route name. The complete routing address is `/api/<group>/<path>`, variables are declared with `:`, such as `/api/user/find/:id`, you can use `$param.id` to access routing request parameters | yes             |
 | method  | String          | The request type. Permitted values ​​`GET`, `POST`, `PUT`, `DELETE`, `HEAD`, `OPTIONS`, `Any`. where `Any` will respond to any type of request                                                     | yes             |
 | guard   | String          | API middleware. If not set, the global middleware is used by default. If you don't want to use global middleware, set the value to `-` .                                                           | No              |
-| process | String          | Invoke processor `process`                                                                                                                                                                         | yes             |
+| process | String          | Invoke process `process`                                                                                                                                                                           | yes             |
 | in      | Array\<String\> | Request argument list, which will be used as input arguments (`args`) to `process`. The incoming parameter can be quoted, it can be an empty array [View input parameters](#3-input parameters)    | yes             |
 | out     | Object Out      | Request response result definition. See the `Object Out` data structure for details                                                                                                                | yes             |
 | err     | Object Out      | Customize the response when the call fails. **Not yet implemented**                                                                                                                                | No              |
@@ -90,7 +90,7 @@ The API will be accessed through the route `/api/<group>/<path>`, the request su
 
 ### Input parameters
 
-The parameter list defined in `in` will be used as input parameters to the processor. Supports the use of `:param` , `:payload` , `$param.field name` and other variables to bind request parameters.
+The parameter list defined in `in` will be used as input parameters to the process. Supports the use of `:param` , `:payload` , `$param.field name` and other variables to bind request parameters.
 
 #### Numerical value
 
@@ -141,11 +141,11 @@ The parameter list defined in `in` will be used as input parameters to the proce
 
 ```json
 {
-	"code": 500,
-	"message": "Data with ID=12 does not exist",
-	"context": {
-		"field": "id"
-	}
+  "code": 500,
+  "message": "Data with ID=12 does not exist",
+  "context": {
+    "field": "id"
+  }
 }
 ```
 
@@ -195,66 +195,66 @@ A complete example can be found in [examples](examples)
 
 ```json
 {
-	"name": "User Interface",
-	"version": "1.0.0",
-	"description": "User API",
-	"group": "user",
-	"guard": "bearer-jwt",
-	"paths": [
-		{
-			"path": "/login",
-			"method": "POST",
-			"guard": "-",
-			"process": "plugins.user.Login",
-			"in": ["$payload.mobile", "$payload.password", "$payload.captcha"],
-			"out": {
-				"status": 200,
-				"type": "application/json"
-			}
-		},
-		{
-			"path": "/ping",
-			"method": "GET",
-			"guard": "-",
-			"process": "plugins.user.Login",
-			"in": ["$payload.mobile", "$payload.password", "$payload.captcha"],
-			"out": {
-				"status": 200,
-				"type": "application/json"
-			}
-		},
-		{
-			"path": "/find/:id",
-			"method": "GET",
-			"guard": "-",
-			"process": "models.user.Find",
-			"in": ["$param.id", ":params"],
-			"out": {
-				"status": 200,
-				"type": "application/json"
-			}
-		},
-		{
-			"path": "/search",
-			"method": "GET",
-			"guard": "-",
-			"process": "models.user.Paginate",
-			"in": [":params", "$query.page", "$query.pagesize"],
-			"out": {
-				"status": 200,
-				"type": "application/json"
-			}
-		},
-		{
-			"path": "/info/:id",
-			"method": "GET",
-			"process": "models.user.Find",
-			"in": ["$param.id", ":params"],
-			"out": {
-				"status": 200,
-				"type": "application/json"
-			}
-		}
-	]
+  "name": "User Interface",
+  "version": "1.0.0",
+  "description": "User API",
+  "group": "user",
+  "guard": "bearer-jwt",
+  "paths": [
+    {
+      "path": "/login",
+      "method": "POST",
+      "guard": "-",
+      "process": "plugins.user.Login",
+      "in": ["$payload.mobile", "$payload.password", "$payload.captcha"],
+      "out": {
+        "status": 200,
+        "type": "application/json"
+      }
+    },
+    {
+      "path": "/ping",
+      "method": "GET",
+      "guard": "-",
+      "process": "plugins.user.Login",
+      "in": ["$payload.mobile", "$payload.password", "$payload.captcha"],
+      "out": {
+        "status": 200,
+        "type": "application/json"
+      }
+    },
+    {
+      "path": "/find/:id",
+      "method": "GET",
+      "guard": "-",
+      "process": "models.user.Find",
+      "in": ["$param.id", ":params"],
+      "out": {
+        "status": 200,
+        "type": "application/json"
+      }
+    },
+    {
+      "path": "/search",
+      "method": "GET",
+      "guard": "-",
+      "process": "models.user.Paginate",
+      "in": [":params", "$query.page", "$query.pagesize"],
+      "out": {
+        "status": 200,
+        "type": "application/json"
+      }
+    },
+    {
+      "path": "/info/:id",
+      "method": "GET",
+      "process": "models.user.Find",
+      "in": ["$param.id", ":params"],
+      "out": {
+        "status": 200,
+        "type": "application/json"
+      }
+    }
+  ]
 }
 ```

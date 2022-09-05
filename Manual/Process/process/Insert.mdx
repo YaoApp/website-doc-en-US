@@ -1,0 +1,245 @@
+# Insert
+
+Insert multiple data records, return the number of inserted rows
+
+## `insert` Insert multiple records, return the number of inserted rows
+
+### process
+
+`models.modelname.Insert`
+
+### Parameters Table
+
+| Parameters | Type                  | Description                | Example                           |
+| ---------- | --------------------- | -------------------------- | --------------------------------- |
+| args[0]    | Array\<String\>       | Field list                 | `["user_id", "province"]`         |
+| args[1]    | Array\<Array\<Any\>\> | Collection of data records | `[[4, "Beijing"],[4, "Tianjin"]]` |
+
+### return value
+
+`Integer` number of rows inserted
+
+## Example one
+
+### Data Model
+
+| Model   | Model Definition                              |
+| ------- | --------------------------------------------- |
+| address | [model description file](../examples/address) |
+
+### process
+
+```json
+models.address.Insert
+```
+
+### Parameters Table
+
+```json
+[
+  ["user_id", "province", "city", "location"],
+  [
+    [
+      4,
+      "Beijing",
+      "Fengtai District",
+      "Room 1024, 9th Floor, Unit 9, Building 9, Yinhai Xingyue"
+    ],
+    [
+      4,
+      "Tianjin City",
+      "Tanggu District",
+      "Room 1003, Unit 3, Building 7, Yihai Xingyun"
+    ]
+  ]
+]
+```
+
+### return value
+
+```json
+2
+```
+
+## external references
+
+### Called in business logic (`Flow`):
+
+```json
+{
+  "nodes": [
+    {
+      "name": "address",
+      "process": "models.address.Insert",
+      "args": [
+        ["user_id", "province", "city", "location"],
+        [
+          [
+            4,
+            "Beijing",
+            "Fengtai District",
+            "Room 1024, 9th Floor, Unit 9, Building 9, Yinhai Xingyue"
+          ],
+          [
+            4,
+            "Tianjin City",
+            "Tanggu District",
+            "Room 1003, Unit 3, Building 7, Yihai Xingyun"
+          ]
+        ]
+      ],
+      "outs": ["{{$out}}"]
+    }
+  ]
+}
+```
+
+### Called in the service interface (`API`):
+
+```json
+{
+  "paths": [
+    {
+      "path": "/insert",
+      "method": "POST",
+      "process": "models.address.Insert",
+      "in": ["$payload.columns", "$payload.data"],
+      "out": {
+        "status": 200,
+        "type": "application/json"
+      }
+    }
+  ]
+}
+```
+
+```bash
+POST /api/address/insert
+```
+
+`REQUEST PAYLOAD`
+
+```json
+{
+  "columns": ["user_id", "province", "city", "location"],
+  "data": [
+    [
+      4,
+      "Beijing",
+      "Fengtai District",
+      "Room 1024, 9th Floor, Unit 9, Building 9, Yinhai Xingyue"
+    ],
+    [
+      4,
+      "Tianjin City",
+      "Tanggu District",
+      "Room 1003, Unit 3, Building 7, Yihai Xingyun"
+    ]
+  ]
+}
+```
+
+## Example 2
+
+### Create a new model, add a `models/category.mod.json` file, and write the following content:
+
+```json
+{
+  "name": "Book Category",
+  "table": {
+    "name": "category",
+    "comment": "Book Category"
+  },
+  "columns": [
+    {
+      "label": "ID",
+      "name": "id",
+      "type": "ID",
+      "comment": "ID",
+      "primary": true
+    },
+    {
+      "label": "parent id",
+      "name": "parent_id",
+      "type": "integer",
+      "nullable": true
+    },
+    {
+      "label": "Classification Name",
+      "name": "name",
+      "type": "string",
+      "length": 128,
+      "index": true
+    }
+  ],
+  "relations": {
+    "book": {
+      "type": "hasMany",
+      "model": "book",
+      "key": "category_id",
+      "foreign": "id",
+      "query": {}
+    },
+    "parent": {
+      "type": "hasOne",
+      "model": "category",
+      "key": "id",
+      "foreign": "parent_id",
+      "query": {}
+    }
+  },
+  "option": {
+    "timestamps": true,
+    "soft_deletes": true
+  },
+  "values": [
+    {
+      "id": 1,
+      "parent_id": null,
+      "name": "Literature and History"
+    },
+    {
+      "id": 2,
+      "parent_id": 1,
+      "name": "History"
+    },
+    {
+      "id": 3,
+      "parent_id": 1,
+      "name": "Ancient Poem"
+    },
+    {
+      "id": 4,
+      "parent_id": null,
+      "name": "Science and Engineering"
+    },
+    {
+      "id": 5,
+      "parent_id": 4,
+      "name": "Math"
+    },
+    {
+      "id": 6,
+      "parent_id": 4,
+      "name": "Physical"
+    }
+  ]
+}
+```
+
+### Insert Batch add:
+
+```javascript
+function Insert() {
+  return Process(
+    "models.category.insert",
+    ["parent_id", "name"],
+    [
+      [1, "language"],
+      [1, "geography"],
+    ]
+  );
+}
+```
+
+Execute `yao run scripts.test.Insert`

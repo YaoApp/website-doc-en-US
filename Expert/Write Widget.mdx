@@ -107,9 +107,9 @@ Use an editor to open **dyform/widget.json** and fill in the basic information o
 
 ## Step 3: Write the handler
 
-Write **dyform/process.js ** script, implement **Model, Table ** processor, convert custom DSL into YAO data model widget and table widget.
+Write **dyform/process.js ** script, implement **Model, Table ** process, convert custom DSL into YAO data model widget and table widget.
 
-Write the Export function, declare the processor to be exported, [View source](https://github.com/YaoApp/demo-widget/blob/main/widgets/dyform/process.js#L311)
+Write the Export function, declare the process to be exported, [View source](https://github.com/YaoApp/demo-widget/blob/main/widgets/dyform/process.js#L311)
 
 ```javascript
 function Export() {
@@ -117,27 +117,27 @@ function Export() {
 }
 ```
 
-Implement Model & Table processor logic
+Implement Model & Table process logic
 
-| **Processor** | **Description**                                                                                                       | **Source link**                                                                               |
-| ------------- | --------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| Model         | Convert dyform DSL to model DSL, which is equivalent to manually writing a xxx.mod.json DSL file in the models folder | [View source](https://github.com/YaoApp/demo-widget/blob/ main/widgets/dyform/process.js#L11) |
-| Table         | Convert dyform DSL to table DSL, which is equivalent to manually writing a xxx..json DSL file in the tables folder    | [View source](https://github.com/YaoApp/demo-widget/blob/main /widgets/dyform/process.js#L27) |
+| **process** | **Description**                                                                                                       | **Source link**                                                                               |
+| ----------- | --------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Model       | Convert dyform DSL to model DSL, which is equivalent to manually writing a xxx.mod.json DSL file in the models folder | [View source](https://github.com/YaoApp/demo-widget/blob/ main/widgets/dyform/process.js#L11) |
+| Table       | Convert dyform DSL to table DSL, which is equivalent to manually writing a xxx..json DSL file in the tables folder    | [View source](https://github.com/YaoApp/demo-widget/blob/main /widgets/dyform/process.js#L27) |
 
-Tip: It is recommended to use the yao run command to debug the processor, refer to the source code comment documentation.
+Tip: It is recommended to use the yao run command to debug the process, refer to the source code comment documentation.
 
 ## Step 4: Export as Model & Table widget
 
 Write **dyform/export.js** script, implement Models, Tables functions, export as YAO model & table widgets.
 
-| **Export function** | **Description**                                                                                                       | **Source code link**                                                                              |
-| ------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| Models              | Call the Model processor to export the Yao model widget, the data structure is {MODEL_NAME:String: Model_DSL:Object}  | [View source code](https://github.com/YaoApp/demo-widget/blob/main/widgets/dyform/export.js#L10)  |
-| Tables              | Call the Table processor, export it as Yao table widget, the data structure is: {TABLE_NAME:String: Table_DSL:Object} | [View source code](https://github.com/YaoApp/demo-widget/blob/main /widgets/dyform/export.js#L24) |
+| **Export function** | **Description**                                                                                                     | **Source code link**                                                                              |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Models              | Call the Model process to export the Yao model widget, the data structure is {MODEL_NAME:String: Model_DSL:Object}  | [View source code](https://github.com/YaoApp/demo-widget/blob/main/widgets/dyform/export.js#L10)  |
+| Tables              | Call the Table process, export it as Yao table widget, the data structure is: {TABLE_NAME:String: Table_DSL:Object} | [View source code](https://github.com/YaoApp/demo-widget/blob/main /widgets/dyform/export.js#L24) |
 
 ## Effect preview
 
-In the dyforms folder, add the **xxx.form.json ** file and write the dyform DSL description file to quickly create a set of form management modules, form APIs, form processors and model processors.
+In the dyforms folder, add the **xxx.form.json ** file and write the dyform DSL description file to quickly create a set of form management modules, form APIs, form processes and model processes.
 
 ![demo.png](https://release-sv-1252011659.cos.na-siliconvalley.myqcloud.com/docs/%E4%B8%93%E5%AE%B6/demo%20%281%29. png)
 
@@ -145,9 +145,5 @@ Use the **yao migrate** command to create the data table structure, the **yao st
 Routing address: http://127.0.0.1:5099/xiang/table/dyform.xxx
 
 <Div style={{ display: "flex", justifyContent: "right" }}>
-  <Link
-    type="next"
-    title="Source Code Compilation"
-    link="Expert/Source Code Compilation"
-  ></Link>
+  <Link type="next" title="CI" link="Expert/CI"></Link>
 </Div>

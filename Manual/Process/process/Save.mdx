@@ -1,0 +1,232 @@
+# Save
+
+Save a single record. If the data record contains the primary key field, it will be updated, and if the data record does not contain the primary key field, the record will be created; it will return the ID of the record created or updated.
+
+## `save` save a single record, there is no created record, there is an update record, return the record ID
+
+### process
+
+`models.modelname.Save`
+
+### Parameters Table
+
+| Parameters | Type       | Description | Example                                                |
+| ---------- | ---------- | ----------- | ------------------------------------------------------ |
+| args[0]    | Object Row | Data record | `{"name": "user created","manu_id": 2,"type": "user"}` |
+
+### return value
+
+`Integer` the ID of the record created or updated
+
+## Example one
+
+### Data Model
+
+| Model | Model Definition                           |
+| ----- | ------------------------------------------ |
+| user  | [model description file](../examples/user) |
+
+### process
+
+```json
+models.user.Save
+```
+
+### Parameters Table
+
+```json
+[
+  {
+    "id": 101,
+    "name": "User Save",
+    "manu_id": 2,
+    "type": "user",
+    "idcard": "23082619820207006X",
+    "mobile": "13900004444",
+    "password": "qV@uT1DI",
+    "key": "XZ12MiPp",
+    "secret": "wBeYjL7FjbcvpAdBrxtDFfjydsoPKhRN",
+    "status": "enabled",
+    "extra": { "sex": "female" }
+  }
+]
+```
+
+### return value
+
+```json
+101
+```
+
+## external references
+
+### Called in business logic (`Flow`):
+
+```json
+{
+  "nodes": [
+    {
+      "name": "user",
+      "process": "models.user.Save",
+      "args": [
+        {
+          "id": 101,
+          "name": "User Save",
+          "manu_id": 2,
+          "type": "user",
+          "idcard": "23082619820207006X",
+          "mobile": "13900004444",
+          "password": "qV@uT1DI",
+          "key": "XZ12MiPp",
+          "secret": "wBeYjL7FjbcvpAdBrxtDFfjydsoPKhRN",
+          "status": "enabled",
+          "extra": { "sex": "female" }
+        }
+      ],
+      "outs": ["{{$out}}"]
+    }
+  ]
+}
+```
+
+### Called in the service interface (`API`):
+
+```json
+{
+  "paths": [
+    {
+      "path": "/save",
+      "method": "POST",
+      "process": "models.user.Save",
+      "in": [":payload"],
+      "out": {
+        "status": 200,
+        "type": "application/json"
+      }
+    }
+  ]
+}
+```
+
+```bash
+POST /api/user/save
+```
+
+`REQUEST PAYLOAD`
+
+```json
+{
+  "id": 101,
+  "name": "User Save",
+  "manu_id": 2,
+  "type": "user",
+  "idcard": "23082619820207006X",
+  "mobile": "13900004444",
+  "password": "qV@uT1DI",
+  "key": "XZ12MiPp",
+  "secret": "wBeYjL7FjbcvpAdBrxtDFfjydsoPKhRN",
+  "status": "enabled",
+  "extra": { "sex": "female" }
+}
+```
+
+## Example 2
+
+### Create a new model, add a `models/category.mod.json` file, and write the following content:
+
+```json
+{
+  "name": "Book Category",
+  "table": {
+    "name": "category",
+    "comment": "Book Category"
+  },
+  "columns": [
+    {
+      "label": "ID",
+      "name": "id",
+      "type": "ID",
+      "comment": "ID",
+      "primary": true
+    },
+    {
+      "label": "parent id",
+      "name": "parent_id",
+      "type": "integer",
+      "nullable": true
+    },
+    {
+      "label": "Classification Name",
+      "name": "name",
+      "type": "string",
+      "length": 128,
+      "index": true
+    }
+  ],
+  "relations": {
+    "book": {
+      "type": "hasMany",
+      "model": "book",
+      "key": "category_id",
+      "foreign": "id",
+      "query": {}
+    },
+    "parent": {
+      "type": "hasOne",
+      "model": "category",
+      "key": "id",
+      "foreign": "parent_id",
+      "query": {}
+    }
+  },
+  "option": {
+    "timestamps": true,
+    "soft_deletes": true
+  },
+  "values": [
+    {
+      "id": 1,
+      "parent_id": null,
+      "name": "Literature and History"
+    },
+    {
+      "id": 2,
+      "parent_id": 1,
+      "name": "History"
+    },
+    {
+      "id": 3,
+      "parent_id": 1,
+      "name": "Ancient Poem"
+    },
+    {
+      "id": 4,
+      "parent_id": null,
+      "name": "Science and Engineering"
+    },
+    {
+      "id": 5,
+      "parent_id": 4,
+      "name": "Math"
+    },
+    {
+      "id": 6,
+      "parent_id": 4,
+      "name": "Physical"
+    }
+  ]
+}
+```
+
+### Add `scripts/test.js`
+
+```javascript
+function Save() {
+  return Process("models.category.save", {
+    parent_id: 1,
+    name: "language",
+  });
+}
+```
+
+Execute `yao run scripts.test.Save`

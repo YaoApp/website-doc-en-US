@@ -107,17 +107,17 @@ The data flow orchestration document consists of basic information, query nodes 
 }
 ```
 
-A data flow orchestration (`Flow`) can have multiple query nodes, each query node can call a processor (`process`), can specify the result processing script and return value, and can refer to the context information in the query node.
+A data flow orchestration (`Flow`) can have multiple query nodes, each query node can call a process (`process`), can specify the result processing script and return value, and can refer to the context information in the query node.
 `Object Node` data structure
 
-| Fields  | Type           | Description                                                                                                                                                           | Required Fields |
-| ------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
-| name    | String         | query node name                                                                                                                                                       | yes             |
-| process | String         | Invoke processor `process`                                                                                                                                            | yes             |
-| args    | Array<Any\>    | Processor argument list. Can refer to input/output or context data                                                                                                    | yes             |
-| script  | String         | Result processing JS script                                                                                                                                           | no              |
-| outs    | Array<String\> | Query node result output. Use `{{$out}}` to refer to the handler to return the result. If not set, the return value is equal to the result returned by the processor. | No              |
-| next    | Object Next    | Jump to the specified query node when the query result meets the set conditions (**Not yet implemented**)                                                             | No              |
+| Fields  | Type           | Description                                                                                                                                                         | Required Fields |
+| ------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| name    | String         | query node name                                                                                                                                                     | yes             |
+| process | String         | Invoke process `process`                                                                                                                                            | yes             |
+| args    | Array<Any\>    | process argument list. Can refer to input/output or context data                                                                                                    | yes             |
+| script  | String         | Result processing JS script                                                                                                                                         | no              |
+| outs    | Array<String\> | Query node result output. Use `{{$out}}` to refer to the handler to return the result. If not set, the return value is equal to the result returned by the process. | No              |
+| next    | Object Next    | Jump to the specified query node when the query result meets the set conditions (**Not yet implemented**)                                                           | No              |
 
 ## output result `output`
 
@@ -140,7 +140,7 @@ The output result of the data flow (`Flow`) can be freely defined according to b
 
 ## 3 Context Data Reference
 
-The data flow (`Flow`) can be passed as a global reference parameter (`{{$in}}`) and the return value of each query node `{{$res}}`. In the `outs` array inside the query node, you can refer to the return value `{{out}}` of the processor (`process`).
+The data flow (`Flow`) can be passed as a global reference parameter (`{{$in}}`) and the return value of each query node `{{$res}}`. In the `outs` array inside the query node, you can refer to the return value `{{out}}` of the process (`process`).
 
 ```json
 {
@@ -196,7 +196,7 @@ The data flow (`Flow`) can be passed as a global reference parameter (`{{$in}}`)
 | ---------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ | -------------------------------------------------------------- |
 | `{{$in}}`  | Array<Any\>        | The parameter table passed in when the data flow is called, supports access to the specified parameters using array subscripts, for example: `{{$in.0}}` The first Arguments, `{{$in.1}}` 2nd argument,     | `nodes[n].args`, `nodes[n].outs`, `output` | `{{$in}}`, ` {{$in.0}}`,`{{$in.0.name}}`                       |
 | `{{$res}}` | \[key:String\]:Any | Query node return value (`nodes[n].outs`) mapping table, support using the query node name to access the return value of a specific query node. For example `{{$res.node1.0}}` first return value of node1. | `nodes[n].args`, `nodes[n].outs`, `output` | `{{$res}}`, `{{$res.node1.0.name}}`, `{{ $res.node2.manu_id}}` |
-| `{{out}}`  | Any                | Query the return value of the node's processor (`process`), support using `.` to apply Object /Array values ​​                                                                                              | `nodes[n].outs`                            | `{{out}} `, `{{out.name}}`, `{{out.0}}`                        |
+| `{{out}}`  | Any                | Query the return value of the node's process (`process`), support using `.` to apply Object /Array values ​​                                                                                                | `nodes[n].outs`                            | `{{out}} `, `{{out.name}}`, `{{out.0}}`                        |
 
 ### Helper functions
 
@@ -208,14 +208,14 @@ Helper function table
 | -------- | ---------------------------- | -------------------------------------------- | ----------------------------- |
 | `pluck`  | `row: Array`, `name: String` | `Array` specifies the set of field values ​​ | `{{pluck(:$res.user, 'id')}}` |
 
-The query node supports processing the return value of the processor (`process`) using JavaScript scripts. The `main()` function passes in the data flow (`Flow`) parameter table, the current query node process return value and the query node return value mapping table. The return value can be referenced using the `$out` variable.
+The query node supports processing the return value of the process (`process`) using JavaScript scripts. The `main()` function passes in the data flow (`Flow`) parameter table, the current query node process return value and the query node return value mapping table. The return value can be referenced using the `$out` variable.
 
 ### Parameters Table
 
 | Parameters | Type               | Description                                                             |
 | ---------- | ------------------ | ----------------------------------------------------------------------- |
 | args[0]    | Array<Any\>        | The parameter list passed in when the data flow is called, ie `{{$in}}` |
-| args[1]    | Any                | current query node processor (`process`) return value, i.e. `{{$out}}`  |
+| args[1]    | Any                | current query node process (`process`) return value, i.e. `{{$out}}`    |
 | args[2]    | \[key:String\]:Any | Query node return value (nodes[n].outs) mapping table, ie `{{$res}}`    |
 
 ### return value
@@ -224,7 +224,7 @@ The processing script runs successfully, and the `{{$out}}` variable will be upd
 
 ## external references
 
-A data flow (`Flow`) can be used as a process to call in other data flows (`Flow`) or service interfaces (`API`). Processors are referenced as `flows.dataflow_name`
+A data flow (`Flow`) can be used as a process to call in other data flows (`Flow`) or service interfaces (`API`). processes are referenced as `flows.dataflow_name`
 
 ### Called in other data flows (Flow)
 

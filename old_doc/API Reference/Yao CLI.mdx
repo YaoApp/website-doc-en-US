@@ -9,7 +9,7 @@ yao <command> [options] [args...]
 | init    | Project initialization                        |
 | inspect | Display application configuration information |
 | migrate | Update database structure                     |
-| run     | run processor                                 |
+| run     | run process                                   |
 | start   | Start WEB service                             |
 | version | Displays the current version number           |
 
@@ -43,9 +43,9 @@ yao inspect
 
 Update the database structure and create the data tables defined under the application engine and models folder. By default, the data table associated with the data model under models is updated.
 
-<Notice type='warning'>
-	Note: The `migrate` command clears the current data table and is not recommended for use in
-	`production` mode.
+<Notice type="warning">
+  Note: The `migrate` command clears the current data table and is not
+  recommended for use in `production` mode.
 </Notice>
 
 Options:
@@ -67,7 +67,7 @@ yao migrate -n pet
 
 # yao run
 
-To run the processor, the first parameter is the processor name, and the rest of the parameters are the processor parameter table.
+To run the process, the first parameter is the process name, and the rest of the parameters are the process parameter table.
 
 If you need to enter complex data structures, you can use the `::` prefix to declare the parameters in JSON format, for example: `'::{"foo":"bar"}'`
 

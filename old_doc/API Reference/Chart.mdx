@@ -1,6 +1,6 @@
 # Chart
 
-Analysis chart (`Chart`) is mainly used for arranging data statistics analysis query logic, supports the use of JavaScript scripts to process the results of each query node, can directly view the analysis chart in the data management background, and can also be used as a processor (`process`), The reference method is `charts.<analytical chart name>`. Analysis chart (`Chart`) supports data analysis engines based on `ElasticSearch` and `MySQL` for various business scenarios.
+Analysis chart (`Chart`) is mainly used for arranging data statistics analysis query logic, supports the use of JavaScript scripts to process the results of each query node, can directly view the analysis chart in the data management background, and can also be used as a process (`process`), The reference method is `charts.<analytical chart name>`. Analysis chart (`Chart`) supports data analysis engines based on `ElasticSearch` and `MySQL` for various business scenarios.
 
 Data kanban and data big screen pages can also be written in the same way.
 
@@ -26,15 +26,15 @@ The analysis chart layout document consists of basic information, query nodes, o
 
 ```json
 {
-	"lang": "gou",
-	"label": "Latest Information",
-	"version": "1.0.0",
-	"description": "Latest Information",
-	"nodes": [],
-	"output": {},
-	"apis": {},
-	"filters": {},
-	"page": {}
+  "lang": "gou",
+  "label": "Latest Information",
+  "version": "1.0.0",
+  "description": "Latest Information",
+  "nodes": [],
+  "output": {},
+  "apis": {},
+  "filters": {},
+  "page": {}
 }
 ```
 
@@ -54,69 +54,69 @@ The analysis chart layout document consists of basic information, query nodes, o
 
 ```json
 {
-	"nodes": [
-		{
-			"name": "Industry Distribution",
-			"query": {
-				"model": "service",
-				"select": ["city", ":COUNT(id) as cnt", "@industries.$ as industry"],
-				"wheres": [
-					{ "column": "created_at", "value": "{{$query.from}}", "op": "ge" },
-					{ "column": "created_at", "value": "{{$query.to}}", "op": "le" }
-				],
-				"order": ["cnt.desc"],
-				"limit": 100,
-				"group": ["@industries.$", "city"]
-			}
-		},
-		{
-			"name": "Billing method",
-			"query": {
-				"model": "service",
-				"select": ["city", ":COUNT(id) as cnt", "@price_options.$ as option"],
-				"wheres": [
-					{ "column": "created_at", "value": "{{$query.from}}", "op": "ge" },
-					{ "column": "created_at", "value": "{{$query.to}}", "op": "le" }
-				],
-				"order": ["cnt.desc"],
-				"limit": 100,
-				"group": ["@price_options.$", "city"]
-			}
-		},
-		{
-			"name": "Merge result",
-			"process": "xiang.chart.MergeData",
-			"args": [
-				["city", "industry", "billing"],
-				{
-					"Industry": {
-						"key": "city",
-						"values": "{{$res.Industry scorecloth[*].industry}}"
-					},
-					"Billing": {
-						"key": "city",
-						"values": "{{$res.Billing method[*].option}}"
-					}
-				}
-			]
-		}
-	]
+  "nodes": [
+    {
+      "name": "Industry Distribution",
+      "query": {
+        "model": "service",
+        "select": ["city", ":COUNT(id) as cnt", "@industries.$ as industry"],
+        "wheres": [
+          { "column": "created_at", "value": "{{$query.from}}", "op": "ge" },
+          { "column": "created_at", "value": "{{$query.to}}", "op": "le" }
+        ],
+        "order": ["cnt.desc"],
+        "limit": 100,
+        "group": ["@industries.$", "city"]
+      }
+    },
+    {
+      "name": "Billing method",
+      "query": {
+        "model": "service",
+        "select": ["city", ":COUNT(id) as cnt", "@price_options.$ as option"],
+        "wheres": [
+          { "column": "created_at", "value": "{{$query.from}}", "op": "ge" },
+          { "column": "created_at", "value": "{{$query.to}}", "op": "le" }
+        ],
+        "order": ["cnt.desc"],
+        "limit": 100,
+        "group": ["@price_options.$", "city"]
+      }
+    },
+    {
+      "name": "Merge result",
+      "process": "xiang.chart.MergeData",
+      "args": [
+        ["city", "industry", "billing"],
+        {
+          "Industry": {
+            "key": "city",
+            "values": "{{$res.Industry scorecloth[*].industry}}"
+          },
+          "Billing": {
+            "key": "city",
+            "values": "{{$res.Billing method[*].option}}"
+          }
+        }
+      ]
+    }
+  ]
 }
 ```
 
-An analysis chart query orchestration (`Chart`) can have multiple query nodes, and each query node can also write and set the `query` query parameters corresponding to the data engine, or call a processor (`process`), which can specify the result Processing scripts and return values ​​can be used to reference contextual information in query nodes. The context data reference and result processing script are specifically consistent with the business logic orchestration (`Flow`), please refer to the related documents: [input and output](../flow/#3-input and output) [context data reference](. ./flow/#3 - context data reference) [result processing script] (../flow/#4 - result processing script)
+An analysis chart query orchestration (`Chart`) can have multiple query nodes, and each query node can also write and set the `query` query parameters corresponding to the data engine, or call a process (`process`), which can specify the result Processing scripts and return values ​​can be used to reference contextual information in query nodes. The context data reference and result processing script are specifically consistent with the business logic orchestration (`Flow`), please refer to the related documents: [input and output](../flow/#3-input and output) [context data reference](. ./flow/#3 - context data reference) [result processing script] (../flow/#4 - result processing script)
 
 `Object Node` data structure
 
-| Fields  | Type           | Description                                                                                                                                                                                                                                         | Required Fields |
-| ------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
-| name    | String         | query node name                                                                                                                                                                                                                                     | yes             |
-| query   | Query DSL      | Query language [see full description](../query)                                                                                                                                                                                                     | no              |
-| process | String         | Invoke the processor `process`, `query` or `process`. If also present ignore the `process` setting.                                                                                                                                                 | No              |
-| args    | Array<Any\>    | Process argument list. Can refer to input/output or context data, same as `flow`. [see full description](../flow/#3 - context data reference)                                                                                                     | no              |
-| script  | String         | Result processing script, supports ES5, same as `flow`. [see full description](../flow/#4-result processing script)                                                                                                                                 | no              |
-| outs    | Array<String\> | Query node result output. Use `{{$out}}` to refer to the processor to return the result, same as `flow`. If not set, the return value is equal to the result returned by the processor. [see full description](../flow/#3 - context data reference) | no              |
-| next    | Object Next    | Jump to the specified query node when the query result meets the set conditions (**Not yet implemented**)                                                                                                                                           | No              |
+| Fields  | Type           | Description                                                                                                                                                                                                                                     | Required Fields |
+| ------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| name    | String         | query node name                                                                                                                                                                                                                                 | yes             |
+| query   | Query DSL      | Query language [see full description](../query)                                                                                                                                                                                                 | no              |
+| process | String         | Invoke the process `process`, `query` or `process`. If also present ignore the `process` setting.                                                                                                                                               | No              |
+| args    | Array<Any\>    | Process argument list. Can refer to input/output or context data, same as `flow`. [see full description](../flow/#3 - context data reference)                                                                                                   | no              |
+| script  | String         | Result processing script, supports ES5, same as `flow`. [see full description](../flow/#4-result processing script)                                                                                                                             | no              |
+| outs    | Array<String\> | Query node result output. Use `{{$out}}` to refer to the process to return the result, same as `flow`. If not set, the return value is equal to the result returned by the process. [see full description](../flow/#3 - context data reference) | no              |
+| next    | Object Next    | Jump to the specified query node when the query result meets the set conditions (**Not yet implemented**)                                                                                                                                       | No              |
 
 ## `Query DSL`
 
@@ -131,19 +131,19 @@ The query page data structure is [Object Page data structure](../table/#4-Object
 
 ```json
 {
-	"page": {
-		"primary": "City",
-		"layout": {
-			"filters": [
-				{ "name": "start time", "width": 6 },
-				{ "name": "end time", "width": 6 }
-			],
-			"charts": [
-				{ "type": "line", "props": {} },
-				{ "type": "bar", "props": {} }
-			]
-		}
-	}
+  "page": {
+    "primary": "City",
+    "layout": {
+      "filters": [
+        { "name": "start time", "width": 6 },
+        { "name": "end time", "width": 6 }
+      ],
+      "charts": [
+        { "type": "line", "props": {} },
+        { "type": "bar", "props": {} }
+      ]
+    }
+  }
 }
 ```
 
@@ -167,17 +167,17 @@ The data and configuration query interface is enabled by default in the analysis
 
 ```json
 {
-	"apis": {
-		"data": {
-			"disable": true,
-			"guard": "bearer-jwt",
-			"default": {}
-		},
-		"setting": {
-			"guard": "-",
-			"default": {}
-		}
-	}
+  "apis": {
+    "data": {
+      "disable": true,
+      "guard": "bearer-jwt",
+      "default": {}
+    },
+    "setting": {
+      "guard": "-",
+      "default": {}
+    }
+  }
 }
 ```
 
@@ -200,79 +200,79 @@ Complete examples are stored in the examples directory, [View complete example](
 
 ```json
 {
-	"lang": "gou",
-	"label": "Indicator comparison",
-	"version": "1.0.0",
-	"decription": "Indicator comparison",
-	"nodes": [
-		{
-			"name": "Industry Distribution",
-			"process": "models.service.get",
-			"query": {
-				"select": ["city", ":COUNT(id) as cnt", "@industries.$ as industry"],
-				"wheres": [
-					{ "column": "created_at", "value": "{{$query.from}}", "op": "ge" },
-					{ "column": "created_at", "value": "{{$query.to}}", "op": "le" }
-				],
-				"order": ["cnt.desc"],
-				"limit": 100,
-				"group": ["@industries.$", "city"]
-			}
-		},
-		{
-			"name": "Billing method",
-			"process": "models.service.get",
-			"query": {
-				"select": ["city", ":COUNT(id) as cnt", "@price_options.$ as option"],
-				"wheres": [
-					{ "column": "created_at", "value": "{{$query.from}}", "op": "ge" },
-					{ "column": "created_at", "value": "{{$query.to}}", "op": "le" }
-				],
-				"order": ["cnt.desc"],
-				"limit": 100,
-				"group": ["@price_options.$", "city"]
-			}
-		},
-		{
-			"name": "Merge result",
-			"process": "xiang.chart.MergeData",
-			"args": [
-				["city", "industry", "billing"],
-				{
-					"Industry": {
-						"key": "city",
-						"values": "{{$res.Industry distribution[*].industry}}"
-					},
-					"Billing": {
-						"key": "city",
-						"values": "{{$res.Billing method[*].option}}"
-					}
-				}
-			]
-		}
-	],
-	"output": "{{$res.merge result}}",
-	"apis": {
-		"data": {
-			"guard": "-"
-		},
-		"setting": {
-			"guard": "-"
-		}
-	},
-	"filters": {},
-	"page": {
-		"primary": "City",
-		"layout": {
-			"filters": [
-				{ "name": "start time", "width": 6 },
-				{ "name": "end time", "width": 6 }
-			],
-			"charts": [
-				{ "type": "line", "props": {} },
-				{ "type": "bar", "props": {} }
-			]
-		}
-	}
+  "lang": "gou",
+  "label": "Indicator comparison",
+  "version": "1.0.0",
+  "decription": "Indicator comparison",
+  "nodes": [
+    {
+      "name": "Industry Distribution",
+      "process": "models.service.get",
+      "query": {
+        "select": ["city", ":COUNT(id) as cnt", "@industries.$ as industry"],
+        "wheres": [
+          { "column": "created_at", "value": "{{$query.from}}", "op": "ge" },
+          { "column": "created_at", "value": "{{$query.to}}", "op": "le" }
+        ],
+        "order": ["cnt.desc"],
+        "limit": 100,
+        "group": ["@industries.$", "city"]
+      }
+    },
+    {
+      "name": "Billing method",
+      "process": "models.service.get",
+      "query": {
+        "select": ["city", ":COUNT(id) as cnt", "@price_options.$ as option"],
+        "wheres": [
+          { "column": "created_at", "value": "{{$query.from}}", "op": "ge" },
+          { "column": "created_at", "value": "{{$query.to}}", "op": "le" }
+        ],
+        "order": ["cnt.desc"],
+        "limit": 100,
+        "group": ["@price_options.$", "city"]
+      }
+    },
+    {
+      "name": "Merge result",
+      "process": "xiang.chart.MergeData",
+      "args": [
+        ["city", "industry", "billing"],
+        {
+          "Industry": {
+            "key": "city",
+            "values": "{{$res.Industry distribution[*].industry}}"
+          },
+          "Billing": {
+            "key": "city",
+            "values": "{{$res.Billing method[*].option}}"
+          }
+        }
+      ]
+    }
+  ],
+  "output": "{{$res.merge result}}",
+  "apis": {
+    "data": {
+      "guard": "-"
+    },
+    "setting": {
+      "guard": "-"
+    }
+  },
+  "filters": {},
+  "page": {
+    "primary": "City",
+    "layout": {
+      "filters": [
+        { "name": "start time", "width": 6 },
+        { "name": "end time", "width": 6 }
+      ],
+      "charts": [
+        { "type": "line", "props": {} },
+        { "type": "bar", "props": {} }
+      ]
+    }
+  }
 }
 ```

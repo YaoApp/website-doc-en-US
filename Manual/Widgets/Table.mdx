@@ -118,7 +118,7 @@ The page, placed in the `ui` directory, can be displayed as a stand-alone interf
 
 ## handler list
 
-| Processor               | Documentation                                                                           | Instructions                                                                                      |
+| process                 | Documentation                                                                           | Instructions                                                                                      |
 | ----------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
 | xiang.table.Search      | [Code Example](https://github.com/YaoApp/docs-yao/blob/main/table/apis/search.md)       | Query by criteria, pagination.                                                                    |
 | xiang.table.Find        | [Code Example](https://github.com/YaoApp/docs-yao/blob/main/table/apis/find.md)         | Query a single record by primary key.                                                             |
@@ -285,7 +285,7 @@ The data table will provide interfaces such as adding, deleting, modifying and c
       ]
     },
     "Management interface(key)": {
-      "process": "Processor name",
+      "process": "process name",
       "guard": "-",
       "default": []
     }
@@ -295,7 +295,7 @@ The data table will provide interfaces such as adding, deleting, modifying and c
 
 | Fields  | Type        | Description                                                                                                                                                     | Required Fields |
 | ------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
-| process | String      | Binding processor (`process`) input and output data structures must be consistent with the original interface                                                   | yes             |
+| process | String      | Binding process (`process`) input and output data structures must be consistent with the original interface                                                     | yes             |
 | guard   | String      | Interface authentication middleware, multiple are separated by `,`, set to `-`, no authentication middleware is set, and no default authentication mode is set. | No              |
 | default | Array<Any\> | The default value of the parameter table, if there is no default value, it can be set to `null`, such as `[null, null, 15]`                                     | No              |
 
@@ -646,7 +646,7 @@ CanIn properties (`props`), you can use `{{field name}}` or `:field name` to ref
 | actions | \[key:String\]:\[key:String\]:Object Render | The mapping table of available page function rendering methods, which are different for each page and are defined in specific pages. | No              |
 | option  | \[key:String\]:Any                          | Page configuration information, freely define as needed. API Setting is returned as is.                                              | No              |
 
-### Write a table preprocessor, using Hooks
+### Write a table preprocess, using Hooks
 
 Table API input and output data can be processed using Hooks. Hooks are divided into two categories: `before` and `after`. Before hook, which runs before the API call, can be used to process incoming parameters, and after hook, which runs after the API call and can be used to process query results.
 
@@ -673,14 +673,14 @@ When describing the data table, in the `hooks` field, declare the handler associ
 
 ### Hooks List
 
-| Hook          | Description                        | Input                                                                 | Output Specification                                                             |
-| ------------- | ---------------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| before:find   | Called before the Find handler     | The Find interface is passed in data                                  | The output result is used as the input parameter of the Find correlation handler |
-| after:find    | Called after the Find handler      | Find interface associated with the handler execution result           | Custom (output result as the final output of the Find handler)                   |
-| before:search | Called before the Search processor | Pass in data through the Search interface                             | Output results as input parameters of the Search correlation processor           |
-| after:search  | Called after the Search handler    | Search interface associated with the handler execution result         | Custom (the output result is the final output of the Search handler)             |
-| before:save   | Called before the Save handler     | The Save interface is passed in data                                  | The output result is used as the input parameter of the Save associated handler  |
-| after:save    | Called after the Save handler      | Save interface is associated with the execution result of the handler | Custom (the output result is the final output of the Save interface)             |
+| Hook          | Description                      | Input                                                                 | Output Specification                                                             |
+| ------------- | -------------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| before:find   | Called before the Find handler   | The Find interface is passed in data                                  | The output result is used as the input parameter of the Find correlation handler |
+| after:find    | Called after the Find handler    | Find interface associated with the handler execution result           | Custom (output result as the final output of the Find handler)                   |
+| before:search | Called before the Search process | Pass in data through the Search interface                             | Output results as input parameters of the Search correlation process             |
+| after:search  | Called after the Search handler  | Search interface associated with the handler execution result         | Custom (the output result is the final output of the Search handler)             |
+| before:save   | Called before the Save handler   | The Save interface is passed in data                                  | The output result is used as the input parameter of the Save associated handler  |
+| after:save    | Called after the Save handler    | Save interface is associated with the execution result of the handler | Custom (the output result is the final output of the Save interface)             |
 
 ## complete example
 

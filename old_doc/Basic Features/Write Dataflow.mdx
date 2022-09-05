@@ -2,11 +2,11 @@
 
 <blockquote>
   <p>
-    The data flow is used to arrange the calling logic of the processor, and supports the use of JavaScirpt
+    The data flow is used to arrange the calling logic of the process, and supports the use of JavaScirpt
     For query node data processing, it is suitable for more complex business logic.
   </p>
   <p>
-    The data stream can be used as a processor, the namespace is
+    The data stream can be used as a process, the namespace is
     <strong>flows.&lt;Process name&gt;</strong>; Query nodes can reference data flows other than themselves.
   </p>
   <p>
@@ -29,14 +29,14 @@ fake.flow.json:
 
 ```json
 {
-	"label": "Add test data",
-	"version": "1.0.0",
-	"description": "Add test data",
-	"nodes": [
-		{ "name": "user", "process": "flows.user" },
-		{ "name": "pet", "process": "flows.pet" }
-	],
-	"output": "DONE"
+  "label": "Add test data",
+  "version": "1.0.0",
+  "description": "Add test data",
+  "nodes": [
+    { "name": "user", "process": "flows.user" },
+    { "name": "pet", "process": "flows.pet" }
+  ],
+  "output": "DONE"
 }
 ```
 
@@ -44,63 +44,64 @@ user.flow.json:
 
 ```json
 {
-	"label": "User test data",
-	"version": "1.0.0",
-	"description": "User test data initialization",
-	"nodes": [
-		{
-			"name": "Clear Default Administrator",
-			"process": "models.xiang.user.DestroyWhere",
-			"args": [{ "wheres": [{ "column": "status", "value": "enabled" }] }]
-		},
-		{
-			"name": "Add new administrator",
-			"process": "models.xiang.user.EachSave",
-			"args": [
-				[
-					{
-						"name": "Administrator",
-						"type": "admin",
-						"email": "yao@iqka.com",
-						"password": "A123456p+",
-						"key": "8304925176",
-						"secret": "XMTdNRVigbgUiAPdiJCfaWgWcz2PaQXw",
-						"status": "enabled"
-					}
-				]
-			]
-		}
-	],
-	"output": "{{$res.Add new administrator}}"
+  "label": "User test data",
+  "version": "1.0.0",
+  "description": "User test data initialization",
+  "nodes": [
+    {
+      "name": "Clear Default Administrator",
+      "process": "models.xiang.user.DestroyWhere",
+      "args": [{ "wheres": [{ "column": "status", "value": "enabled" }] }]
+    },
+    {
+      "name": "Add new administrator",
+      "process": "models.xiang.user.EachSave",
+      "args": [
+        [
+          {
+            "name": "Administrator",
+            "type": "admin",
+            "email": "yao@iqka.com",
+            "password": "A123456p+",
+            "key": "8304925176",
+            "secret": "XMTdNRVigbgUiAPdiJCfaWgWcz2PaQXw",
+            "status": "enabled"
+          }
+        ]
+      ]
+    }
+  ],
+  "output": "{{$res.Add new administrator}}"
 }
 ```
 
-<Notice type='success'>
-	Tip: <strong>xiang.user</strong> is a built-in data model, and the data table name is
-	<strong>xiang_user</strong>, used to store the system administrator account. <a href='#'>View Data Model API Documentation</a>
+<Notice type="success">
+  Tip: <strong>xiang.user</strong> is a built-in data model, and the data table
+  name is
+  <strong>xiang_user</strong>, used to store the system administrator account. <a href="#">View Data Model API Documentation</a>
 </Notice>
 
 pet.flow.json:
 
 ```json
 {
-	"label": "Add pet data",
-	"version": "1.0.0",
-	"description": "Add pet data",
-	"nodes": [
-		{
-			"name": "Add pet data",
-			"process": "models.pet.Inset",
-			"args": [
-				["sn", "name", "type", "desc"],
-				[
-					["400001", "Ball Ball", "Dog", "New Member"],
-					["400002", "Prosperity", "Dog", "New Member"]
-				]
-			]
-		}
-	],
-	"output": "{{$res.Add pet data}}"
+  "label": "Add pet data",
+  "version": "1.0.0",
+  "description": "Add pet data",
+  "nodes": [
+    {
+      "name": "Add pet data",
+      "process": "models.pet.Inset",
+      "args": [
+        ["sn", "name", "type", "desc"],
+        [
+          ["400001", "Ball Ball", "Dog", "New Member"],
+          ["400002", "Prosperity", "Dog", "New Member"]
+        ]
+      ]
+    }
+  ],
+  "output": "{{$res.Add pet data}}"
 }
 ```
 
@@ -116,19 +117,19 @@ yao run flows.fake
 
 - You can use the `{{$in}}` variable globally to access the incoming parameters when calling;
 - The return value of each point can be accessed globally using the `{{$res}}` variable;
-- You can use the `{{$out}}` variable to access the return value of the processor in the node; `outs` is used to declare the return value of the current node, if not the return value of the processor.
+- You can use the `{{$out}}` variable to access the return value of the process in the node; `outs` is used to declare the return value of the current node, if not the return value of the process.
 - The `output` field is used to declare the output results of the data flow, if not declared to return the running results of all nodes.
 
 | variable   | type               | description                                                                                                                                                                                                 | scope of use                               | example                                                        |
 | ---------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ | -------------------------------------------------------------- |
 | `{{$in}}`  | array<any\>        | As the parameter list passed in when the process is called, it supports accessing specified parameters using array subscripts, for example: `{{$in.0}}` 1 argument, `{{$in.1}}` 2nd argument,               | `nodes[*].args`, `nodes[*].outs`, `output` | `{{$in}}` , `{{$in.0}}`,`{{$in.0.name}}`                       |
 | `{{$res}}` | \[key:string\]:any | Query node return value (`nodes[*].outs`) mapping table, support using the query node name to access the return value of a specific query node. For example `{{$res.node1.0}}` first return value of node1. | `nodes[*].args`, `nodes[*].outs`, `output` | `{{$res}}`, `{{$res.node1.0.name}}`, `{{ $res.node2.manu_id}}` |
-| `{{$out}}` | any                | Query the return value of the node's processor (`process`), support using `.` to access Object/Array values ​​                                                                                              | `nodes[*].outs`                            | `{{out} }`, `{{out.name}}`, `{{out.0}}`                        |
+| `{{$out}}` | any                | Query the return value of the node's process (`process`), support using `.` to access Object/Array values ​​                                                                                                | `nodes[*].outs`                            | `{{out} }`, `{{out.name}}`, `{{out.0}}`                        |
 
-<Notice type='success'>
-	Tip: If the parameter table has only one parameter, and the data type is the mapping table
-	[key:string]:any , the input data can be accessed via the key{' '}
-	<strong>&#123;&#123;$key&#125;&#125;</strong> .
+<Notice type="success">
+  Tip: If the parameter table has only one parameter, and the data type is the
+  mapping table [key:string]:any , the input data can be accessed via the key{" "}
+  <strong>&#123;&#123;$key&#125;&#125;</strong> .
 </Notice>
 
 Use a dataflow to query a set of data.
@@ -141,47 +142,47 @@ Write the data flow description file `latest.flow.json` and place it in the `flo
 
 ```json
 {
-	"label": "Query latest data",
-	"version": "1.0.0",
-	"description": "Query the latest data of the system",
-	"nodes": [
-		{
-			"name": "pet",
-			"process": "models.pet.Get",
-			"args": [
-				{
-					"select": ["id", "name", "kind", "created_at"],
-					"wheres": [{ "column": "kind", "value": "{{$in.0}}" }],
-					"orders": [{ "column": "created_at", "option": "desc" }],
-					"limit": 10
-				}
-			]
-		},
-		{
-			"name": "User",
-			"process": "models.xiang.user.Get",
-			"args": [
-				{
-					"select": ["id", "name", "created_at"],
-					"wheres": [{ "column": "status", "value": "enabled" }],
-					"orders": [{ "column": "created_at", "option": "desc" }],
-					"limit": 1
-				}
-			],
-			"outs": ["{{$out.0.id}}", "{{$out.0.name}}", "{{$out.0.created_at}}"]
-		},
-		{
-			"name": "Print data",
-			"process": "xiang.sys.Print",
-			"args": ["{{$res.pet}}", "{{$res.user}}"]
-		}
-	],
-	"output": {
-		"Node return value": "{{$res}}",
-		"parameter table": "{{$in}}",
-		"pet list": "{{$res.pet}}",
-		"user": "{{$res.user}}"
-	}
+  "label": "Query latest data",
+  "version": "1.0.0",
+  "description": "Query the latest data of the system",
+  "nodes": [
+    {
+      "name": "pet",
+      "process": "models.pet.Get",
+      "args": [
+        {
+          "select": ["id", "name", "kind", "created_at"],
+          "wheres": [{ "column": "kind", "value": "{{$in.0}}" }],
+          "orders": [{ "column": "created_at", "option": "desc" }],
+          "limit": 10
+        }
+      ]
+    },
+    {
+      "name": "User",
+      "process": "models.xiang.user.Get",
+      "args": [
+        {
+          "select": ["id", "name", "created_at"],
+          "wheres": [{ "column": "status", "value": "enabled" }],
+          "orders": [{ "column": "created_at", "option": "desc" }],
+          "limit": 1
+        }
+      ],
+      "outs": ["{{$out.0.id}}", "{{$out.0.name}}", "{{$out.0.created_at}}"]
+    },
+    {
+      "name": "Print data",
+      "process": "xiang.sys.Print",
+      "args": ["{{$res.pet}}", "{{$res.user}}"]
+    }
+  ],
+  "output": {
+    "Node return value": "{{$res}}",
+    "parameter table": "{{$in}}",
+    "pet list": "{{$res.pet}}",
+    "user": "{{$res.user}}"
+  }
 }
 ```
 
@@ -196,9 +197,9 @@ yao run flows.latest cat
 Extended reading:
 
 <Extend
-	title='Use JS in data flow'
-	desc='Learn how to use JS script to process data flow node data.'
-	link='b.Basic%20Features/e.Write%20Dataflow'
+  title="Use JS in data flow"
+  desc="Learn how to use JS script to process data flow node data."
+  link="b.Basic%20Features/e.Write%20Dataflow"
 ></Extend>
 
 ## Recommended
@@ -206,12 +207,20 @@ Extended reading:
 Next, it is recommended to study the following chapters:
 
 <Extend
-	title='Query Data'
-	desc='Learn how to use the Data Model Process and Query DSL to query data in a data flow.'
-	link='b.Basic%20Features/f.Query%20Data'
+  title="Query Data"
+  desc="Learn how to use the Data Model Process and Query DSL to query data in a data flow."
+  link="b.Basic%20Features/f.Query%20Data"
 ></Extend>
 
-<Div style={{ display: 'flex', justifyContent: 'space-between' }}>
-	<Link type='prev' title='Use Process' link='b.Basic%20Features/d.Use%20Process'></Link>
-	<Link type='next' title='Query data' link='b.Basic%20Features/f.Query%20Data'></Link>
+<Div style={{ display: "flex", justifyContent: "space-between" }}>
+  <Link
+    type="prev"
+    title="Use Process"
+    link="b.Basic%20Features/d.Use%20Process"
+  ></Link>
+  <Link
+    type="next"
+    title="Query data"
+    link="b.Basic%20Features/f.Query%20Data"
+  ></Link>
 </Div>

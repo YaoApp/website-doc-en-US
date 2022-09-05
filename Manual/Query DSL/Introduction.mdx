@@ -1,0 +1,61 @@
+# Query DSL
+
+## Sample code:
+
+<Detail title="View source code">
+
+```json
+{
+  "comment": "Statistics of the highest scores in each industry",
+  "select": ["industries@", "city", ":MAX(score) as high_score"],
+  "from": "service",
+  "wheres": [
+    { ":created_at": "created time", ">=": "2021-01-01" },
+    { ":created_at": "created time", "<=": "{'2021-12-31'}" },
+    { ":updated_at": "updated time", "is": "null" },
+    {
+      "wheres": [
+        { ":type": "type", "=": 1 },
+        { "or:type": "or type", "=": 2 }
+      ]
+    }
+  ],
+  "orders": "high_score desc",
+  "limit": 100,
+  "groups": ["industries@", "city"]
+}
+```
+
+</Detail>
+
+## introduce
+
+Gou Query DSL (Domain Specific Language) is used to describe data query conditions and is suitable for data analysis engines based on database implementation.
+The data type of the data query is `Object QueryDSL`. The query conditions are described by fields such as `select`, `wheres`, and the parser converts them into the corresponding `SQL statement`.
+
+## DSL structure list:
+
+| Fields    | Type                      | Description                                                                                                                                                            | Required Fields |
+| --------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| select    | Array\<Field Expression\> | select field list [document](./Query)                                                                                                                                  | yes             |
+| from      | String                    | query data table name or data model [document](./Query)                                                                                                                | no              |
+| wheres    | Array\<Object Where\>     | data query condition [document](./Query)                                                                                                                               | no              |
+| orders    | Array\<Object Order\>     | sort condition [document](./Sort)                                                                                                                                      | no              |
+| offset    | Int                       | record start position [document](./Query)                                                                                                                              | no              |
+| limit     | Int                       | The number of read data [document](./Query)                                                                                                                            | no              |
+| page      | Int                       | Paging query current page page number [document](./Query)                                                                                                              | No              |
+| pagesize  | Int                       | Number of records read per page [document](./Query)                                                                                                                    | no              |
+| data-only | Bool                      | Set to `true`, the query result is Array\<Object Record\>; default is `false`, the query result is Array\<Object Paginate\>, only when `page` or Valid for `pagesize`. | No              |
+| groups    | Array\<Object Group\>     | Aggregate fields and statistics level settings. [document](./Complex Query)                                                                                            | no              |
+| havings   | Array\<Object Having\>    | Aggregate query result filtering, only valid when `groups` is set. [document](./Complex Query)                                                                         | no              |
+| unions    | Array\<Object QueryDSL\>  | Union query. Multiple queries combine results into one table [document](./Join)                                                                                        | no              |
+| query     | Object QueryDSL           | Subquery. Describe the query logic according to QueryDSL, and generate a two-dimensional data table or value. [view subquery documentation](./Nested Query)            | no              |
+| joins     | Array\<Object Join\>      | Table joins. **Not recommended** when connecting to tables with large data volumes. [document](./Nested Query)                                                         | no              |
+| sql       | Object SQL                | SQL statement. **Not necessary, do not use**. [document](./Nested Query)                                                                                               | no              |
+| comment   | String                    | CheckQuery condition comments are used to help understand the query condition logic and render it in the development platform.                                         | No              |
+| No        |
+
+<Div style={{ display: "flex", justifyContent: "right" }}>
+
+  <Link type="next" title="Basic Usage" link="Manual/Query DSL/Basic Usage"></Link>
+</Div>

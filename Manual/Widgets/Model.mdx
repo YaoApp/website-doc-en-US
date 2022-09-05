@@ -58,26 +58,26 @@
 
 View [code example](#complete example)
 
-Yao can read data model definitions, implement data migration, metadata atomic operations, metadata input verification, and metadata management backend. Metadata atomic operation methods are mapped as processors (`process`), which support data relationship mapping between models, and can access queries in data flows (`Flow`) and interfaces (`API`). If you use the `golang` language to develop business plug-ins (`Plugin`), you can use Package `Gou` to access various methods of the model, and language SDKs such as `NodeJS` will be provided in the future. A data model corresponds to a data table in the database. It describes the structure of the data table through a JSON file and is placed in the `models` directory. Use `yao migrate` command to create/update data table structure design.
+Yao can read data model definitions, implement data migration, metadata atomic operations, metadata input verification, and metadata management backend. Metadata atomic operation methods are mapped as processes (`process`), which support data relationship mapping between models, and can access queries in data flows (`Flow`) and interfaces (`API`). If you use the `golang` language to develop business plug-ins (`Plugin`), you can use Package `Gou` to access various methods of the model, and language SDKs such as `NodeJS` will be provided in the future. A data model corresponds to a data table in the database. It describes the structure of the data table through a JSON file and is placed in the `models` directory. Use `yao migrate` command to create/update data table structure design.
 
 ## handler list
 
-| Processor                                | Description                                                                                                       | Documentation                                    |
-| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| models.<model name\>.Find                | Query a single record                                                                                             | [view](../Processor/process/Find)                |
-| models.<model name\>.Get                 | query by condition, no pagination                                                                                 | [view](../Processor/process/Get)                 |
-| models.<model name\>.Paginate            | query by condition, paginate                                                                                      | [view](../Processor/process/Paginate)            |
-| models.<model name\>.Create              | Creates a single record, returns the ID of the newly created record                                               | [view](../Processor/process/Create)              |
-| models.<model name\>.Update              | update a single record                                                                                            | [view](../Processor/process/Update)              |
-| models.<model name\>.Save                | save a single record, no create record exists, update record exists, return record id                             | [view](../Processor/process/Save)                |
-| models.<model name\>.Delete              | delete a single record (mark delete)                                                                              | [view](../Processor/process/Delete)              |
-| models.<model name\>.Destroy             | delete a single record (true delete)                                                                              | [view](../Processor/process/Destroy)             |
-| models.<model name\>.Insert              | Insert multiple records, returns the number of inserted rows                                                      | [view](../Processor/process/Insert)              |
-| models.<model name\>.UpdateWhere         | Update records conditionally, returning the number of updated rows                                                | [view](../Processor/process/UpdateWhere)         |
-| models.<model name\>.DeleteWhere         | delete data by condition, return the number of rows deleted (marked delete)                                       | [view](../Processor/process/DeleteWhere)         |
-| models.<model name\>.DestroyWhere        | Delete data by condition, return the number of rows deleted (true delete)                                         | [View](../Processor/process/DestroyWhere)        |
-| models.<model name\>.EachSave            | save multiple records, no create record exists, update record exists, return record id collection                 | [view](../Processor/process/EachSave)            |
-| models.<model name\>.EachSaveAfterDelete | Save multiple records after deleting a set of records with a given ID, no create, no update, return ID collection | [view](../Processor/process/EachSaveAfterDelete) |
+| process                                  | Description                                                                                                       | Documentation                                  |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| models.<model name\>.Find                | Query a single record                                                                                             | [view](../Process/process/Find)                |
+| models.<model name\>.Get                 | query by condition, no pagination                                                                                 | [view](../Process/process/Get)                 |
+| models.<model name\>.Paginate            | query by condition, paginate                                                                                      | [view](../Process/process/Paginate)            |
+| models.<model name\>.Create              | Creates a single record, returns the ID of the newly created record                                               | [view](../Process/process/Create)              |
+| models.<model name\>.Update              | update a single record                                                                                            | [view](../Process/process/Update)              |
+| models.<model name\>.Save                | save a single record, no create record exists, update record exists, return record id                             | [view](../Process/process/Save)                |
+| models.<model name\>.Delete              | delete a single record (mark delete)                                                                              | [view](../Process/process/Delete)              |
+| models.<model name\>.Destroy             | delete a single record (true delete)                                                                              | [view](../Process/process/Destroy)             |
+| models.<model name\>.Insert              | Insert multiple records, returns the number of inserted rows                                                      | [view](../Process/process/Insert)              |
+| models.<model name\>.UpdateWhere         | Update records conditionally, returning the number of updated rows                                                | [view](../Process/process/UpdateWhere)         |
+| models.<model name\>.DeleteWhere         | delete data by condition, return the number of rows deleted (marked delete)                                       | [view](../Process/process/DeleteWhere)         |
+| models.<model name\>.DestroyWhere        | Delete data by condition, return the number of rows deleted (true delete)                                         | [View](../Process/process/DestroyWhere)        |
+| models.<model name\>.EachSave            | save multiple records, no create record exists, update record exists, return record id collection                 | [view](../Process/process/EachSave)            |
+| models.<model name\>.EachSaveAfterDelete | Save multiple records after deleting a set of records with a given ID, no create, no update, return ID collection | [view](../Process/process/EachSaveAfterDelete) |
 
 ## Naming conventions
 

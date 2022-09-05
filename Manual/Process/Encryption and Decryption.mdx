@@ -1,0 +1,87 @@
+# encrypt and decode
+
+## process list
+
+Encryption and decryption process, reference document <a href="https://github.com/YaoApp/yao/blob/main/crypto/crypto.go">Comparison table</a>
+
+| process                | Instructions                                                                                     | How to use                                                |
+| ---------------------- | ------------------------------------------------------------------------------------------------ | --------------------------------------------------------- |
+| yao.crypto.hmac        | Use SHA1 encryption, with base64 encryption                                                      | Process("yao.crypto.hmac", "SHA1", value, key, "base64"); |
+| encoding.base64.Encode | use base64 encryption                                                                            | Process("encoding.base64.Encode", str);                   |
+| encoding.base64.Decode | Decrypt with base64                                                                              | Process("encoding.base64.Decode", str);                   |
+| yao.crypto.hash        | Use various encryption methods, the first parameter can be filled in: MD4, MD5, SHA1, SHA256 ... | Process("yao.crypto.hash", "SHA1", str);                  |
+|                        |
+
+## yao.crypto.hmac
+
+**Parameters Table**
+
+| Parameters | Type | Required Fields | Description                                         |
+| ---------- | ---- | --------------- | --------------------------------------------------- |
+| args[0]    | any  | yes             | encryption method: (eg: SHA1)                       |
+| args[1]    | any  | yes             | string to encrypt                                   |
+| args[2]    | any  | yes             | key to encrypt                                      |
+| args[3]    | any  | Yes             | Data type returned after encryption Default: base64 |
+
+## encoding.base64.Encode
+
+**Parameters Table**
+
+| Parameters | Type | Required Fields | Description             |
+| ---------- | ---- | --------------- | ----------------------- |
+| args[0]    | any  | yes             | base64 encrypted string |
+
+## encoding.base64.Decode
+
+**Parameters Table**
+
+| Parameters | Type | Required Fields | Description       |
+| ---------- | ---- | --------------- | ----------------- |
+| args[0]    | any  | yes             | string to decrypt |
+
+## yao.crypto.hash
+
+**Parameters Table**
+
+| Parameters | Type | Required Fields | Description                 |
+| ---------- | ---- | --------------- | --------------------------- |
+| args[0]    | any  | yes             | encryption method (eg: MD5) |
+| args[1]    | any  | yes             | number to be encrypted      |
+
+## Partial code example
+
+```javascript
+function Crypt() {
+  var value = "123456";
+  var key = "key";
+
+  // encrypt with SHA1
+  var res = Process("yao.crypto.hmac", "SHA1", value, key, "base64");
+  console.log(res);
+
+  // use base64 encryption
+  var res = Process("encoding.base64.Encode", value);
+  console.log(res);
+
+  // encrypt with SHA1
+  var res = Process("yao.crypto.hash", "SHA1", value);
+  console.log(res);
+
+  // use MD5 encryption
+  var res = Process("yao.crypto.hash", "MD5", value);
+  console.log(res);
+}
+```
+
+<Div style={{ display: "flex", justifyContent: "space-between" }}>
+  <Link
+    type="prev"
+    title="Session Handling"
+    link="Manual/Process/Session Handling"
+  ></Link>
+  <Link
+    type="next"
+    title="Process Control"
+    link="Manual/Process/Process Control"
+  ></Link>
+</Div>

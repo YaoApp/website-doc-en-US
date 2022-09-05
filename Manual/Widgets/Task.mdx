@@ -29,11 +29,11 @@ Generally speaking, we take the logic that is time-consuming, consumes a lot of 
 
 ## handler list
 
-| Processor          | Description                            | Documentation |
-| ------------------ | -------------------------------------- | ------------- |
-| tasks.XXX.Add      | Add a task                             | -             |
-| tasks.XXX.progress | Query the progress of a task processor | -             |
-| tasks.XXX.get      | Get information about task processing  | -             |
+| process            | Description                           | Documentation |
+| ------------------ | ------------------------------------- | ------------- |
+| tasks.XXX.Add      | Add a task                            | -             |
+| tasks.XXX.progress | Query the progress of a task process  | -             |
+| tasks.XXX.get      | Get information about task processing | -             |
 
 ## Naming conventions
 
@@ -44,7 +44,7 @@ Generally speaking, we take the logic that is time-consuming, consumes a lot of 
 | attempts      | Number of failed retries                        |             |
 | attempt_after | retry interval                                  |             |
 | timeout       | timeout period                                  |             |
-| process       | The processor bound to this task                |             |
+| process       | The process bound to this task                  |             |
 | next          | Generate task unique id                         |             |
 | add           | Method triggered when a task is added           |             |
 | success       | Trigger method after successful task processing |             |

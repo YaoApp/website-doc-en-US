@@ -1,0 +1,63 @@
+# session data
+
+<blockquote>
+  <p>
+    You can use <strong>session.*</strong>,<strong>Captcha</strong>,
+    <strong>PasswordValidate</strong>
+    <strong>JwtMake</strong>, <strong>JwtValidate</strong> and other processes to
+    implement custom user login and user identity authentication.
+  </p>
+  <p>
+    The session data set when logging in can be used in data streams, JS-written
+    processes and data tables.{" "}
+  </p>
+</blockquote>
+
+## handler list
+
+Application engine related process.
+
+| process       | Description                    | Documentation |
+| ------------- | ------------------------------ | ------------- |
+| session.start | start session return sessionID | -             |
+| session.set   | Set session data               | -             |
+| session.Get   | Get session data               | -             |
+
+## code example
+
+Set the value of the session, create a new `flows/session.flow.json`, the three parameters of args correspond respectively: session key, session value, expiration time
+
+```json
+{
+  "label": "session",
+  "version": "1.0.0",
+  "description": "session",
+  "nodes": [
+    {
+      "name": "SID",
+      "process": "session.start"
+    },
+    {
+      "name": "Set session data",
+      "process": "session.set",
+      "args": ["user", "123456", 28800]
+    }
+  ],
+  "output": "success"
+}
+```
+
+After setting the session, you can use `Process("session.Get", "user")` to get the corresponding value
+
+<Div style={{ display: "flex", justifyContent: "space-between" }}>
+  <Link
+    type="prev"
+    title="File Operations"
+    link="Manual/Process/File Operations"
+  ></Link>
+  <Link
+    type="next"
+    title="Encryption and Decryption"
+    link="Manual/Process/Encryption and Decryption"
+  ></Link>
+</Div>

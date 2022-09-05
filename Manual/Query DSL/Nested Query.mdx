@@ -1,0 +1,187 @@
+# subqueries
+
+## Subquery `query`
+
+You can dynamically generate a two-dimensional data table or value by describing `query`, and query or apply WHERE, HAVING query conditions on the data table. When used in a SELECT subquery scenario, an alias must be set. If `query` is set, then `from` will be invalid. The `query` data structure is `QueryDSL`.
+
+### for SELECT scenarios
+
+Query DSL:
+
+```json
+{
+  "select": ["id", "name"],
+  "query": {
+    "comment": "Generate a new data table by subquery (alias must be set)",
+    "select": ["id", "short_name as name"],
+    "from": "manu as m",
+    "limit": 50
+  },
+  "orders": "id",
+  "limit": 20
+}
+```
+
+The parsed `SQL statement` :
+
+```sql
+SELECT `id`, `name`
+FROM (
+  SELECT `id`, `short_name` as `name` FROM `manu` LIMIT 50
+) AS `m`
+ORDER BY `id` ASC
+LIMIT 50
+```
+
+### for WHERE scene
+
+Query DSL:
+
+```json
+{
+  "select": ["id", "name"],
+  "form": "service",
+  "wheres": [
+    {
+      "field": "manu_id",
+      "op": "in",
+      "query": {
+        "comment": "Query the manufacturer ID array",
+        "select": ["id"],
+        "from": "manu"
+      }
+    }
+  ],
+  "orders": "id",
+  "limit": 20
+}
+```
+
+The parsed `SQL statement` :
+
+```sql
+SELECT `id`, `name`
+FROM `service`
+WHERE `manu_id` IN (
+  SELECT `id` FROM `manu`
+)
+ORDER BY `id` ASC
+LIMIT 50
+```
+
+### FOR HAVING SCENE
+
+Gou Query DSL:
+
+```json
+{
+  "select": ["id", "name", ":COUNT(`id`) as number"],
+  "form": "service",
+  "groups": "id",
+  "havings": [
+    {
+      "field": "Quantity",
+      "op": "=",
+      "query": {
+        "select": ["1"]
+      }
+    }
+  ]
+}
+```
+
+The parsed `SQL statement` :
+
+```sql
+SELECT `id`, `name`, COUNT(`id`) as number
+FROM `service`
+GROUP BY `id`
+HAVING `number` = (SELECT 1)
+LIMIT 50
+```
+
+### Table joins (not recommended) `joins`
+
+Connecting two data tables with a large amount of data consumes a lot of server resources, and the query is inefficient. For scenarios such as data statistical analysis, data warehouses or data analysis engines should be used to set business data structures, cleaning and collection logic and query logic according to business scenarios, and finally collect them into a **wide table**, which is performed in the wide table. D. For applications with a large amount of data, it is recommended to use the `Xu` data analysis engine.
+
+Gou Query DSL:
+
+```json
+{
+  "select": ["id", "name", "manu.name as manu_name"],
+  "form": "service",
+  "joins": [
+    {
+      "left": true,
+      "from": "manu",
+      "key": "id",
+      "foreign": "service.manu_id"
+    }
+  ]
+}
+```
+
+The parsed `SQL statement` :
+
+```sql
+SELECT `service`.`id`, `service`.`name`, `manu`.`name` as `manu_name`
+FROM `service`
+LEFT JOIN `manu` ON `manu`.`id` = `service`.`manu_id`
+```
+
+The query result is:
+
+| id  | name                      | manu_name                                                   |
+| --- | ------------------------- | ----------------------------------------------------------- |
+| 1   | Tencent Cloud Hosting CVM | Beijing Yundao Tiancheng Technology Co., Ltd.               |
+| 2   | Tencent Cloud Disk        | Beijing Yundao Tiancheng Technology Co., Ltd.               |
+| 3   | Ali host                  | Xiangchuan High-tech (Beijing) Digital Technology Co., Ltd. |
+| 4   | UCloud Cloud Hosting      | Xiangchuan Zhishu (Beijing) Software Technology Co., Ltd.   |
+| 5   | adfasdf                   | Beijing Yundao Tiancheng Technology Co., Ltd.               |
+
+#### Object Join data structure
+
+| Fields  | Type   | Description                                                                              | Required Fields |
+| ------- | ------ | ---------------------------------------------------------------------------------------- | --------------- |
+| from    | String | Join table name, same as Object QueryDSL `from`.                                         | yes             |
+| key     | String | field name of the associated join table                                                  | yes             |
+| foreign | String | Field name of the associated target table (table name or alias needs to be specified)    | Yes             |
+| left    | Bool   | `true` join method is `LEFT JOIN`, default is `false` join method is `JOIN`              | no              |
+| right   | Bool   | `true` connection method is `RIGHT JOIN`, default is `false` connection method is `JOIN` | no              |
+
+### SQL statement (use with caution) `sql`
+
+**Not necessary, do not use** Unless the query logic cannot be described using the Query DSL, do not write SQL statements directly. Directly writing SQL statements will increase the difficulty of application maintenance; increase the security risk of system information leakage; due to uncontrollable query logic, it may cause database or data warehouse downtime; data migration, database, data warehouse, data analysis engine upgrade, etc. Can make the query statement unavailable\*\*.
+
+Gou Query DSL:
+
+```json
+{
+  "sql": {
+    "stmt": "SELECT `id`, `name` FROM `service` WHERE id = ?",
+    "args": [1]
+  }
+}
+```
+
+The parsed `SQL statement` :
+
+```sql
+SELECT `id`, `name` FROM `service` WHERE id = 1
+```
+
+**Object SQL data structure**
+
+| Fields | Type         | Description    | Required Fields |
+| ------ | ------------ | -------------- | --------------- |
+| stmt   | String       | SQL statement  | yes             |
+| args   | Array\<Any\> | parameter list | no              |
+
+<Div style={{ display: "flex", justifyContent: "space-between" }}>
+  <Link
+    type="prev"
+    title="Complex Query"
+    link="Manual/Query DSL/Complex Query"
+  ></Link>
+  <Link type="next" title="Join" link="Manual/Query DSL/Join"></Link>
+</Div>

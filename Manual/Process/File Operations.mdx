@@ -1,0 +1,126 @@
+# file operations
+
+<blockquote>
+  <p>
+    You can use processes such as <strong>xiang.fs.*</strong> to implement file
+    upload operations.
+  </p>
+</blockquote>
+
+## File handler list:
+
+| process           | Description                                           | Documentation |
+| ----------------- | ----------------------------------------------------- | ------------- |
+| xiang.fs.Upload   | Upload files to application `data` directory          | -             |
+| xiang.fs.ReadFile | Read the contents of the file in the `data` directory | -             |
+
+## sample code
+
+Export Excel operation and create a new routing file: `/apis/utils.http.json` The code is as follows:
+
+```json
+{
+  "name": "Download Excel",
+  "version": "1.0.0",
+  "description": "Download Excel",
+  "group": "utils",
+  "guard": "-",
+  "paths": [
+    {
+      "guard": "-",
+      "path": "/export/:name",
+      "method": "GET",
+      "process": "flows.utils.export",
+      "in": ["$param.name"],
+      "out": {
+        "status": 200,
+        "type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "headers": {
+          "Content-Disposition": "attachment;filename=export data.xlsx"
+        }
+      }
+    }
+  ]
+}
+```
+
+New file: `/flows/utils/export.flow.json` The code is as follows:
+
+```json
+{
+  "label": "Download",
+  "version": "1.0.0",
+  "description": "Download",
+  "nodes": [
+    {
+      "name": "file",
+      "process": "xiang.table.Export",
+      "args": ["{{$in.0}}", {}, 20]
+    },
+    {
+      "name": "Data",
+      "process": "xiang.fs.ReadFile",
+      "args": ["{{$res.file}}", false]
+    }
+  ],
+  "output": "{{$res.data.content}}"
+}
+```
+
+If there is a table named: `/tables/pet.tab.json`, to export the list data of the table only need to request: `/utils/export/pet`
+
+To upload a file, upload a file named file, and create a new `/apis/storage.http.json` code as follows:
+
+```json
+{
+  "name": "Storage Interface",
+  "version": "1.0.0",
+  "description": "Storage API",
+  "group": "storage",
+  "guard": "bearer-jwt",
+  "paths": [
+    {
+      "path": "/upload",
+      "method": "POST",
+      "guard": "-",
+      "process": "flows.upload",
+      "in": ["$file.file"],
+      "out": {
+        "status": 200,
+        "type": "application/json"
+      }
+    }
+  ]
+}
+```
+
+The new `/flows/upload.flow.json` code is as follows:
+
+```json
+{
+  "label": "Upload file",
+  "version": "1.0.0",
+  "description": "Upload file",
+  "nodes": [
+    {
+      "name": "Upload",
+      "process": "xiang.fs.Upload",
+      "args": ["{{$in.0}}"]
+    }
+  ],
+  "output": "{{$res.upload}}"
+}
+```
+
+<Div style={{ display: "flex", justifyContent: "space-between" }}>
+  <Link
+    type="prev"
+    title="Network Requests"
+    link="Manual/Process/Network Requests"
+  ></Link>
+  <Link
+    type="next"
+    title="Session Handling"
+    link="Manual/Process/Session Handling"
+  ></Link>
+</Div>

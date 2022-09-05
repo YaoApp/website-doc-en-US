@@ -1,0 +1,352 @@
+# Aggregate query
+
+## Data aggregation `groups`, `havings`
+
+The data aggregation method is defined in `groups`, and the Group data structure is `Array<Object Group>`.
+
+| Fields  | Type                   | Description                                    | Required Fields |
+| ------- | ---------------------- | ---------------------------------------------- | --------------- |
+| groups  | Array\<Object Group\>  | Aggregate fields and statistics level settings | No              |
+| havings | Array\<Object Having\> | Aggregate query result filtering               | No              |
+
+**Object Group data structure**
+
+| Fields  | Type             | Description                                                                                                        | Required Fields |
+| ------- | ---------------- | ------------------------------------------------------------------------------------------------------------------ | --------------- |
+| field   | Field Expression | field expression, aliasing is not supported `as`                                                                   | yes             |
+| rollup  | String           | Returns multi-level statistical results at the same time, corresponding to the name of the aggregated field value. | No              |
+| comment | String           | Aggregate condition comment to help understand query condition logic and render in development platform.           | No              |
+
+### data sheet
+
+Data table `service` :
+
+| id  | city     | kind          | amount |
+| --- | -------- | ------------- | ------ |
+| 1   | Beijing  | Cloud Hosting | 50     |
+| 2   | Beijing  | Cloud Hosting | 50     |
+| 3   | Beijing  | Cloud Storage | 50     |
+| 4   | Shanghai | Cloud Hosting | 200    |
+
+## Aggregate statistics `group`
+
+Gou Query DSL:
+
+```json
+{
+  "select": ["kind as type", "city as city", ":SUM(amount) as quantity"],
+  "from": "service",
+  "groups": [
+    { "field": "kind", "comment": "Statistics by type" },
+    { "field": "city", "comment": "Statistics by city" }
+  ]
+}
+```
+
+The parsed `SQL statement` is (MySQL):
+
+```sql
+  SELECT
+    `kind` AS `type`,
+    `city` AS `city`,
+    SUM(`amount`) AS `amount`
+  FROM `service`
+  GROUP BY `kind`, `city`
+```
+
+The query result is:
+
+| Type          | City     | Quantity |
+| ------------- | -------- | -------- |
+| Cloud Hosting | Beijing  | 100      |
+| Cloud Storage | Beijing  | 50       |
+| Cloud Hosting | Shanghai | 200      |
+
+## Multi-level aggregation statistics `rollup`
+
+Gou Query DSL:
+
+```json
+{
+  "select": ["kind as type", "city as city", ":SUM(amount) as quantity"],
+  "from": "service",
+  "groups": [
+    { "field": "kind", "rollup": "all types", "comment": "statistics by type" },
+    { "field": "city", "comment": "Statistics by city" }
+  ]
+}
+```
+
+The parsed `SQL statement` is (MySQL):
+
+```sql
+  SELECT
+    IF(GROUPING(`kind`), 'all types', `kind`) AS `type`,
+    `city` AS `city`,
+    SUM(`amount`) AS `amount`
+  FROM `service`
+  GROUP BY `kind`, `city` WITH ROLLUP
+```
+
+The query result is:
+
+| Type          | City     | Quantity |
+| ------------- | -------- | -------- |
+| Cloud Hosting | Shanghai | 200      |
+| Cloud Hosting | Beijing  | 100      |
+| Cloud Host    | **NULL** | 300      |
+| Cloud Storage | Beijing  | 50       |
+| Cloud Storage | **NULL** | 50       |
+| **all types** | **NULL** | 350      |
+
+Gou Query DSL:
+
+```json
+{
+  "select": ["kind as type", "city as city", ":SUM(amount) as quantity"],
+  "from": "service",
+  "groups": [
+    { "field": "kind", "rollup": "all types", "comment": "statistics by type" },
+    { "field": "city", "rollup": "All cities", "comment": "Statistics by city" }
+  ]
+}
+```
+
+The parsed `SQL statement` is (MySQL):
+
+```sql
+  SELECT
+    IF(GROUPING(`kind`), 'all types', `kind`) AS `type`,
+    IF(GROUPING(`city`), 'all cities', `city`) AS `city`,
+    SUM(`amount`) AS `amount`
+  FROM `service`
+  GROUP BY `kind`, `city` WITH ROLLUP
+```
+
+The query result is:
+
+| Type          | City           | Quantity |
+| ------------- | -------------- | -------- |
+| Cloud Hosting | Shanghai       | 200      |
+| Cloud Hosting | Beijing        | 100      |
+| Cloud Hosting | **All Cities** | 300      |
+| Cloud Storage | Beijing        | 50       |
+| Cloud Storage | **All Cities** | 50       |
+| **All Types** | **All Cities** | 350      |
+
+## Aggregate functions `aggregate functions`
+
+Aggregate functions collect statistics on a set of data records according to a specific algorithm and return a value, which is generally used for aggregation queries.
+
+### data sheet
+
+| id  | city     | kind          | amount |
+| --- | -------- | ------------- | ------ |
+| 1   | Beijing  | Cloud Hosting | 50     |
+| 2   | Beijing  | Cloud Hosting | 50     |
+| 3   | Beijing  | Cloud Storage | 50     |
+| 4   | Shanghai | Cloud Hosting | 200    |
+
+### Aggregate function table
+
+| Function         | Parameter List                          | Description                   | SELECT Example                                           | Value                              |
+| ---------------- | --------------------------------------- | ----------------------------- | -------------------------------------------------------- | ---------------------------------- |
+| SUM()            | [`Field Expression`]                    | Summation                     | `:SUM(amount)` , `:SUM(DISTINCT amount)`                 | `350`, `250`                       |
+| COUNT()          | [`Field Expression`]                    | Record row count              | `:COUNT(id)`,`:COUNT(amount)`, `:COUNT(DISTINCT amount)` | `4`,`4`, ` 2`                      |
+| AVG()            | [`Field Expression`]                    | Average                       | `:AVG(amount)`, `:AVG(DISTINCT amount)`                  | `87.5000`, `125.0000`              |
+| MIN()            | [`Field Expression`]                    | minimum value                 | `:MIN(amount)`                                           | `50`                               |
+| MAX()            | [`Field Expression`]                    | maximum value                 | `:MAX(amount)`                                           | `200`                              |
+| STDDEV_POP()     | [`Field Expression`]                    | Population standard deviation | `:STDDEV_POP(amount)`                                    | `64.9519052838329`                 |
+| STDDEV_SAMP()    | [`Field Expression`]                    | Sample standard deviation     | `:STDDEV_SAMP(amount)`                                   | `75`                               |
+| VAR_POP()        | [`Field Expression`]                    | Population variance           | `:VAR_POP(amount)`                                       | `4218.75`                          |
+| VAR_SAMP()       | [`Field Expression`]                    | Sample variance               | `:VAR_SAMP(amount)`                                      | `5625`                             |
+| JSON_ARRAYAGG()  | [`Field Expression`]                    | Combine into a JSON Array     | `:JSON_ARRAYAGG(amount)`                                 | `[50, 50, 50, 200]`                |
+| JSON_OBJECTAGG() | [`Field Expression`,`Field Expression`] | Combined into a JSON Object   | `:JSON_OBJECTAGG(city,price)`                            | `{"Shanghai": 200, "Beijing": 50}` |
+
+## Aggregate result filtering `havings`
+
+Aggregate result data cannot be filtered in `wheres`. If you need to filter aggregate query results, you can use `havings` to implement, the data structure is `Array<Object Having>`
+
+Gou Query DSL:
+
+```json
+{
+  "select": ["kind as type", "city as city", ":SUM(amount) as quantity"],
+  "from": "service",
+  "groups": [
+    { "field": "kind", "rollup": "all types", "comment": "statistics by type" },
+    { "field": "city", "rollup": "All cities", "comment": "Statistics by city" }
+  ],
+  "havings": [
+    {
+      "field": "type",
+      "value": "cloud host",
+      "comment": "filter cloud host in aggregated results"
+    },
+    {
+      "havings": [
+        {
+          "field": "quantity",
+          "op": "=",
+          "value": 100,
+          "comment": "quantity equals 100"
+        },
+        {
+          "or": true,
+          "field": "number",
+          "value": 300,
+          "comment": "or 300 records"
+        }
+      ]
+    }
+  ]
+}
+```
+
+The parsed `SQL statement` is (MySQL):
+
+```sql
+  SELECT
+    IF(GROUPING(`kind`), 'all types', `kind`) AS `type`,
+    IF(GROUPING(`city`), 'all cities', `city`) AS `city`,
+    SUM(`amount`) AS `amount`
+  FROM `service`
+  GROUP BY `kind`, `city` WITH ROLLUP
+  HAVING `type` = 'cloud host' AND (`quantity` = 100 OR `quantity` = 300)
+```
+
+The query result is:
+
+| Type          | City       | Quantity |
+| ------------- | ---------- | -------- |
+| Cloud Hosting | Beijing    | 100      |
+| Cloud Hosting | All Cities | 300      |
+
+**Object Having Data Structure**
+
+| Fields  | Type                   | Description                                                                                                                             | Required Fields |
+| ------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| field   | Field Expression       | field expression, aliasing is not supported `as`                                                                                        | yes             |
+| value   | Any                    | Matches numeric values. If the data type is `Field Expression`, use `{}` to include, such as `{updated_at}`                             | no              |
+| op      | String                 | Match relational operator. Allowed values ​​`=`,`like`,`in`,`>` etc, default is `=`                                                     | no              |
+| or      | Bool                   | `true` The logical relation of the query condition is `or`, the default is `false` The logical relation of the query condition is `and` | No              |
+| havings | Array\<Object Having\> | Grouping queries. For `condition 1` `and` ( `condition 2` OR `condition 3`) scenario                                                    | no              |
+| query   | Object QueryDSL        | Subquery; `value` value is ignored if `query` is specified. [View Subqueries Documentation](Manual/QueryDSL/Subqueries)                 | No              |
+| comment | String                 | The query condition comment, which is used to help understand the query condition logic and render it in the development platform.      | No              |
+
+## Data aggregation syntactic sugar `groups syntactic sugar`
+
+### Groups shorthand
+
+In general, you only need to specify the aggregate field, which can be described by `Array<Field Expression>` structure; or by `Field Expression` type description, and multiple are separated by `,`.
+
+The analysis results described below are the same.
+
+`full description`
+
+```json
+{
+  "select": ["kind as type", "city as city", ":SUM(amount) as quantity"],
+  "from": "service",
+  "groups": [
+    { "field": "kind", "comment": "Statistics by type" },
+    { "field": "city", "comment": "Statistics by city" }
+  ]
+}
+```
+
+`Simplifies to Array<Field Expression>`
+
+```json
+{
+  "select": ["kind as type", "city as city", ":SUM(amount) as quantity"],
+  "from": "service",
+  "groups": ["kind", { "field": "city", "comment": "Statistics by city" }]
+}
+```
+
+`Simplified to Field Expression`
+
+```json
+{
+  "select": ["kind as type", "city as city", ":SUM(amount) as quantity"],
+  "from": "service",
+  "groups": "kind,city"
+}
+```
+
+## JSON Array field aggregation
+
+When performing aggregate query on `JSON Array` field, you need to connect JSON Table first, and then perform aggregate query on the connected data table. Can be shortened to aggregate directly by JSON Array field.
+
+Data table `service` :
+
+| id  | city     | kind          | industries(JSON Array)          | pricing(JSON Array\<Object\>)                                               | amount |
+| --- | -------- | ------------- | ------------------------------- | --------------------------------------------------------------------------- | ------ |
+| 1   | Beijing  | Cloud Hosting | `["Education","Medical"]`       | `[{"id":1, "name":"Monthly Payment"},{"id":2, "name" :"Pay annually"}]`     | 50     |
+| 2   | Beijing  | Cloud Hosting | `["Art","Medical"]`             | `[{"id":1, "name":"Monthly Payment"},{"id":3, "name" :"one-time payment"}]` | 50     |
+| 3   | Beijing  | Cloud Storage | `["Education","Manufacturing"]` | `[{"id":2, "name":"Annual Payment"},{"id":3, "name" :"one-time payment"}]`  | 50     |
+| 4   | Shanghai | Cloud Hosting | `["Energy","Car"]`              | `[{"id":1, "name":"Monthly Pay"}]`                                          | 200    |
+
+Query DSL:
+
+```json
+{
+  "select": [
+    "@industries as industries",
+    "@pricing[*].name as billing method",
+    ":SUM(amount) as amount"
+  ],
+  "from": "service",
+  "groups": [
+    { "field": "industry", "rollup": "all industries" },
+    { "field": "Billing method", "rollup": "All billing methods" }
+  ]
+}
+```
+
+The parsed `SQL statement` (MySQL8):
+
+```sql
+SELECT
+  IF(GROUPING(`Industry`), 'All industries', `Industry`) AS `Industry`,
+  IF(GROUPING(`Billing method`), 'All billing methods', `Billing method`) AS `Billing method`,
+  SUM(`amount`) AS `amount`
+FROM `service`
+  JOIN JSON_TABLE(`service`.`industries`, '$[*]' columns (`industries` varchar(50) path '$') ) as industries
+  JOIN JSON_TABLE(`service`.`pricing`, '$[*]' columns (`billing method` varchar(50) path '$.name') ) as pricing
+GROUP by `Industry`, `Billing method` WITH ROLLUP
+```
+
+Return result:
+
+| Industry       | Billing Method      | Quantity |
+| -------------- | ------------------- | -------- |
+| Manufacturing  | One Time Fee        | 50       |
+| Manufacturing  | Paid annually       | 50       |
+| Manufacturing  | All Billing Methods | 100      |
+| Medical        | One-time fee        | 50       |
+| Medical        | Paid annually       | 50       |
+| Medical        | Pay per month       | 100      |
+| Medical        | All Billing Methods | 200      |
+| Education      | One Time Fee        | 50       |
+| Education      | Paid annually       | 100      |
+| Education      | Paid Monthly        | 50       |
+| Education      | All Billing Methods | 200      |
+| Car            | Pay per month       | 200      |
+| Car            | All billing methods | 200      |
+| Energy         | Pay per month       | 200      |
+| Energy         | All Billing Methods | 200      |
+| Art            | One Time Fee        | 50       |
+| Art            | Paid Monthly        | 50       |
+| Art            | All Billing Methods | 100      |
+| All Industries | All Billing Methods | 1000     |
+
+<Div style={{ display: "flex", justifyContent: "space-between" }}>
+  <Link type="prev" title="Sort" link="Manual/Query DSL/Sort"></Link>
+  <Link
+    type="next"
+    title="Nested Query"
+    link="Manual/Query DSL/Nested Query"
+  ></Link>
+</Div>

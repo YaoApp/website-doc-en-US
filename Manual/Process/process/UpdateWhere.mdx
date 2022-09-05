@@ -1,0 +1,214 @@
+#UpdateWhere
+
+Update data records conditionally, return the number of updated rows
+
+## `updateWhere` Update records by condition, return the number of updated rows
+
+### process
+
+`models.modelname.UpdateWhere`
+
+### Parameters Table
+
+| Parameters | Type              | Description      | Example                                               |
+| ---------- | ----------------- | ---------------- | ----------------------------------------------------- |
+| args[0]    | Object QueryParam | Query conditions | `{"wheres":[{"column":"name", "value":"Zhang San"}]}` |
+| args[1]    | Object Row        | Data record      | `{"balance": 200}`                                    |
+
+### return value
+
+`Integer` updates the number of rows
+
+## Example one
+
+### Data Model
+
+| Model | Model Definition                           |
+| ----- | ------------------------------------------ |
+| user  | [model description file](../examples/user) |
+
+### process
+
+```json
+models.user.UpdateWhere
+```
+
+### Parameters Table
+
+```json
+[
+  {
+    "wheres": [{ "column": "status", "value": "enabled" }]
+  },
+  {
+    "balance": 200
+  }
+]
+```
+
+### return value
+
+```json
+4
+```
+
+## external references
+
+### Called in business logic (`Flow`):
+
+```json
+{
+  "nodes": [
+    {
+      "name": "users",
+      "process": "models.user.UpdateWhere",
+      "args": [
+        {
+          "wheres": [{ "column": "status", "value": "enabled" }]
+        },
+        {
+          "balance": 200
+        }
+      ],
+      "outs": ["{{$out}}"]
+    }
+  ]
+}
+```
+
+### Called in the service interface (`API`):
+
+```json
+{
+  "paths": [
+    {
+      "path": "/updatewhere",
+      "method": "POST",
+      "process": "models.user.UpdateWhere",
+      "in": [":params", ":payload"],
+      "out": {
+        "status": 200,
+        "type": "application/json"
+      }
+    }
+  ]
+}
+```
+
+```bash
+POST /api/user/updatewhere?where.status.eq=enabled
+```
+
+`REQUEST PAYLOAD`
+
+```json
+{
+  "balance": 200
+}
+```
+
+## Example 2
+
+### Create a new model, add a `models/category.mod.json` file, and write the following content:
+
+```json
+{
+  "name": "Book Category",
+  "table": {
+    "name": "category",
+    "comment": "Book Category"
+  },
+  "columns": [
+    {
+      "label": "ID",
+      "name": "id",
+      "type": "ID",
+      "comment": "ID",
+      "primary": true
+    },
+    {
+      "label": "parent id",
+      "name": "parent_id",
+      "type": "integer",
+      "nullable": true
+    },
+    {
+      "label": "Classification Name",
+      "name": "name",
+      "type": "string",
+      "length": 128,
+      "index": true
+    }
+  ],
+  "relations": {
+    "book": {
+      "type": "hasMany",
+      "model": "book",
+      "key": "category_id",
+      "foreign": "id",
+      "query": {}
+    },
+    "parent": {
+      "type": "hasOne",
+      "model": "category",
+      "key": "id",
+      "foreign": "parent_id",
+      "query": {}
+    }
+  },
+  "option": {
+    "timestamps": true,
+    "soft_deletes": true
+  },
+  "values": [
+    {
+      "id": 1,
+      "parent_id": null,
+      "name": "Literature and History"
+    },
+    {
+      "id": 2,
+      "parent_id": 1,
+      "name": "History"
+    },
+    {
+      "id": 3,
+      "parent_id": 1,
+      "name": "Ancient Poem"
+    },
+    {
+      "id": 4,
+      "parent_id": null,
+      "name": "Science and Engineering"
+    },
+    {
+      "id": 5,
+      "parent_id": 4,
+      "name": "Math"
+    },
+    {
+      "id": 6,
+      "parent_id": 4,
+      "name": "Physical"
+    }
+  ]
+}
+```
+
+### UpdateWhere batch update
+
+```javascript
+function UpdateWhere() {
+  return Process(
+    "models.category.updatewhere",
+    {
+      wheres: [{ column: "parent_id", value: 1 }],
+    },
+    {
+      name: "Mathematics",
+    }
+  );
+}
+```
+
+Execute `yao run scripts.test.UpdateWhere`

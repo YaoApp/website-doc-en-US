@@ -60,7 +60,7 @@ The business interface description file is a JSON text file named with **lowerca
 | sock          | Socket API (in beta)             |
 | ws            | WEB Socket API (in beta)         |
 
-An interface (`API`) document of the `http` protocol, which can define a set of APIs, and can bind a processor (`process`) to each API, and the system automatically calls the processor and returns the result of the processor call;
+An interface (`API`) document of the `http` protocol, which can define a set of APIs, and can bind a process (`process`) to each API, and the system automatically calls the process and returns the result of the process call;
 
 | Fields      | Type                 | Description                                                                                                                    | Required Fields |
 | ----------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------------- |
@@ -73,14 +73,14 @@ An interface (`API`) document of the `http` protocol, which can define a set of 
 
 ### `Object Path` data structure
 
-The API will be accessed through the route `/api/<group>/<path>`, the request succeeds and responds to the status code, Content-Type and the return value of the processor (`process`) defined in `out`, and the request fails and responds to the exception status code and error messages in JSON format [see exception specification](#Exception specification).
+The API will be accessed through the route `/api/<group>/<path>`, the request succeeds and responds to the status code, Content-Type and the return value of the process (`process`) defined in `out`, and the request fails and responds to the exception status code and error messages in JSON format [see exception specification](#Exception specification).
 
 | Fields  | Type            | Description                                                                                                                                                                                        | Required Fields |
 | ------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
 | path    | String          | API route name. The complete routing address is `/api/<group>/<path>`, variables are declared with `:`, such as `/api/user/find/:id`, you can use `$param.id` to access routing request parameters | yes             |
 | method  | String          | The request type. Permitted values ​​`GET`, `POST`, `PUT`, `DELETE`, `HEAD`, `OPTIONS`, `Any`. where `Any` will respond to any type of request                                                     | yes             |
 | guard   | String          | API middleware. If not set, the global middleware is used by default. If you don't want to use global middleware, set the value to `-` .                                                           | No              |
-| process | String          | Invoke processor `process`                                                                                                                                                                         | yes             |
+| process | String          | Invoke process `process`                                                                                                                                                                           | yes             |
 | in      | Array\<String\> | Request argument list, which will be used as input arguments (`args`) to `process`. Can refer to incoming parameters, can be an empty array [View input parameters](#input parameters)             | yes             |
 | out     | Object Out      | Request response result definition. See the `Object Out` data structure for details                                                                                                                | yes             |
 | err     | Object Out      | Customize the response when the call fails. **Not yet implemented**                                                                                                                                | No              |
@@ -95,7 +95,7 @@ The API will be accessed through the route `/api/<group>/<path>`, the request su
 
 ### Input parameters
 
-The parameter list defined in `in` will be used as input parameters to the processor. Supports the use of `:param` , `:payload` , `$param.field name` and other variables to bind request parameters.
+The parameter list defined in `in` will be used as input parameters to the process. Supports the use of `:param` , `:payload` , `$param.field name` and other variables to bind request parameters.
 
 #### Numerical value
 

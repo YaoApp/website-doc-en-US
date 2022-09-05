@@ -1,41 +1,46 @@
 # Use Process
 
 <blockquote>
-	<p>
-		Yao Built-in data atomic operations, network requests, process control and a series of
-		processes. These processes can be used in scenarios such as data interfaces, data
-		tables, data charts, data streams, etc. 80% of business logic processing requirements.
-	</p>
-	<p>The processor supports writing using data streams, JS scripts, and GRPC plugins. </p>
+  <p>
+    Yao Built-in data atomic operations, network requests, process control and a
+    series of processes. These processes can be used in scenarios such as data
+    interfaces, data tables, data charts, data streams, etc. 80% of business
+    logic processing requirements.
+  </p>
+  <p>
+    The process supports writing using data streams, JS scripts, and GRPC
+    plugins.{" "}
+  </p>
 </blockquote>
 
 ## Process
 
-A processor is a function `Process( ...args:any[] ) any` that performs a specific function, consisting of the processor name, parameter list, and return value. Processes include the following types:
+A process is a function `Process( ...args:any[] ) any` that performs a specific function, consisting of the process name, parameter list, and return value. Processes include the following types:
 
-| Process                 | Description                                           |
-| ------------------------- | ----------------------------------------------------- |
-| xiang.\*.\*               | Built-in processor                                    |
-| models.<model name\>.\*   | built-in processes, atomic operations on data models |
-| flows.<data flow name\>   | built-in processes, processes written with data flows   |
-| scripts.<script name\>.\* | Built-in processes, scripting processes via JavaScript  |
-| plugins.<plugin name\>.\* | Write processes via GRPC plugins                     |
-| session.\*                | built-in, session data process                        |
+| Process                   | Description                                            |
+| ------------------------- | ------------------------------------------------------ |
+| xiang.\*.\*               | Built-in process                                       |
+| models.<model name\>.\*   | built-in processes, atomic operations on data models   |
+| flows.<data flow name\>   | built-in processes, processes written with data flows  |
+| scripts.<script name\>.\* | Built-in processes, scripting processes via JavaScript |
+| plugins.<plugin name\>.\* | Write processes via GRPC plugins                       |
+| session.\*                | built-in, session data process                         |
 
-<Notice type='warning'>
-	Note: App Engine built-in processor namespace is <strong>xiang</strong> , Prevent when used on
-	the command line with
-	<strong>yao</strong> confusion. <strong>xiang</strong> is the internal R&D code of the application
-	engine, named after Zhouyi
-	<strong>The Legend of the Elephant[xiàng zhuàn]</strong>, used to interpret hexagrams and lines,
-	take the meaning of observing Vientiane, and predicting trends.
+<Notice type="warning">
+  Note: App Engine built-in process namespace is <strong>xiang</strong> ,
+  Prevent when used on the command line with
+  <strong>yao</strong> confusion. <strong>xiang</strong> is the internal R&D code
+  of the application engine, named after Zhouyi
+  <strong>The Legend of the Elephant[xiàng zhuàn]</strong>, used to interpret
+  hexagrams and lines, take the meaning of observing Vientiane, and predicting
+  trends.
 </Notice>
 
 ## How To Use
 
 ### Use In CLI
 
-The processor `yao run <process> [args...]` can be run using the `run` command.
+The process `yao run <process> [args...]` can be run using the `run` command.
 
 ```bash
 yao run models.pet.Get '::{}'
@@ -43,7 +48,7 @@ yao run models.pet.Get '::{}'
 
 ### Use In API
 
-Specify `process` in the API to set the processor. `query` sets the parameter list for the process.
+Specify `process` in the API to set the process. `query` sets the parameter list for the process.
 
 ```json
 {
@@ -66,7 +71,7 @@ Specify `process` in the API to set the processor. `query` sets the parameter li
 
 ### Used In Dataflow Nodes
 
-The processor is specified by `process` in the data flow node, and `args` is passed in the processor parameter table.
+The process is specified by `process` in the data flow node, and `args` is passed in the process parameter table.
 
 ```json
 {
@@ -106,9 +111,9 @@ The same method can also be used on the data flow nodes of Kanban, large screen,
 Extended reading:
 
 <Extend
-	title='Write Data Flow'
-	desc='Learn how to concatenate contextual data for multiple queries through data streams.'
-	link='b.Basic%20Features/e.Write%20Dataflow'
+  title="Write Data Flow"
+  desc="Learn how to concatenate contextual data for multiple queries through data streams."
+  link="b.Basic%20Features/e.Write%20Dataflow"
 ></Extend>
 
 ### Use In Data Tables
@@ -146,15 +151,15 @@ Used as a form `Hook` to handle contextual data
 Extended reading:
 
 <Extend
-	title='Custom form data query'
-	desc='Learn how to implement custom tabular data interfaces by specifying processes.'
-	link='b.Basic%20Features/e.Write%20Dataflow'
+  title="Custom form data query"
+  desc="Learn how to implement custom tabular data interfaces by specifying processes."
+  link="b.Basic%20Features/e.Write%20Dataflow"
 ></Extend>
 
 <Extend
-	title='Use Hook in the form'
-	desc='Learn how to implement contextual data processing for tables by specifying processes.'
-	link='b.Basic%20Features/e.Write%20Dataflow'
+  title="Use Hook in the form"
+  desc="Learn how to implement contextual data processing for tables by specifying processes."
+  link="b.Basic%20Features/e.Write%20Dataflow"
 ></Extend>
 
 ## Recommended
@@ -162,16 +167,20 @@ Extended reading:
 Next, it is recommended to study the following chapters:
 
 <Extend
-	title='Write Data Flow'
-	desc='Learn how to use data streams to orchestrate data query logic.'
-	link='b.Basic%20Features/f.Query%20Data'
+  title="Write Data Flow"
+  desc="Learn how to use data streams to orchestrate data query logic."
+  link="b.Basic%20Features/f.Query%20Data"
 ></Extend>
 
-<Div style={{ display: 'flex', justifyContent: 'space-between' }}>
-	<Link
-		type='prev'
-		title='Description interface'
-		link='b.Basic%20Features/c.Describe%20Interface'
-	></Link>
-	<Link type='next' title='Write data flow' link='b.Basic%20Features/e.Write%20Dataflow'></Link>
+<Div style={{ display: "flex", justifyContent: "space-between" }}>
+  <Link
+    type="prev"
+    title="Description interface"
+    link="b.Basic%20Features/c.Describe%20Interface"
+  ></Link>
+  <Link
+    type="next"
+    title="Write data flow"
+    link="b.Basic%20Features/e.Write%20Dataflow"
+  ></Link>
 </Div>

@@ -1,0 +1,204 @@
+#Update
+
+Update a single data record with the specified primary key
+
+## `update` update a single record
+
+### process
+
+`models.modelname.Update`
+
+### Parameters Table
+
+| Parameters | Type       | Description       | Example            |
+| ---------- | ---------- | ----------------- | ------------------ |
+| args[0]    | Object Row | Model primary key | `1`                |
+| args[1]    | Object Row | Data record       | `{"balance": 200}` |
+
+### return value
+
+`null` returns no value
+
+## Example one
+
+### Data Model
+
+| Model | Model Definition                           |
+| ----- | ------------------------------------------ |
+| user  | [model description file](../examples/user) |
+
+### process
+
+```json
+models.user.Update
+```
+
+### Parameters Table
+
+```json
+[
+  1,
+  {
+    "balance": 200
+  }
+]
+```
+
+### return value
+
+```json
+null
+```
+
+## external references
+
+### Called in business logic (`Flow`):
+
+```json
+{
+  "nodes": [
+    {
+      "name": "user",
+      "process": "models.user.Update",
+      "args": [
+        1,
+        {
+          "balance": 200
+        }
+      ],
+      "outs": []
+    }
+  ]
+}
+```
+
+### Called in the service interface (`API`):
+
+```json
+{
+  "paths": [
+    {
+      "path": "/update/:id",
+      "method": "POST",
+      "process": "models.user.Update",
+      "in": ["$params.id", ":payload"],
+      "out": {
+        "status": 200
+      }
+    }
+  ]
+}
+```
+
+```bash
+POST /api/user/update/1
+```
+
+`REQUEST PAYLOAD`
+
+```json
+{
+  "balance": 200
+}
+```
+
+## Example 2
+
+### Create a new model, add a `models/category.mod.json` file, and write the following content:
+
+```json
+{
+  "name": "Book Category",
+  "table": {
+    "name": "category",
+    "comment": "Book Category"
+  },
+  "columns": [
+    {
+      "label": "ID",
+      "name": "id",
+      "type": "ID",
+      "comment": "ID",
+      "primary": true
+    },
+    {
+      "label": "parent id",
+      "name": "parent_id",
+      "type": "integer",
+      "nullable": true
+    },
+    {
+      "label": "Classification Name",
+      "name": "name",
+      "type": "string",
+      "length": 128,
+      "index": true
+    }
+  ],
+  "relations": {
+    "book": {
+      "type": "hasMany",
+      "model": "book",
+      "key": "category_id",
+      "foreign": "id",
+      "query": {}
+    },
+    "parent": {
+      "type": "hasOne",
+      "model": "category",
+      "key": "id",
+      "foreign": "parent_id",
+      "query": {}
+    }
+  },
+  "option": {
+    "timestamps": true,
+    "soft_deletes": true
+  },
+  "values": [
+    {
+      "id": 1,
+      "parent_id": null,
+      "name": "Literature and History"
+    },
+    {
+      "id": 2,
+      "parent_id": 1,
+      "name": "History"
+    },
+    {
+      "id": 3,
+      "parent_id": 1,
+      "name": "Ancient Poem"
+    },
+    {
+      "id": 4,
+      "parent_id": null,
+      "name": "Science and Engineering"
+    },
+    {
+      "id": 5,
+      "parent_id": 4,
+      "name": "Math"
+    },
+    {
+      "id": 6,
+      "parent_id": 4,
+      "name": "Physical"
+    }
+  ]
+}
+```
+
+### Update update, the first parameter is the id, and the second parameter is the update object:
+
+```javascript
+function Update() {
+  return Process("models.category.update", 9, {
+    parent_id: 1,
+    name: "English",
+  });
+}
+```
+
+Execute `yao run scripts.test.Update`

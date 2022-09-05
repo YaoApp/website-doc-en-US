@@ -1,8 +1,8 @@
 # Describe Interface
 
 <blockquote>
-	Write a JSON page description and place it in `tables` In the directory, a set of interfaces
-	for data list, data display and data editing can be realized.
+  Write a JSON page description and place it in `tables` In the directory, a set
+  of interfaces for data list, data display and data editing can be realized.
 </blockquote>
 
 In a similar way, it is also possible to describe the analytical chart interface (`charts` directory), the dashboard interface (
@@ -21,83 +21,86 @@ Write a data table description file pet.tab.json and place it in the application
 
 ```json
 {
-	"name": "pet",
-	"version": "1.0.0",
-	"decription": "Pet Management Form",
-	"bind": { "model": "pet" },
-	"apis": {},
-	"columns": {
-		"ID": {
-			"label": "ID",
-			"view": { "type": "label", "props": { "value": ":id" } }
-		},
-		"Numbering": {
-			"label": "Number",
-			"view": { "type": "label", "props": { "value": ":sn" } },
-			"edit": { "type": "input", "props": { "value": ":sn" } }
-		},
-		"name": {
-			"label": "Name",
-			"view": { "type": "label", "props": { "value": ":name" } },
-			"edit": { "type": "input", "props": { "value": ":name" } }
-		},
-		"type": {
-			"label": "Type",
-			"view": { "type": "label", "props": { "value": ":kind" } },
-			"edit": {
-				"type": "select",
-				"props": {
-					"value": ":kind",
-					"options": [
-						{ "label": "cat", "value": "cat" },
-						{ "label": "dog", "value": "dog" }
-					]
-				}
-			}
-		},
-		"introduce": {
-			"label": "Introduction",
-			"view": { "type": "label", "props": { "value": ":desc" } },
-			"edit": { "type": "textArea", "props": { "value": ":desc", "rows": 4 } }
-		}
-	},
-	"filters": {
-		"Key words": {
-			"label": "Keyword",
-			"bind": "where.name.match",
-			"input": { "type": "input", "props": { "placeholder": "Please enter keywords" } }
-		}
-	},
-	"list": {
-		"primary": "id",
-		"layout": {
-			"columns": [
-				{ "name": "ID", "width": 80 },
-				{ "name": "number", "width": 100 },
-				{ "name": "name", "width": 200 },
-				{ "name": "type" }
-			],
-			"filters": [{ "name": "keyword" }]
-		},
-		"actions": { "pagination": { "props": { "showTotal": true } } },
-		"option": {}
-	},
-	"edit": {
-		"primary": "id",
-		"layout": {
-			"fieldset": [
-				{
-					"columns": [
-						{ "name": "number", "width": 8 },
-						{ "name": "name", "width": 8 },
-						{ "name": "type", "width": 8 },
-						{ "name": "introduction", "width": 24 }
-					]
-				}
-			]
-		},
-		"actions": { "cancel": {}, "save": {}, "delete": {} }
-	}
+  "name": "pet",
+  "version": "1.0.0",
+  "decription": "Pet Management Form",
+  "bind": { "model": "pet" },
+  "apis": {},
+  "columns": {
+    "ID": {
+      "label": "ID",
+      "view": { "type": "label", "props": { "value": ":id" } }
+    },
+    "Numbering": {
+      "label": "Number",
+      "view": { "type": "label", "props": { "value": ":sn" } },
+      "edit": { "type": "input", "props": { "value": ":sn" } }
+    },
+    "name": {
+      "label": "Name",
+      "view": { "type": "label", "props": { "value": ":name" } },
+      "edit": { "type": "input", "props": { "value": ":name" } }
+    },
+    "type": {
+      "label": "Type",
+      "view": { "type": "label", "props": { "value": ":kind" } },
+      "edit": {
+        "type": "select",
+        "props": {
+          "value": ":kind",
+          "options": [
+            { "label": "cat", "value": "cat" },
+            { "label": "dog", "value": "dog" }
+          ]
+        }
+      }
+    },
+    "introduce": {
+      "label": "Introduction",
+      "view": { "type": "label", "props": { "value": ":desc" } },
+      "edit": { "type": "textArea", "props": { "value": ":desc", "rows": 4 } }
+    }
+  },
+  "filters": {
+    "Key words": {
+      "label": "Keyword",
+      "bind": "where.name.match",
+      "input": {
+        "type": "input",
+        "props": { "placeholder": "Please enter keywords" }
+      }
+    }
+  },
+  "list": {
+    "primary": "id",
+    "layout": {
+      "columns": [
+        { "name": "ID", "width": 80 },
+        { "name": "number", "width": 100 },
+        { "name": "name", "width": 200 },
+        { "name": "type" }
+      ],
+      "filters": [{ "name": "keyword" }]
+    },
+    "actions": { "pagination": { "props": { "showTotal": true } } },
+    "option": {}
+  },
+  "edit": {
+    "primary": "id",
+    "layout": {
+      "fieldset": [
+        {
+          "columns": [
+            { "name": "number", "width": 8 },
+            { "name": "name", "width": 8 },
+            { "name": "type", "width": 8 },
+            { "name": "introduction", "width": 24 }
+          ]
+        }
+      ]
+    },
+    "actions": { "cancel": {}, "save": {}, "delete": {} }
+  }
 }
 ```
 
@@ -129,17 +132,18 @@ Page routing: `/xiang/table/<Table Name>`
 
 4. It is recommended to add the `/xiang/table/pet` route as a menu item.
 
-<Notice type='warning'>
-	Note: Since the project was born mainly to improve the internal productivity of the team,
-	there is no fine-grained error throwing under the conventional writing description, so
-	developers may write In the process of JSON debugging interface, the interface is empty.
-	Please refer to the component documentation for disposal methods.
+<Notice type="warning">
+  Note: Since the project was born mainly to improve the internal productivity
+  of the team, there is no fine-grained error throwing under the conventional
+  writing description, so developers may write In the process of JSON debugging
+  interface, the interface is empty. Please refer to the component documentation
+  for disposal methods.
 </Notice>
 
 Yao will automatically generate component associations based on the field types defined
 in the data model. as in `columns` Re-declaration in , will override the default associated
 component.The data model is not coupled with the data table. If you do not set the data model
-binding, you can specify the list by specifying the processor, the detailed data reading
+binding, you can specify the list by specifying the process, the detailed data reading
 logic, and the processing logic for operations such as saving and deleting.
 
 A model can be bound to multiple tables, and the component description associated with
@@ -150,15 +154,15 @@ for details.
 Extended reading:
 
 <Extend
-	title='Data Table'
-	desc='Learn how to describe data table components, filters, batch management, file import and other functions.'
-	link='f.API%20Reference/g.Table'
+  title="Data Table"
+  desc="Learn how to describe data table components, filters, batch management, file import and other functions."
+  link="f.API%20Reference/g.Table"
 ></Extend>
 
 <Extend
-	title='Component'
-	desc='List of components for data display, data entry and charting'
-	link='/components'
+  title="Component"
+  desc="List of components for data display, data entry and charting"
+  link="/components"
 ></Extend>
 
 ## Data Kanban
@@ -171,62 +175,62 @@ Write a data kanban description file pet.kan.json and place it in the applicatio
 
 ```json
 {
-	"label": "Pet Statistics",
-	"version": "1.0.0",
-	"description": "Pet Statistics",
-	"nodes": [
-		{
-			"name": "Type summary",
-			"engine": "xiang",
-			"query": {
-				"select": [":COUNT(id) as quantity", "kind as type"],
-				"groups": "Type",
-				"from": "$pet"
-			}
-		}
-	],
-	"output": {
-		"data": {
-			"Pet Type Distribution": "{{$res.Type Summary}}"
-		}
-	},
-	"page": {
-		"primary": "kind",
-		"layout": {
-			"filters": [],
-			"charts": [
-				{
-					"name": "Pet Type Distribution",
-					"width": 24,
-					"type": "bar",
-					"props": {
-						"height": 240,
-						"x_key": "Type",
-						"axisLabel": {
-							"interval": 0,
-							"rotate": 45,
-							"textStyle": { "fontSize": 10 }
-						},
-						"tooltip": {
-							"textStyle": { "color": "#a2a5b9", "fontSize": 12 },
-							"backgroundColor": "#232326",
-							"borderRadius": 6
-						},
-						"series": [
-							{
-								"name": "Quantity",
-								"type": "bar",
-								"colorBy": "data",
-								"splitLine": { "show": false },
-								"label": { "show": true, "position": "top" },
-								"axisLabel": { "show": true }
-							}
-						]
-					}
-				}
-			]
-		}
-	}
+  "label": "Pet Statistics",
+  "version": "1.0.0",
+  "description": "Pet Statistics",
+  "nodes": [
+    {
+      "name": "Type summary",
+      "engine": "xiang",
+      "query": {
+        "select": [":COUNT(id) as quantity", "kind as type"],
+        "groups": "Type",
+        "from": "$pet"
+      }
+    }
+  ],
+  "output": {
+    "data": {
+      "Pet Type Distribution": "{{$res.Type Summary}}"
+    }
+  },
+  "page": {
+    "primary": "kind",
+    "layout": {
+      "filters": [],
+      "charts": [
+        {
+          "name": "Pet Type Distribution",
+          "width": 24,
+          "type": "bar",
+          "props": {
+            "height": 240,
+            "x_key": "Type",
+            "axisLabel": {
+              "interval": 0,
+              "rotate": 45,
+              "textStyle": { "fontSize": 10 }
+            },
+            "tooltip": {
+              "textStyle": { "color": "#a2a5b9", "fontSize": 12 },
+              "backgroundColor": "#232326",
+              "borderRadius": 6
+            },
+            "series": [
+              {
+                "name": "Quantity",
+                "type": "bar",
+                "colorBy": "data",
+                "splitLine": { "show": false },
+                "label": { "show": true, "position": "top" },
+                "axisLabel": { "show": true }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
 }
 ```
 
@@ -259,21 +263,21 @@ Page route: `/xiang/kanban/<Kanban Name>`
 Extended reading:
 
 <Extend
-	title='Data Kanban'
-	desc='Learn how to describe data Kanban related components, processes, API interface input and output, etc.'
-	link='f.API%20Reference/h.Chart'
+  title="Data Kanban"
+  desc="Learn how to describe data Kanban related components, processes, API interface input and output, etc."
+  link="f.API%20Reference/h.Chart"
 ></Extend>
 
 <Extend
-	title='Write Data Flow'
-	desc='Learn how to use data streams to orchestrate data query logic.'
-	link='b.Basic%20Features/e.Write%20Dataflow'
+  title="Write Data Flow"
+  desc="Learn how to use data streams to orchestrate data query logic."
+  link="b.Basic%20Features/e.Write%20Dataflow"
 ></Extend>
 
 <Extend
-	title='Query Data'
-	desc='Learn how to use the Data Model Process and Query DSL to query data in a data flow.'
-	link='b.Basic%20Features/f.Query%20Data'
+  title="Query Data"
+  desc="Learn how to use the Data Model Process and Query DSL to query data in a data flow."
+  link="b.Basic%20Features/f.Query%20Data"
 ></Extend>
 
 ## Analysis Chart
@@ -288,83 +292,83 @@ Write a data analysis description file pet.cha.json and place it in the applicat
 
 ```json
 {
-	"label": "Pet Statistics",
-	"version": "1.0.0",
-	"description": "Pet Statistics",
-	"nodes": [
-		{
-			"name": "Type summary",
-			"engine": "xiang",
-			"query": {
-				"select": [":COUNT(id) as quantity", "kind as type"],
-				"wheres": [{ ":kind": "Pet Type", "in": "$kinds" }],
-				"groups": "Type",
-				"from": "$pet"
-			}
-		}
-	],
-	"output": {
-		"data": {
-			"Pet Type Distribution": "{{$res.Type Summary}}"
-		},
-		"query": "{{$in}}"
-	},
-	"apis": {
-		"data": { "default": [{ "kinds": ["cat", "dog"] }] }
-	},
-	"filters": {
-		"type": {
-			"label": "Type",
-			"bind": "kinds",
-			"input": {
-				"type": "select",
-				"props": {
-					"mode": "multiple",
-					"options": [
-						{ "label": "cat", "value": "cat" },
-						{ "label": "dog", "value": "dog" }
-					]
-				}
-			}
-		}
-	},
-	"page": {
-		"primary": "kind",
-		"layout": {
-			"filters": [{ "name": "type" }],
-			"charts": [
-				{
-					"name": "Pet Type Distribution",
-					"width": 24,
-					"type": "bar",
-					"props": {
-						"height": 240,
-						"x_key": "Type",
-						"axisLabel": {
-							"interval": 0,
-							"rotate": 45,
-							"textStyle": { "fontSize": 10 }
-						},
-						"tooltip": {
-							"textStyle": { "color": "#a2a5b9", "fontSize": 12 },
-							"backgroundColor": "#232326",
-							"borderRadius": 6
-						},
-						"series": [
-							{
-								"name": "Quantity",
-								"type": "bar",
-								"colorBy": "data",
-								"splitLine": { "show": false },
-								"label": { "show": true, "position": "top" },
-								"axisLabel": { "show": true }
-							}
-						]
-					}
-				}
-			]
-		}
-	}
+  "label": "Pet Statistics",
+  "version": "1.0.0",
+  "description": "Pet Statistics",
+  "nodes": [
+    {
+      "name": "Type summary",
+      "engine": "xiang",
+      "query": {
+        "select": [":COUNT(id) as quantity", "kind as type"],
+        "wheres": [{ ":kind": "Pet Type", "in": "$kinds" }],
+        "groups": "Type",
+        "from": "$pet"
+      }
+    }
+  ],
+  "output": {
+    "data": {
+      "Pet Type Distribution": "{{$res.Type Summary}}"
+    },
+    "query": "{{$in}}"
+  },
+  "apis": {
+    "data": { "default": [{ "kinds": ["cat", "dog"] }] }
+  },
+  "filters": {
+    "type": {
+      "label": "Type",
+      "bind": "kinds",
+      "input": {
+        "type": "select",
+        "props": {
+          "mode": "multiple",
+          "options": [
+            { "label": "cat", "value": "cat" },
+            { "label": "dog", "value": "dog" }
+          ]
+        }
+      }
+    }
+  },
+  "page": {
+    "primary": "kind",
+    "layout": {
+      "filters": [{ "name": "type" }],
+      "charts": [
+        {
+          "name": "Pet Type Distribution",
+          "width": 24,
+          "type": "bar",
+          "props": {
+            "height": 240,
+            "x_key": "Type",
+            "axisLabel": {
+              "interval": 0,
+              "rotate": 45,
+              "textStyle": { "fontSize": 10 }
+            },
+            "tooltip": {
+              "textStyle": { "color": "#a2a5b9", "fontSize": 12 },
+              "backgroundColor": "#232326",
+              "borderRadius": 6
+            },
+            "series": [
+              {
+                "name": "Quantity",
+                "type": "bar",
+                "colorBy": "data",
+                "splitLine": { "show": false },
+                "label": { "show": true, "position": "top" },
+                "axisLabel": { "show": true }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
 }
 ```
 
@@ -399,9 +403,9 @@ Page routing: `/xiang/chart/<Chart Name>`
 Extended reading:
 
 <Extend
-	title='Analysis Chart'
-	desc='Learn how to describe components related to analysis charts, processes, API interface input and output, etc.'
-	link='f.API%20Reference/h.Chart'
+  title="Analysis Chart"
+  desc="Learn how to describe components related to analysis charts, processes, API interface input and output, etc."
+  link="f.API%20Reference/h.Chart"
 ></Extend>
 
 ## Data Screen
@@ -414,62 +418,62 @@ Write a data screen description file pet.scr.json and place it in the screens di
 
 ```json
 {
-	"label": "Pet Statistics",
-	"version": "1.0.0",
-	"description": "Pet Statistics",
-	"nodes": [
-		{
-			"name": "Type summary",
-			"engine": "xiang",
-			"query": {
-				"select": [":COUNT(id) as quantity", "kind as type"],
-				"groups": "Type",
-				"from": "$pet"
-			}
-		}
-	],
-	"output": {
-		"data": {
-			"Pet Type Distribution": "{{$res.Type Summary}}"
-		}
-	},
-	"page": {
-		"primary": "kind",
-		"layout": {
-			"filters": [],
-			"charts": [
-				{
-					"name": "Pet Type Distribution",
-					"width": 4,
-					"height": 4,
-					"type": "bar",
-					"props": {
-						"x_key": "Type",
-						"axisLabel": {
-							"interval": 0,
-							"rotate": 45,
-							"textStyle": { "fontSize": 10 }
-						},
-						"tooltip": {
-							"textStyle": { "color": "#a2a5b9", "fontSize": 12 },
-							"backgroundColor": "#232326",
-							"borderRadius": 6
-						},
-						"series": [
-							{
-								"name": "Quantity",
-								"type": "bar",
-								"colorBy": "data",
-								"splitLine": { "show": false },
-								"label": { "show": true, "position": "top" },
-								"axisLabel": { "show": true }
-							}
-						]
-					}
-				}
-			]
-		}
-	}
+  "label": "Pet Statistics",
+  "version": "1.0.0",
+  "description": "Pet Statistics",
+  "nodes": [
+    {
+      "name": "Type summary",
+      "engine": "xiang",
+      "query": {
+        "select": [":COUNT(id) as quantity", "kind as type"],
+        "groups": "Type",
+        "from": "$pet"
+      }
+    }
+  ],
+  "output": {
+    "data": {
+      "Pet Type Distribution": "{{$res.Type Summary}}"
+    }
+  },
+  "page": {
+    "primary": "kind",
+    "layout": {
+      "filters": [],
+      "charts": [
+        {
+          "name": "Pet Type Distribution",
+          "width": 4,
+          "height": 4,
+          "type": "bar",
+          "props": {
+            "x_key": "Type",
+            "axisLabel": {
+              "interval": 0,
+              "rotate": 45,
+              "textStyle": { "fontSize": 10 }
+            },
+            "tooltip": {
+              "textStyle": { "color": "#a2a5b9", "fontSize": 12 },
+              "backgroundColor": "#232326",
+              "borderRadius": 6
+            },
+            "series": [
+              {
+                "name": "Quantity",
+                "type": "bar",
+                "colorBy": "data",
+                "splitLine": { "show": false },
+                "label": { "show": true, "position": "top" },
+                "axisLabel": { "show": true }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
 }
 ```
 
@@ -520,9 +524,9 @@ Page routing: `/xiang/screen/<Screen Name>`
 2. It is recommended to add a link to the big data screen through the Kanban `option` configuration.
 
 <Extend
-	title='Chart'
-	desc='Learn how to describe components related to analysis charts, processes, API interface input and output, etc.'
-	link='f.API%20Reference/h.Chart'
+  title="Chart"
+  desc="Learn how to describe components related to analysis charts, processes, API interface input and output, etc."
+  link="f.API%20Reference/h.Chart"
 ></Extend>
 
 ## HTML Page
@@ -533,14 +537,14 @@ Write an HTML page index.html and place it in the application's ui directory.
 
 ```html
 <html>
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Yao App Engine</title>
-	</head>
-	<body class="overscroll-none">
-		It works!
-	</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Yao App Engine</title>
+  </head>
+  <body class="overscroll-none">
+    It works!
+  </body>
 </html>
 ```
 

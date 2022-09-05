@@ -1,0 +1,180 @@
+# Query conditions
+
+### Query condition `wheres`
+
+`wheres` is used to describe data query conditions, and the data structure is `Array<Object Where>`.
+
+Query DSL:
+
+```json
+{
+  "wheres": [
+    { "field": "created_at", "op": ">=", "value": "2020-01-01" },
+    { "field": "created_at", "op": "<=", "value": "{'2020-12-31'}" },
+    { "field": "created_at", "op": "<=", "value": "{updated_at}" },
+    {
+      "wheres": [
+        { "field": "type", "value": 1 },
+        { "or": true, "field": "type", "value": 2 }
+      ]
+    },
+    {
+      "comment": "Limited scope: only valid manufacturers are listed",
+      "field": "manu_id",
+      "op": "in",
+      "query": {
+        "select": ["id"],
+        "from": "$manu",
+        "wheres": [{ "field": "status", "value": "enabled" }]
+      }
+    }
+  ]
+}
+```
+
+The parsed `SQL statement` is:
+
+```sql
+  WHERE `created_at` >= '2020-01-01'
+    AND `created_at` <= '2020-12-31'
+    AND `created_at` <= `updated_at`
+    AND (
+      `type` = 1 OR `type` = 2
+    )
+    AND `manu_id` IN (SELECT `id` FROM `manu` WHERE `status` = 'enabled' )
+```
+
+#### Object Where data structure
+
+| Fields  | Type                  | Description                                                                                                                             | Required Fields |
+| ------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| field   | Field Expression      | field expression, aliasing is not supported `as`                                                                                        | yes             |
+| value   | Any                   | Matches numeric values. If the data type is `Field Expression`, use `{}` to include, such as `{updated_at}`                             | no              |
+| op      | String                | Match relational operator. Allowed values ​​`=`,`like`,`in`,`>` etc, default is `=`                                                     | no              |
+| or      | Bool                  | `true` The logical relation of the query condition is `or`, the default is `false` The logical relation of the query condition is `and` | No              |
+| wheres  | Array\<Object Where\> | Group query. For `condition 1` `and` ( `condition 2` OR `condition 3`) scenario                                                         | no              |
+| query   | Object QueryDSL       | Subquery; `value` value is ignored if `query` is specified.                                                                             | No              |
+| comment | String                | The query condition comment, which is used to help understand the query condition logic and render it in the development platform.      | No              |
+
+##### Matching relational operators
+
+| operator  | description                                    |
+| --------- | ---------------------------------------------- |
+| `=`       | default equal to WHERE field = number          |
+| `>`       | Greater than WHERE field > number              |
+| `>=`      | Greater than or equal to WHERE field >= number |
+| `<`       | less than WHERE field < number                 |
+| `<=`      | Less than or equal to WHERE field <= number    |
+| `like`    | matches WHERE fields like values ​​            |
+| `match`   | Fuzzy match WHERE field match value            |
+| `null`    | is empty WHERE field IS NULL                   |
+| `notnull` | not null WHERE field IS NOT NULL               |
+| `in`      | list contains WHERE field IN (numeric...)      |
+
+### select field `select`
+
+`select` is used to describe the selection field list, the data type is field expression string array `Array<Field Expression>`, supports data table field names, constants and functions; you can use `as` to set aliases for fields, aliases are regarded as The main table field name, which can be used directly in `wheres`, `order`, `having`.
+
+```json
+{
+  "select": [
+    "name",
+    "short_name as short",
+    "*mobile",
+    ":MAX(score) as high_score",
+    "$extra",
+    "$extra.sex as sex",
+    "@prices",
+    "@prices[0] as price",
+    "@addresses[0].id as address_id",
+    "t2.name as t2_name",
+    "t2.short_name as t2_short",
+    "0.618 as golden section",
+    "'enable' as state"
+  ]
+}
+```
+
+### select data table `from`
+
+`form` is used to specify the query data table name or data model, and the data type is `String`;
+
+| Example      | Expression                  | Description                                                                                                                                               |
+| ------------ | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `goods`      | `data table name`           | query in `goods` data table                                                                                                                               |
+| `goods as g` | `Data table name as alias`  | Query in `goods` data table, set alias to `g`, `g.field name` is equivalent to `goods.field name`                                                         |
+| `$user`      | `$data model name`          | Query in the data table (`xxx`) associated with the data model `models.user`, set the alias to `user`, `user.field name` and `xxx. field name` equivalent |
+| `$user as u` | `$data model name as alias` | Query in the data table (`xxx`) associated with the data model `models.user`, set the alias to `u`, `u.field name` Equivalent to `xxx.fieldname`          |
+
+**illustrate**
+
+- You can use the `$` identifier to specify the data table to which the data model is bound.
+- You can use `as` to set an alias for the data table, the alias supports Chinese, and the alias can be used instead of the data table name in scenarios such as table connection and field reference.
+- If you set a subquery `query` ( [View Subquery Documentation](Manual/QueryDSL/Subquery)), the interpreter will respond to the subquery logic first, ignoring the `from` setting. One of `query` and `from` is required.
+
+### Quantity limits `limit`, `offset`, `page`, `pagesize`, `data-only`
+
+Use `limit`, `offset` or `page`, `pagesize` to limit the range of records. `page` and `pagesize` automatically paginate according to query conditions.
+
+#### Starting from the 20th, read 50 pieces of data
+
+Gou Query DSL:
+
+```json
+{
+  "select": ["id", "name"],
+  "from": "manu",
+  "offset": 20,
+  "limit": 50
+}
+```
+
+The parsed `SQL statement` is (MySQL example):
+
+```sql
+  SELECT `id`, `name` FROM `manu` LIMIT 20,50
+```
+
+#### 50 pieces of data per page, read from page 1
+
+The record range is limited by `page` and `pagesize`. The default return value of QueryDSL includes paging information. You can set `data-only` to not return paging information.
+
+Gou Query DSL:
+
+```json
+{
+  "select": ["id", "name"],
+  "from": "manu",
+  "page": 1,
+  "pagesize": 50
+}
+```
+
+The parsed `SQL statement` is (MySQL example):
+
+```sql
+  -- Execute the first query, query the total number of records
+  SELECT count(`id`) as `total` FROM `manu`
+  -- The parser calculates offset and limit based on total, page and pagesize
+  -- Execute the second query
+  SELECT `id`, `name` FROM `manu` LIMIT 50
+```
+
+#### Quantity limit settings
+
+| Fields    | Type | Description                                                                                          | Required Fields |
+| --------- | ---- | ---------------------------------------------------------------------------------------------------- | --------------- |
+| offset    | Int  | Record start position. The default is to start from scratch.                                         | No              |
+| limit     | Int  | The entry of data to read from the start position. Defaults to `0`, unlimited.                       | No              |
+| page      | Int  | Paging query current page page number, default is `1`                                                | No              |
+| pagesize  | Int  | Number of records read per page. If only the `page` value is specified, `pagesize` defaults to `15`. | No              |
+| data-only | Bool | Only valid when `page` or `pagesize` are set. Set to `true`, default to `false`                      | no              |
+
+<Div style={{ display: "flex", justifyContent: "space-between" }}>
+  <Link
+    type="prev"
+    title="Basic Usage"
+    link="Manual/Query DSL/Basic Usage"
+  ></Link>
+  <Link type="next" title="Sort" link="Manual/Query DSL/Sort"></Link>
+</Div>

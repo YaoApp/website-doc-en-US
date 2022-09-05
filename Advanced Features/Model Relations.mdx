@@ -1,0 +1,302 @@
+# data model association
+
+<blockquote>
+  <strong>hasOne</strong> and <strong>hasMany</strong> supported between data
+  models way to associate, query by <strong>withs</strong>
+  parameter to directly query the associated data.
+</blockquote>
+
+Write two data models of supplier `supplier` and user `user`, one user corresponds to one supplier, and one supplier has multiple users. When querying a user, it returns the information of the supplier at the same time, and when querying a supplier, it returns the user list of the supplier at the same time.
+
+Supplier model `supplier`:
+
+<Detail title="View source code">
+
+| Fields | Labels |
+| ------ | ------ |
+| id     | ID     |
+| name   | name   |
+
+Data example:
+
+| ID  | Name                    |
+| --- | ----------------------- |
+| 1   | The wisdom of elephants |
+| 2   | Yao App Engine          |
+
+`supplier.mod.json`
+
+```json
+{
+  "name": "Supplier",
+  "table": { "name": "supplier", "comment": "Supplier table" },
+  "columns": [
+    {
+      "label": "ID",
+      "name": "id",
+      "type": "ID",
+      "comment": "ID"
+    },
+    {
+      "label": "Name",
+      "name": "name",
+      "type": "string",
+      "index": true,
+      "comment": "Supplier Name"
+    }
+  ],
+  "values": [
+    { "id": 1, "name": "Xiang Chuan wisdom" },
+    { "id": 2, "name": "Yao App Engine" }
+  ]
+}
+```
+
+</Detail>
+
+User model `user` :
+
+<Detail title="View source code">
+
+| Fields      | Labels      |
+| ----------- | ----------- |
+| ID          | id          |
+| supplier_id | Supplier ID |
+| name        | name        |
+
+Data example:
+
+| ID  | Supplier | Name           |
+| --- | -------- | -------------- |
+| 1   | 1        | Zhang Wuji     |
+| 2   | 1        | Li Guangfu     |
+| 3   | 2        | Li Muting      |
+| 4   | 2        | Zhao Changqing |
+
+`user.mod.json`
+
+```json
+{
+  "name": "User",
+  "table": { "name": "user", "comment": "user table" },
+  "columns": [
+    { "label": "ID", "name": "id", "type": "ID", "comment": "ID" },
+    {
+      "label": "Supplier",
+      "name": "supplier_id",
+      "type": "bigInteger",
+      "index": true,
+      "comment": "Vendor ID"
+    },
+    {
+      "label": "Name",
+      "name": "name",
+      "type": "string",
+      "index": true,
+      "comment": "User Name"
+    }
+  ],
+  "values": [
+    { "id": 1, "supplier_id": 1, "name": "Zhang Wuji" },
+    { "id": 2, "supplier_id": 1, "name": "Li Guangfu" },
+    { "id": 3, "supplier_id": 2, "name": "Li Muting" },
+    { "id": 4, "supplier_id": 2, "name": "Zhao Changqing" }
+  ]
+}
+```
+
+</Detail>
+
+**Create data table**
+
+```bash
+yao migrate
+```
+
+## Association statement
+
+Relationships are declared in `relations`, a data model supports multiple mapping relationship declarations, and the data structure is `{"relation_name":ObjectRelation, "relation_name":ObjectRelation ,...}`
+
+Object Relation data structure:
+
+| Fields  | Type   | Required Fields | Description                                                                                                               |
+| ------- | ------ | --------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| name    | string | is              | the name of the association, which is referenced by this name when querying                                               |
+| type    | enum   | yes             | The type of relationship with the current data model. `hasOne` is one-to-one, `hasMany` is one-to-many.                   |
+| model   | string | yes             | **Linked Data Model** name                                                                                                |
+| key     | string | yes             | **Associated Data Model** field name, used for association mapping (Associated Data Model.key = CurrentDataModel.foreign) |
+| foreign | string | yes             | **current_data_model** field name, used for association mapping (associated_data_model.key = current_data_model.foreign)  |
+| query   | object | No              | **Related data model** query conditions, which can be overloaded during query. Example: `{ "select": ["id", "name"] }`    |
+
+## hasOne
+
+When querying a user, the information of the supplier to which the user belongs is also returned. Modify the user model description file `user.mod.json` and add the `hasOne` association statement.
+
+<Detail title="View source code">
+
+```json
+{
+  "name": "User",
+  "table": { "name": "user", "comment": "user table" },
+  "columns": [
+    { "label": "ID", "name": "id", "type": "ID", "comment": "ID" },
+    {
+      "label": "Supplier",
+      "name": "supplier_id",
+      "type": "bigInteger",
+      "index": true,
+      "comment": "Vendor ID"
+    },
+    {
+      "label": "Name",
+      "name": "name",
+      "type": "string",
+      "index": true,
+      "comment": "User Name"
+    }
+  ],
+  "relations": {
+    "supplier": {
+      "name": "supplier",
+      "type": "hasOne",
+      "model": "supplier",
+      "key": "id",
+      "foreign": "supplier_id",
+      "query": { "select": ["id", "name"] }
+    }
+  },
+  "values": [
+    { "id": 1, "supplier_id": 1, "name": "Zhang Wuji" },
+    { "id": 2, "supplier_id": 1, "name": "Li Guangfu" },
+    { "id": 3, "supplier_id": 2, "name": "Li Muting" },
+    { "id": 4, "supplier_id": 2, "name": "Zhao Changqing" }
+  ]
+}
+```
+
+</Detail>
+
+**data query**
+
+At the same time when querying users, query all supplier information:
+
+```bash
+yao run models.user.Find 1 '::{"withs":{ "supplier": {} }}'
+yao run models.user.Get '::{"withs":{ "supplier": {} }}'
+```
+
+Specify the pick field for the associated model:
+
+```bash
+yao run models.user.Find 1 '::{"withs":{ "supplier": { "select":["name"] } }}'
+```
+
+Query conditions by the fields of the associated model:
+
+```bash
+yao run models.user.Get '::{"withs":{ "supplier": {} }, "wheres":[{"rel":"supplier", "column":"name", "value": "Yao App Engine" }]}'
+```
+
+Use arbitrary associations in JS:
+
+```javascript
+function test() {
+  var user = Process("models.user.get", {
+    withs: {
+      supplier: {
+        query: {
+          select: ["name", "id"],
+        },
+      },
+    },
+    wheres: [{ column: "user_id", value: 1, op: "=" }],
+    orders: [{ column: "id", option: "desc" }],
+    limit: 1,
+  });
+}
+```
+
+## hasMany
+
+When querying a supplier, the user information of the supplier is also returned. Modify the user model description file `supplier.mod.json` and add the `hasMany` relationship statement.
+
+<Detail title="View source code">
+
+```json
+{
+  "name": "Supplier",
+  "table": { "name": "supplier", "comment": "Supplier table" },
+  "columns": [
+    { "label": "ID", "name": "id", "type": "ID", "comment": "ID" },
+    {
+      "label": "Name",
+      "name": "name",
+      "type": "string",
+      "index": true,
+      "comment": "Supplier Name"
+    }
+  ],
+  "relations": {
+    "users": {
+      "name": "users",
+      "type": "hasMany",
+      "model": "user",
+      "key": "supplier_id",
+      "foreign": "id",
+      "query": { "select": ["id", "name"] }
+    }
+  },
+  "values": [
+    { "id": 1, "name": "Xiang Chuan wisdom" },
+    { "id": 2, "name": "Yao App Engine" }
+  ]
+}
+```
+
+</Detail>
+
+**data query**
+
+When querying suppliers, also query the user information:
+
+```bash
+yao run models.supplier.Find 1 '::{"withs":{ "users": {} }}'
+yao run models.supplier.Get '::{"withs":{ "users": {} }}'
+```
+
+Specify the pick field for the associated model:
+
+```bash
+yao run models.supplier.Find 1 '::{"withs":{ "users": { "select":["name"] } }}'
+```
+
+Specify associated user filters:
+
+```bash
+yao run models.supplier.Find 1 '::{"withs":{ "users": { "wheres":[{"column":"name", "value":"Zhang Wuji"}] } }}'
+```
+
+## Nested query
+
+Associations support nested queries, specified through the `withs` query parameter.
+
+```bash
+yao run models.supplier.Find 1 '::{"withs":{ "users": { "withs": {"supplier":{} } } }}'
+```
+
+```bash
+yao run models.supplier.Get '::{"withs":{ "users": { "withs": {"supplier":{} } } }}'
+```
+
+<Div style={{ display: "flex", justifyContent: "space-between" }}>
+  <Link
+    type="prev"
+    title="Write Process"
+    link="Advanced Features/Write Process"
+  ></Link>
+  <Link
+    type="next"
+    title="Complex Query"
+    link="Advanced Features/Complex Query"
+  ></Link>
+</Div>

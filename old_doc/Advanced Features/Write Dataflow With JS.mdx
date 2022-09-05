@@ -1,10 +1,10 @@
 # Write Dataflow With JS
 
 <blockquote>
-	<p>
-		You can use JavaScript scripts to process the return values ​​of data flow nodes and
-		return data structures as needed.
-	</p>
+  <p>
+    You can use JavaScript scripts to process the return values ​​of data flow
+    nodes and return data structures as needed.
+  </p>
 </blockquote>
 
 ## Using JS
@@ -17,18 +17,18 @@ find.flow.json:
 
 ```json
 {
-	"label": "pet",
-	"version": "1.0.0",
-	"description": "Data query",
-	"nodes": [
-		{
-			"name": "List",
-			"process": "models.pet.Find",
-			"args": ["{{$in.0}}", { "select": ["id", "name", "kind"] }],
-			"script": "format"
-		}
-	],
-	"output": "{{$res.list}}"
+  "label": "pet",
+  "version": "1.0.0",
+  "description": "Data query",
+  "nodes": [
+    {
+      "name": "List",
+      "process": "models.pet.Find",
+      "args": ["{{$in.0}}", { "select": ["id", "name", "kind"] }],
+      "script": "format"
+    }
+  ],
+  "output": "{{$res.list}}"
 }
 ```
 
@@ -38,13 +38,13 @@ find.format.js:
 /**
  * add color to return value
  * @param []any args data stream parameter table $in
- * @param any out Data flow node processor or QueryDSL return value
+ * @param any out Data flow node process or QueryDSL return value
  * @param [key:string]any res Return value of each node of the data stream
  */
 function main(args, out, res) {
-	var data = out || {}
-	data['color'] = '#FEFEFE'
-	return data
+  var data = out || {};
+  data["color"] = "#FEFEFE";
+  return data;
 }
 ```
 
@@ -56,7 +56,7 @@ function main(args, out, res) {
 yao run flows.find 1
 ```
 
-## Using Functions 
+## Using Functions
 
 Modify `find.format.js` to add colors according to the type.
 
@@ -67,31 +67,31 @@ Modify `find.format.js` to add colors according to the type.
  * Set color according to type
  */
 const color = (kind) => {
-	if (kind == 'cat') {
-		return '#FEFEFE'
-	} else if (kind == 'dog') {
-		return '#55555'
-	}
-}
+  if (kind == "cat") {
+    return "#FEFEFE";
+  } else if (kind == "dog") {
+    return "#55555";
+  }
+};
 
 /**
  * pet's full name
  */
 function fullname(id, kind, name) {
-	return `${id}: ${kind} ${name}`
+  return `${id}: ${kind} ${name}`;
 }
 
 /**
  * add color to return value
  * @param []any args data stream parameter table $in
- * @param any out Data flow node processor or QueryDSL return value
+ * @param any out Data flow node process or QueryDSL return value
  * @param [key:string]any res Return value of each node of the data stream
  */
 function main(args, out, res) {
-	var data = out || {}
-	data['color'] = color(data.kind)
-	data['fullname'] = fullname(args[0], data.kind, data.name)
-	return data
+  var data = out || {};
+  data["color"] = color(data.kind);
+  data["fullname"] = fullname(args[0], data.kind, data.name);
+  return data;
 }
 ```
 
@@ -104,9 +104,9 @@ yao run flows.find 1
 yao run flows.find 2
 ```
 
-## Using Processes In JS 
+## Using Processes In JS
 
-A processor can be called using the `Process` function. Modify `find.format.js` to also return user information.
+A process can be called using the `Process` function. Modify `find.format.js` to also return user information.
 
 <Detail title="View source code">
 
@@ -115,39 +115,39 @@ A processor can be called using the `Process` function. Modify `find.format.js` 
  * Read user list
  */
 const users = () => {
-	return Process('models.xiang.user.Get', { limit: 2, select: ['id', 'name'] })
-}
+  return Process("models.xiang.user.Get", { limit: 2, select: ["id", "name"] });
+};
 
 /**
  * Set color according to type
  */
 const color = (kind) => {
-	if (kind == 'cat') {
-		return '#FEFEFE'
-	} else if (kind == 'dog') {
-		return '#55555'
-	}
-}
+  if (kind == "cat") {
+    return "#FEFEFE";
+  } else if (kind == "dog") {
+    return "#55555";
+  }
+};
 
 /**
  * pet's full name
  */
 function fullname(id, kind, name) {
-	return `${id}: ${kind} ${name}`
+  return `${id}: ${kind} ${name}`;
 }
 
 /**
  * add color to return value
  * @param []any args data stream parameter table $in
- * @param any out Data flow node processor or QueryDSL return value
+ * @param any out Data flow node process or QueryDSL return value
  * @param [key:string]any res Return value of each node of the data stream
  */
 function main(args, out, res) {
-	var data = out || {}
-	data['color'] = color(data.kind)
-	data['fullname'] = fullname(args[0], data.kind, data.name)
-	data['users'] = users()
-	return data
+  var data = out || {};
+  data["color"] = color(data.kind);
+  data["fullname"] = fullname(args[0], data.kind, data.name);
+  data["users"] = users();
+  return data;
 }
 ```
 
@@ -159,11 +159,15 @@ function main(args, out, res) {
 yao run flows.find 1
 ```
 
-<Div style={{ display: 'flex', justifyContent: 'space-between' }}>
-	<Link type='prev' title='Query data' link='b.Basic%20Features/f.Query%20Data'></Link>
-	<Link
-		type='next'
-		title='Relation of Models'
-		link='c.Advanced%20Features/b.Relation%20of%20Models'
-	></Link>
+<Div style={{ display: "flex", justifyContent: "space-between" }}>
+  <Link
+    type="prev"
+    title="Query data"
+    link="b.Basic%20Features/f.Query%20Data"
+  ></Link>
+  <Link
+    type="next"
+    title="Relation of Models"
+    link="c.Advanced%20Features/b.Relation%20of%20Models"
+  ></Link>
 </Div>

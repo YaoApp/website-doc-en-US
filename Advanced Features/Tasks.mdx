@@ -1,0 +1,133 @@
+# concurrent tasks
+
+Generally speaking, we take the logic that is time-consuming, consumes a lot of resources, or is prone to error, which is very suitable to be separated from the main request process and executed asynchronously. For example, when a new user registers, the system usually sends a welcome email after the registration is successful. The action of sending the welcome email can be separated from the registration process and executed as an asynchronous task. In this way, the application server can avoid being overwhelmed by computationally intensive tasks such as image processing, and users can also get a faster response. Yao supports adding asynchronous tasks to reduce server request pressure.
+
+## Yao supports task concurrent tasks
+
+- New file directory `/tasks/task.js`:
+
+```json
+{
+  "name": "Test task",
+  "worker_nums": 10,
+  "attempts": 3,
+  "attempt_after": 200,
+  "timeout": 2,
+  "size": 1000,
+  "process": "scripts.task.Send",
+  "event": {
+    "next": "scripts.task.NextID",
+    "add": "scripts.task.OnAdd",
+    "success": "scripts.task.OnSuccess",
+    "error": "scripts.task.OnError",
+    "progress": "scripts.task.OnProgress"
+  }
+}
+```
+
+| Parameters    | Meaning                                         | Description |
+| ------------- | ----------------------------------------------- | ----------- |
+| name          | Task name                                       |             |
+| worker_nums   | Specifies the number of processes               |             |
+| attempts      | Number of failed retries                        |             |
+| attempt_after | retry interval                                  |             |
+| timeout       | timeout period                                  |             |
+| process       | The process bound to this task                  |             |
+| next          | Generate task unique id                         |             |
+| add           | Method triggered when a task is added           |             |
+| success       | Trigger method after successful task processing |             |
+| error         | Trigger method after task failure               |             |
+| progress      | Called during task processing                   |             |
+
+New `scripts/task.js`
+
+<Detail title="View source code">
+
+```javascript
+var id = 1024;
+
+/**
+ * Generate job id
+ * @returns
+ */
+function NextID() {
+  id = id + 1;
+  console.log(`NextID: ${id}`);
+  return id;
+}
+
+function Send(id, message) {
+  console.log(message);
+}
+
+/**
+ * OnAdd add event
+ * @param {*} id
+ */
+function OnAdd(id) {
+  log.Error("Enter add");
+  console.log(`OnAdd: #${id}`);
+}
+
+/**
+ * OnProgress
+ * @param {*} id
+ * @param {*} current
+ * @param {*} total
+ * @param {*} message
+ */
+function OnProgress(id, current, total, message) {
+  console.log(`OnProgress: #${id} ${message} ${current}/${total} `);
+}
+
+function OnSuccess(id, res) {
+  console.log(`OnSuccess: #${id} ${JSON.stringify(res)}`);
+}
+
+function OnError(id, err) {
+  console.log(`OnError: #${id} ${err}`);
+}
+```
+
+</Detail>
+
+New route `apis/task.http.json`
+
+```json
+{
+  "name": "Task",
+  "version": "1.0.0",
+  "description": "Task",
+  "guard": "",
+  "group": "task",
+  "paths": [
+    {
+      "path": "/task",
+      "method": "GET",
+      "process": "scripts.test.task",
+      "in": [],
+      "out": {
+        "status": 200,
+        "type": "application/json"
+      }
+    }
+  ]
+}
+```
+
+New test function `scripts/test.js`
+
+```javascript
+function task() {
+  for (i = 1; i < 100; i++) {
+    Process("tasks.test.Add", "Enter task" + i);
+  }
+}
+```
+
+Run the project `yao start` and visit the url `127.0.0.1:5099/api/task/task` to see the print information
+
+<Div style={{ display: "flex", justifyContent: "space-between" }}>
+  <Link type="prev" title="Export" link="Advanced Features/Export"></Link>
+  <Link type="next" title="Schedules" link="Advanced Features/Schedules"></Link>
+</Div>

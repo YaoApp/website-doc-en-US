@@ -1,0 +1,182 @@
+# Delete
+
+Mark to delete a single data record with the specified primary key. If `soft_deletes` is not enabled in the model definition, the data record will be deleted.
+
+## `delete` delete a single record (mark delete)
+
+### process
+
+`models.modelname.Delete`
+
+### Parameters Table
+
+| Parameters | Type       | Description       | Example |
+| ---------- | ---------- | ----------------- | ------- |
+| args[0]    | Object Row | Model primary key | `1`     |
+
+### return value
+
+`null` returns no value
+
+## Example one
+
+### Data Model
+
+| Model | Model Definition                           |
+| ----- | ------------------------------------------ |
+| user  | [model description file](../examples/user) |
+
+### process
+
+```json
+models.user.Delete
+```
+
+### Parameters Table
+
+```json
+[1]
+```
+
+### return value
+
+```json
+null
+```
+
+## external references
+
+### Called in business logic (`Flow`):
+
+```json
+{
+  "nodes": [
+    {
+      "name": "user",
+      "process": "models.user.Delete",
+      "args": [1],
+      "outs": []
+    }
+  ]
+}
+```
+
+### Called in the service interface (`API`):
+
+```json
+{
+  "paths": [
+    {
+      "path": "/delete/:id",
+      "method": "POST",
+      "process": "models.user.Delete",
+      "in": ["$params.id"],
+      "out": {
+        "status": 200
+      }
+    }
+  ]
+}
+```
+
+```bash
+POST /api/user/delete/1
+```
+
+## Example 2
+
+### Create a new model, add a `models/category.mod.json` file, and write the following content:
+
+```json
+{
+  "name": "Book Category",
+  "table": {
+    "name": "category",
+    "comment": "Book Category"
+  },
+  "columns": [
+    {
+      "label": "ID",
+      "name": "id",
+      "type": "ID",
+      "comment": "ID",
+      "primary": true
+    },
+    {
+      "label": "parent id",
+      "name": "parent_id",
+      "type": "integer",
+      "nullable": true
+    },
+    {
+      "label": "Classification Name",
+      "name": "name",
+      "type": "string",
+      "length": 128,
+      "index": true
+    }
+  ],
+  "relations": {
+    "book": {
+      "type": "hasMany",
+      "model": "book",
+      "key": "category_id",
+      "foreign": "id",
+      "query": {}
+    },
+    "parent": {
+      "type": "hasOne",
+      "model": "category",
+      "key": "id",
+      "foreign": "parent_id",
+      "query": {}
+    }
+  },
+  "option": {
+    "timestamps": true,
+    "soft_deletes": true
+  },
+  "values": [
+    {
+      "id": 1,
+      "parent_id": null,
+      "name": "Literature and History"
+    },
+    {
+      "id": 2,
+      "parent_id": 1,
+      "name": "History"
+    },
+    {
+      "id": 3,
+      "parent_id": 1,
+      "name": "Ancient Poem"
+    },
+    {
+      "id": 4,
+      "parent_id": null,
+      "name": "Science and Engineering"
+    },
+    {
+      "id": 5,
+      "parent_id": 4,
+      "name": "Math"
+    },
+    {
+      "id": 6,
+      "parent_id": 4,
+      "name": "Physical"
+    }
+  ]
+}
+```
+
+### Delete Input id to delete, if soft delete is set, it will become soft delete, create `scripts/test.js`
+
+```javascript
+function deletes() {
+  return Process("models.category.delete", 10, {});
+}
+```
+
+run `yao run scripts.test.deletes`

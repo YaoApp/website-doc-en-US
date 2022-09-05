@@ -178,15 +178,15 @@
 
 Check out [Code Sample](https://github.com/YaoApp/demo-crm/blob/master/kanban/index.kan.json)
 
-Analysis chart (`Chart`) is mainly used to arrange data statistics analysis query logic, supports the use of JavaScript scripts to process the results of each query node, can directly view the analysis chart in the data management background, and can also be used as a processor (`process`), The reference method is `charts.<analytical chart name>`. Analysis chart (`Chart`) supports data analysis engines based on `ElasticSearch` and `MySQL` for various business scenarios.
+Analysis chart (`Chart`) is mainly used to arrange data statistics analysis query logic, supports the use of JavaScript scripts to process the results of each query node, can directly view the analysis chart in the data management background, and can also be used as a process (`process`), The reference method is `charts.<analytical chart name>`. Analysis chart (`Chart`) supports data analysis engines based on `ElasticSearch` and `MySQL` for various business scenarios.
 
 Data kanban and data big screen pages can also be written in the same way.
 
 ## handler list
 
-Data kanban, analysis charts, data screen related processors.
+Data kanban, analysis charts, data screen related processes.
 
-| Processor           | Description                                                                 | Documentation |
+| process             | Description                                                                 | Documentation |
 | ------------------- | --------------------------------------------------------------------------- | ------------- |
 | xiang.chart.Data    | Returns chart query results.                                                | -             |
 | xiang.chart.Setting | Read data table configuration information for front-end interface rendering | -             |
@@ -393,19 +393,19 @@ Page route: `/xiang/kanban/<Kanban Name>`
 }
 ```
 
-An analysis chart query orchestration (`Chart`) can have multiple query nodes, each query node also writes and sets the `query` query parameters corresponding to the data engine, or calls a processor (`process`), which can specify the result Processing scripts and return values ​​can be used to reference contextual information in query nodes. The context data reference and result processing script are specifically consistent with the business logic orchestration (`Flow`).
+An analysis chart query orchestration (`Chart`) can have multiple query nodes, each query node also writes and sets the `query` query parameters corresponding to the data engine, or calls a process (`process`), which can specify the result Processing scripts and return values ​​can be used to reference contextual information in query nodes. The context data reference and result processing script are specifically consistent with the business logic orchestration (`Flow`).
 
 `Object Node` data structure
 
-| Fields  | Type           | Description                                                                                                                                                                             | Required Fields |
-| ------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
-| name    | String         | query node name                                                                                                                                                                         | yes             |
-| query   | Query DSL      | Query Language                                                                                                                                                                          | No              |
-| process | String         | Invoke the processor `process`, `query` or `process`. If also present ignore the `process` setting.                                                                                     | No              |
-| args    | Array<Any\>    | Processor argument list. Can refer to input/output or context data, same as `flow`.                                                                                                     | No              |
-| script  | String         | Result processing script, supports ES5, same as `flow`.                                                                                                                                 | No              |
-| outs    | Array<String\> | Query node result output. Use `{{$out}}` to refer to the processor to return the result, same as `flow`. If not set, the return value is equal to the result returned by the processor. | No              |
-| next    | Object Next    | Jump to the specified query node when the query result meets the set conditions (**Not yet implemented**)                                                                               | No              |
+| Fields  | Type           | Description                                                                                                                                                                         | Required Fields |
+| ------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| name    | String         | query node name                                                                                                                                                                     | yes             |
+| query   | Query DSL      | Query Language                                                                                                                                                                      | No              |
+| process | String         | Invoke the process `process`, `query` or `process`. If also present ignore the `process` setting.                                                                                   | No              |
+| args    | Array<Any\>    | process argument list. Can refer to input/output or context data, same as `flow`.                                                                                                   | No              |
+| script  | String         | Result processing script, supports ES5, same as `flow`.                                                                                                                             | No              |
+| outs    | Array<String\> | Query node result output. Use `{{$out}}` to refer to the process to return the result, same as `flow`. If not set, the return value is equal to the result returned by the process. | No              |
+| next    | Object Next    | Jump to the specified query node when the query result meets the set conditions (**Not yet implemented**)                                                                           | No              |
 
 ### Analysis chart query interface `apis`
 

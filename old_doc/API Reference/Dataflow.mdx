@@ -22,11 +22,11 @@ The data flow orchestration document consists of basic information, query nodes 
 
 ```json
 {
-	"label": "Latest Information",
-	"version": "1.0.0",
-	"description": "Latest Information",
-	"nodes": [],
-	"output": {}
+  "label": "Latest Information",
+  "version": "1.0.0",
+  "description": "Latest Information",
+  "nodes": [],
+  "output": {}
 }
 ```
 
@@ -42,55 +42,55 @@ The data flow orchestration document consists of basic information, query nodes 
 
 ```json
 {
-	"nodes": [
-		{
-			"name": "manus",
-			"process": "models.manu.get",
-			"args": [
-				{
-					"select": ["id", "name", "short_name"],
-					"limit": 20,
-					"orders": [{ "column": "created_at", "option": "desc" }],
-					"wheres": [
-						{ "column": "status", "value": "enabled" },
-						{ "column": "name", "value": "{{$in.0}}", "op": "like" }
-					]
-				}
-			],
-			"script": "rank",
-			"outs": ["{{$out.manus}}", "{{$out.manu_ids}}"]
-		}
-	]
+  "nodes": [
+    {
+      "name": "manus",
+      "process": "models.manu.get",
+      "args": [
+        {
+          "select": ["id", "name", "short_name"],
+          "limit": 20,
+          "orders": [{ "column": "created_at", "option": "desc" }],
+          "wheres": [
+            { "column": "status", "value": "enabled" },
+            { "column": "name", "value": "{{$in.0}}", "op": "like" }
+          ]
+        }
+      ],
+      "script": "rank",
+      "outs": ["{{$out.manus}}", "{{$out.manu_ids}}"]
+    }
+  ]
 }
 ```
 
-A data flow orchestration (`Flow`) can have multiple query nodes, each query node can call a processor (`process`), can specify the result processing script and return value, and can refer to the context information in the query node, For details, please refer to related documents: [input and output](#3-input and output) [context data reference](#3-context data reference) [result processing script](#4-result processing script)
+A data flow orchestration (`Flow`) can have multiple query nodes, each query node can call a process (`process`), can specify the result processing script and return value, and can refer to the context information in the query node, For details, please refer to related documents: [input and output](#3-input and output) [context data reference](#3-context data reference) [result processing script](#4-result processing script)
 
 `Object Node` data structure
 
-| Fields  | Type           | Description                                                                                                                                                           | Required Fields |
-| ------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
-| name    | String         | query node name                                                                                                                                                       | yes             |
-| process | String         | Invoke processor `process`                                                                                                                                            | yes             |
+| Fields  | Type           | Description                                                                                                                                                         | Required Fields |
+| ------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| name    | String         | query node name                                                                                                                                                     | yes             |
+| process | String         | Invoke process `process`                                                                                                                                            | yes             |
 | args    | Array<Any\>    | Process parameter table. Can reference input/output or context data [see full description] (#3-context data reference)                                              | yes             |
-| script  | String         | Result processing JS script [View full description](#4-Result processing script)                                                                                      | No              |
-| outs    | Array<String\> | Query node result output. Use `{{$out}}` to refer to the process to return the result. If not set, the return value is equal to the result returned by the processor. | No              |
-| next    | Object Next    | Jump to the specified query node when the query result meets the set conditions (**Not yet implemented**)                                                             | No              |
+| script  | String         | Result processing JS script [View full description](#4-Result processing script)                                                                                    | No              |
+| outs    | Array<String\> | Query node result output. Use `{{$out}}` to refer to the process to return the result. If not set, the return value is equal to the result returned by the process. | No              |
+| next    | Object Next    | Jump to the specified query node when the query result meets the set conditions (**Not yet implemented**)                                                           | No              |
 
 ## `output`
 
 ```json
 {
-	"output": {
-		"foo": "{{$in}}",
-		"bar": {
-			"node1": "{{$res.node1.0}}",
-			"node2": "{{$res.node2.0}}",
-			"node3": "{{$res.node3}}"
-		},
-		"data": "{{$res}}",
-		"ping": "pong"
-	}
+  "output": {
+    "foo": "{{$in}}",
+    "bar": {
+      "node1": "{{$res.node1.0}}",
+      "node2": "{{$res.node2.0}}",
+      "node3": "{{$res.node3}}"
+    },
+    "data": "{{$res}}",
+    "ping": "pong"
+  }
 }
 ```
 
@@ -98,53 +98,53 @@ The output result of the data flow (`Flow`) can be freely defined according to b
 
 ## Context Data Reference
 
-The data flow (`Flow`) can be passed as a global reference parameter (`{{$in}}`) and the return value of each query node `{{$res}}`. In the `outs` array inside the query node, you can refer to the return value `{{out}}` of the processor (`process`).
+The data flow (`Flow`) can be passed as a global reference parameter (`{{$in}}`) and the return value of each query node `{{$res}}`. In the `outs` array inside the query node, you can refer to the return value `{{out}}` of the process (`process`).
 
 ```json
 {
-	"label": "Latest Information",
-	"version": "1.0.0",
-	"description": "Latest Information",
-	"nodes": [
-		{
-			"name": "manus",
-			"process": "models.manu.get",
-			"args": [
-				{
-					"select": ["id", "name", "short_name"],
-					"limit": 20,
-					"orders": [{ "column": "created_at", "option": "desc" }],
-					"wheres": [
-						{ "column": "status", "value": "enabled" },
-						{ "column": "name", "value": "{{$in.0}}", "op": "like" }
-					]
-				}
-			],
-			"script": "rank",
-			"outs": ["{{$out.manus}}", "{{$out.manu_ids}}"]
-		},
-		{
-			"name": "github",
-			"process": "plugins.user.github",
-			"args": [
-				"{{$res.users.0}}",
-				"{{$res.manus}}",
-				"{{$in.0}}",
-				"{{$in.1}}",
-				"{{$in.2}}",
-				"{{hello(:$res.users, 'id', 0.618, 10)}}",
-				"foo",
-				1
-			]
-		}
-	],
-	"output": {
-		"params": "{{$in}}",
-		"data": {
-			"manus": "{{$res.manus.0}}",
-			"github": "{{$res.github}}"
-		}
-	}
+  "label": "Latest Information",
+  "version": "1.0.0",
+  "description": "Latest Information",
+  "nodes": [
+    {
+      "name": "manus",
+      "process": "models.manu.get",
+      "args": [
+        {
+          "select": ["id", "name", "short_name"],
+          "limit": 20,
+          "orders": [{ "column": "created_at", "option": "desc" }],
+          "wheres": [
+            { "column": "status", "value": "enabled" },
+            { "column": "name", "value": "{{$in.0}}", "op": "like" }
+          ]
+        }
+      ],
+      "script": "rank",
+      "outs": ["{{$out.manus}}", "{{$out.manu_ids}}"]
+    },
+    {
+      "name": "github",
+      "process": "plugins.user.github",
+      "args": [
+        "{{$res.users.0}}",
+        "{{$res.manus}}",
+        "{{$in.0}}",
+        "{{$in.1}}",
+        "{{$in.2}}",
+        "{{hello(:$res.users, 'id', 0.618, 10)}}",
+        "foo",
+        1
+      ]
+    }
+  ],
+  "output": {
+    "params": "{{$in}}",
+    "data": {
+      "manus": "{{$res.manus.0}}",
+      "github": "{{$res.github}}"
+    }
+  }
 }
 ```
 
@@ -154,7 +154,7 @@ The data flow (`Flow`) can be passed as a global reference parameter (`{{$in}}`)
 | ---------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ | -------------------------------------------------------------- |
 | `{{$in}}`  | Array<Any\>        | The parameter table passed in when the data flow is called, supports access to the specified parameters using array subscripts, for example: `{{$in.0}}` The first Arguments, `{{$in.1}}` 2nd Argument,     | `nodes[n].args`, `nodes[n].outs`, `output` | `{{$in}}`, ` {{$in.0}}`,`{{$in.0.name}}`                       |
 | `{{$res}}` | \[key:String\]:Any | Query node return value (`nodes[n].outs`) mapping table, support using the query node name to access the return value of a specific query node. For example `{{$res.node1.0}}` first return value of node1. | `nodes[n].args`, `nodes[n].outs`, `output` | `{{$res}}`, `{{$res.node1.0.name}}`, `{{ $res.node2.manu_id}}` |
-| `{{out}}`  | Any                | Query the return value of the node's processor (`process`), support using `.` to apply Object /Array values ​​                                                                                              | `nodes[n].outs`                            | `{{out}} `, `{{out.name}}`, `{{out.0}}`                        |
+| `{{out}}`  | Any                | Query the return value of the node's process (`process`), support using `.` to apply Object /Array values ​​                                                                                                | `nodes[n].outs`                            | `{{out}} `, `{{out.name}}`, `{{out.0}}`                        |
 
 ### Helper Functions
 
@@ -172,15 +172,15 @@ Helper function table
 
 ```json
 {
-	"nodes": [
-		{
-			"name": "github",
-			"process": "plugins.user.github",
-			"args": ["{{$in.1}}", "{{$in.2}}", "foo", 1],
-			"script": "count",
-			"outs": ["$out.args", "$out.plugin"]
-		}
-	]
+  "nodes": [
+    {
+      "name": "github",
+      "process": "plugins.user.github",
+      "args": ["{{$in.1}}", "{{$in.2}}", "foo", 1],
+      "script": "count",
+      "outs": ["$out.args", "$out.plugin"]
+    }
+  ]
 }
 ```
 
@@ -188,21 +188,21 @@ Helper function table
 
 ```javascript
 function main(args, out, res) {
-	return {
-		args: args,
-		plugin: res.github.name
-	}
+  return {
+    args: args,
+    plugin: res.github.name,
+  };
 }
 ```
 
-The query node supports processing the return value of the processor (`process`) using JavaScript scripts. The `main()` function passes in the data flow (`Flow`) parameter table, the current query node process return value and the query node return value mapping table. The return value can be referenced using the `$out` variable.
+The query node supports processing the return value of the process (`process`) using JavaScript scripts. The `main()` function passes in the data flow (`Flow`) parameter table, the current query node process return value and the query node return value mapping table. The return value can be referenced using the `$out` variable.
 
 ### Parameters Table
 
 | Parameters | Type               | Description                                                             |
 | ---------- | ------------------ | ----------------------------------------------------------------------- |
 | args[0]    | Array<Any\>        | The parameter list passed in when the data flow is called, ie `{{$in}}` |
-| args[1]    | Any                | current query node processor (`process`) return value, i.e. `{{$out}}`  |
+| args[1]    | Any                | current query node process (`process`) return value, i.e. `{{$out}}`    |
 | args[2]    | \[key:String\]:Any | Query node return value (nodes[n].outs) mapping table, ie `{{$res}}`    |
 
 ### Return Value
@@ -217,15 +217,15 @@ A data flow (`Flow`) can be used as a process to call in other data flows (`Flow
 
 ```json
 {
-	"nodes": [
-		{
-			"name": "github",
-			"process": "flows.github",
-			"args": ["{{$in.1}}", "{{$in.2}}", "foo", 1],
-			"script": "count",
-			"outs": ["$out.args", "$out.plugin"]
-		}
-	]
+  "nodes": [
+    {
+      "name": "github",
+      "process": "flows.github",
+      "args": ["{{$in.1}}", "{{$in.2}}", "foo", 1],
+      "script": "count",
+      "outs": ["$out.args", "$out.plugin"]
+    }
+  ]
 }
 ```
 
@@ -233,14 +233,14 @@ A data flow (`Flow`) can be used as a process to call in other data flows (`Flow
 
 ```json
 {
-	"path": "/latest/:day",
-	"method": "GET",
-	"process": "flows.latest",
-	"in": ["$param.day"],
-	"out": {
-		"status": 200,
-		"type": "application/json"
-	}
+  "path": "/latest/:day",
+  "method": "GET",
+  "process": "flows.latest",
+  "in": ["$param.day"],
+  "out": {
+    "status": 200,
+    "type": "application/json"
+  }
 }
 ```
 
@@ -250,76 +250,76 @@ A complete example can be found in [examples](examples)
 
 ```json
 {
-	"label": "Latest Information",
-	"version": "1.0.0",
-	"description": "Latest Information",
-	"nodes": [
-		{
-			"name": "manus",
-			"process": "models.manu.get",
-			"args": [
-				{
-					"select": ["id", "name", "short_name"],
-					"limit": 20,
-					"orders": [{ "column": "created_at", "option": "desc" }],
-					"wheres": [
-						{ "column": "status", "value": "enabled" },
-						{ "column": "name", "value": "{{$in.0}}", "op": "like" }
-					]
-				}
-			],
-			"script": "rank",
-			"outs": ["{{$out.manus}}", "{{$out.manu_ids}}"]
-		},
-		{
-			"name": "users",
-			"process": "models.user.paginate",
-			"args": [
-				{
-					"select": ["id", "name", "extra", "resume"],
-					"withs": {
-						"manu": { "query": { "select": ["name", "short_name"] } },
-						"addresses": {
-							"query": { "select": ["province", "city", "location"] }
-						}
-					},
-					"orders": [{ "column": "created_at", "option": "desc" }],
-					"wheres": [
-						{ "column": "status", "value": "enabled" },
-						{ "column": "manu_id", "value": "{{$res.manus.1}}", "op": "in" }
-					]
-				},
-				1,
-				20
-			],
-			"outs": ["{{$out.data}}"]
-		},
-		{
-			"name": "github",
-			"process": "plugins.user.github",
-			"args": [
-				"{{$res.users.0}}",
-				"{{$res.manus}}",
-				"{{$in.0}}",
-				"{{$in.1}}",
-				"{{$in.2}}",
-				"{{pluck(:$res.users, 'id', 0.618, 10)}}",
-				"foo",
-				1
-			]
-		},
-		{
-			"name": "count",
-			"script": "count"
-		}
-	],
-	"output": {
-		"params": "{{$in}}",
-		"data": {
-			"manus": "{{$res.manus.0}}",
-			"users": "{{$res.users.0}}",
-			"count": "{{$res.count}}"
-		}
-	}
+  "label": "Latest Information",
+  "version": "1.0.0",
+  "description": "Latest Information",
+  "nodes": [
+    {
+      "name": "manus",
+      "process": "models.manu.get",
+      "args": [
+        {
+          "select": ["id", "name", "short_name"],
+          "limit": 20,
+          "orders": [{ "column": "created_at", "option": "desc" }],
+          "wheres": [
+            { "column": "status", "value": "enabled" },
+            { "column": "name", "value": "{{$in.0}}", "op": "like" }
+          ]
+        }
+      ],
+      "script": "rank",
+      "outs": ["{{$out.manus}}", "{{$out.manu_ids}}"]
+    },
+    {
+      "name": "users",
+      "process": "models.user.paginate",
+      "args": [
+        {
+          "select": ["id", "name", "extra", "resume"],
+          "withs": {
+            "manu": { "query": { "select": ["name", "short_name"] } },
+            "addresses": {
+              "query": { "select": ["province", "city", "location"] }
+            }
+          },
+          "orders": [{ "column": "created_at", "option": "desc" }],
+          "wheres": [
+            { "column": "status", "value": "enabled" },
+            { "column": "manu_id", "value": "{{$res.manus.1}}", "op": "in" }
+          ]
+        },
+        1,
+        20
+      ],
+      "outs": ["{{$out.data}}"]
+    },
+    {
+      "name": "github",
+      "process": "plugins.user.github",
+      "args": [
+        "{{$res.users.0}}",
+        "{{$res.manus}}",
+        "{{$in.0}}",
+        "{{$in.1}}",
+        "{{$in.2}}",
+        "{{pluck(:$res.users, 'id', 0.618, 10)}}",
+        "foo",
+        1
+      ]
+    },
+    {
+      "name": "count",
+      "script": "count"
+    }
+  ],
+  "output": {
+    "params": "{{$in}}",
+    "data": {
+      "manus": "{{$res.manus.0}}",
+      "users": "{{$res.users.0}}",
+      "count": "{{$res.count}}"
+    }
+  }
 }
 ```

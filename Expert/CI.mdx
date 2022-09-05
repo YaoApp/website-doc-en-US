@@ -1,0 +1,143 @@
+# source code compilation
+
+Before starting, it is recommended to read [YAO Architecture Analysis](../Introduction/Yao%20Architecture%20Analysis), understand the source code structure of YAO.
+
+## Development environment
+
+YAO is developed in golang, and a development environment can be established in a Mac or Linux environment.
+
+| Tools  | Versions | Instructions |
+| ------ | -------- | ------------ |
+| Golang | 1.18+    | Golang       |
+| MySQL  | 8.0+     | optional     |
+
+[Golang](https://go.dev/learn/)
+
+It is recommended to use Docker to install the service
+
+[MySQL Docker image](https://hub.docker.com/layers/mysql/library/mysql/8.0.26/images/sha256-882e55f40d61034a2bb8a1abab1353571ad2a33866f382350788eb34740528b5?context=explore)
+
+## Source code download
+
+YAO related code repository
+
+| Warehouse                       | Instructions                    |
+| ------------------------------- | ------------------------------- |
+| https://github.com/yaoapp/yao   | Yao                             |
+| https://github.com/yaoapp/gou   | Engine Framework                |
+| https://github.com/yaoapp/xun   | ORM                             |
+| https://github.com/yaoapp/kun   | Common data processing packages |
+| https://github.com/rogchap/v8go | V8 JavaScript engine            |
+
+Download the source code to the project directory
+
+```bash
+mkdir /your-project/root
+git clone https://github.com/yaoapp/yao
+git clone https://github.com/yaoapp/gou
+git clone https://github.com/yaoapp/xun
+git clone https://github.com/yaoapp/kun
+git clone https://github.com/rogchap/v8go
+cd v8go && chekout 5e91d3d9dcabd2986f901b6b31590e49fc3c4dd8
+```
+
+## Environment variables
+
+Set environment variables for source code debugging
+
+| variable       | description                                                 | example                           |
+| -------------- | ----------------------------------------------------------- | --------------------------------- |
+| YAO_DEV        | Source path                                                 | /your-project/root/yao            |
+| YAO_ENV        | How to start the test application development \| production | development                       |
+| YAO_ROOT       | Test application directory                                  | /your-project/root/yao/tests      |
+| YAO_HOST       | Listening host                                              | 0.0.0.0                           |
+| YAO_PORT       | Listening port                                              | 5099                              |
+| YAO_LOG        | Test application log file                                   | /your-project/root/yao/tests/logs |
+| YAO_JWT_SECRET | JWT secret                                                  | qo-2U+hoTRU                       |
+| YAO_DB_AESKEY  | Database AES KEY                                            | LX=T&f6refe                       |
+
+```bash
+export YAO_DEV="/your-project/root/yao"
+export YAO_ENV="development"
+export YAO_ROOT="/your-project/root/yao/tests"
+export YAO_HOST="0.0.0.0"
+export YAO_PORT="5099"
+export YAO_LOG="/your-project/root/yao/tests/logs"
+export YAO_JWT_SECRET="qo-2U+hoTRU"
+
+# Enable MySQL database
+export YAO_DB_DRIVER=mysql
+export YAO_DB_PRIMARY="root:db-password@tcp(db-server:3308)/xiang?charset=utf8mb4&parseTime=True&loc=Local"
+export YAO_DB_AESKEY="LX=T&f6refe"
+
+```
+
+## unit test
+
+Go to the Yao project directory to run unit tests
+
+```bash
+cd /your-project/root/yao
+make test
+```
+
+## run debugging
+
+Debugging with Go commands
+
+```bash
+cd /your-project/root/yao
+go run .
+go run . run xiang.sys.ping
+go run . start
+```
+
+## compile artifacts
+
+For the first compilation, you need to install related tools
+
+```bash
+cd /your-project/root/yao
+make tools
+```
+
+During the compilation process, the code will be pulled from the https://github.com/YaoApp/xgen.git repository and built
+Need to install nodejs 16+ in advance
+
+###MacOS
+
+```bash
+cd /your-project/root/yao
+make release
+```
+
+Artifact is `dist/release/yao`
+
+### Linux
+
+```bash
+cd /your-project/root/yao
+make linux-release
+```
+
+Artifact is `dist/release/yao`
+
+### Debug debugging
+
+Does not integrate XGen interface engine
+
+```bash
+make debug
+```
+
+Artifact is `dist/release/yao-debug`
+
+### Workflows
+
+https://github.com/YaoApp/yao/blob/main/.github/workflows/release-linux.yml
+https://github.com/YaoApp/yao/blob/main/.github/workflows/release-macos.yml
+
+<Div style={{ display: "flex", justifyContent: "space-between" }}>
+  <Link type="prev" title="Write Widget" link="Expert/Write Widget"></Link>
+  <Link type="next" title="ENV" link="Expert/ENV"></Link>
+</Div>
