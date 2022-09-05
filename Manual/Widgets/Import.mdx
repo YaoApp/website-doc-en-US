@@ -1,1 +1,384 @@
-# Import
+# Import data import
+
+<Detail title="View source code">
+
+````json
+{
+  "name": "Ticket List",
+  "version": "1.0.0",
+  "decription": "List of tickets",
+  "bind": {
+    "model": "ticket"
+  },
+  "apis": {},
+  "actions": {
+    "create": {
+      "type": "button",
+      "props": { "label": "Add Ticket", "icon": "fas fa-plus" }
+    },
+    "import": {
+      "props": {
+        "api": {
+          "setting": "/api/xiang/import/ticket/setting",
+          "mapping": "/api/xiang/import/ticket/mapping",
+          "mapping_setting": "/api/xiang/import/ticket/mapping/setting",
+          "preview": "/api/xiang/import/ticket/data",
+          "preview_setting": "/api/xiang/import/ticket/data/setting",
+          "import": "/api/xiang/import/ticket"
+        }
+      }
+    },
+    "pagination": {}
+  },
+  "columns": {},
+  "filters": {},
+  "list": {},
+  "edit": {},
+  "view": {}
+}
+````
+
+</Detail>
+
+View [code example](#sample code)
+
+<blockquote>
+  <p>
+    File import function, usually used for Excel table import.
+  </p>
+  <p>
+    Use the data import component in Tables as a processor.
+  </p>
+  <p>
+    This chapter introduces the Excel import function.
+  </p>
+
+</blockquote>
+
+## handler list
+
+| Processor | Description |
+| ------------------------------------- | --------------------- ----- |
+| xiang.import.Run | Start running the import function |
+| xiang.import.Data | Get table data |
+| xiang.import.Setting | Get the mapping field setting of the table |
+| xiang.import.DataSetting | Get mapping data |
+| xiang.import.Mapping | Get Mapping |
+| xiang.import.MappingSetting | Get mapping data |
+
+## API list
+
+| Interface | Description |
+| -------------------------------------------- | ---- ---------------------- |
+| /api/xiang/import/<table name>/setting | Get the Setting of the table |
+| /api/xiang/import/<table name>/mapping | Get the mapping field of the table |
+| /api/xiang/import/<table name>/mapping/setting | Get the mapping field setting of the table |
+| /api/xiang/import/<table name>/data | Get data |
+| /api/xiang/import/<table name>/data/setting | setting to get data |
+| /api/xiang/import/<table name> | Import data interface |
+
+````json
+{
+  "setting": "/api/xiang/import/ticket/setting",
+  "mapping": "/api/xiang/import/ticket/mapping",
+  "mapping_setting": "/api/xiang/import/ticket/mapping/setting",
+  "preview": "/api/xiang/import/ticket/data",
+  "preview_setting": "/api/xiang/import/ticket/data/setting",
+  "import": "/api/xiang/import/ticket"
+}
+````
+
+## sample code
+
+### Step 1: Add the models directory file `/models/ticket.mod.json`
+
+<Detail title="View source code">
+
+````json
+{
+  "name": "Ticket table",
+  "table": {
+    "name": "ticket",
+    "comment": "Ticket Form"
+  },
+  "columns": [
+    { "label": "ID", "name": "id", "type": "ID" },
+    {
+      "label": "Nickname",
+      "name": "name",
+      "type": "string",
+      "length": 20,
+      "comment": "Nickname",
+      "index": true
+    },
+    {
+      "label": "Phone number",
+      "name": "phone",
+      "type": "string",
+      "comment": "Phone number",
+      "nullable": true
+    },
+    {
+      "label": "User gender",
+      "comment": "User gender",
+      "name": "gender",
+      "type": "string",
+      "default": ""
+    },
+
+    {
+      "label": "Area",
+      "name": "area",
+      "type": "string",
+      "nullable": true,
+      "comment": "Region"
+    }
+  ],
+  "option": {
+    "timestamps": true,
+    "soft_deletes": true
+  },
+  "values": []
+}
+````
+
+</Detail>
+
+Add the table directory file `/tables/ticket.tab.json`:
+
+<Detail title="View source code">
+
+````json
+{
+  "name": "Ticket List",
+  "version": "1.0.0",
+  "decription": "List of tickets",
+  "bind": {
+    "model": "ticket"
+  },
+  "apis": {},
+  "actions": {
+    "create": {
+      "type": "button",
+      "props": { "label": "Add Ticket", "icon": "fas fa-plus" }
+    },
+    "import": {
+      "props": {
+        "api": {
+          "setting": "/api/xiang/import/ticket/setting",
+          "mapping": "/api/xiang/import/ticket/mapping",
+          "mapping_setting": "/api/xiang/import/ticket/mapping/setting",
+          "preview": "/api/xiang/import/ticket/data",
+          "preview_setting": "/api/xiang/import/ticket/data/setting",
+          "import": "/api/xiang/import/ticket"
+        }
+      }
+    },
+    "pagination": {}
+  },
+  "columns": {},
+  "filters": {},
+  "list": {},
+  "edit": {},
+  "view": {}
+}
+````
+
+</Detail>
+
+### Step 2: Import the Excel file, add a new directory file `/imports/ticket.imp.json`
+
+Application directory structure:
+
+```bash
+├── apis # Used to store interface description files
+│
+├──tables
+| └──ticket.tab.json #import excel table
+|
+├── models # Used to store data model description files
+│
+├── db
+└── imports #map file for importing data
+| └── ticket.imp.json
+|
+|──scripts
+| └──imports
+| └──ticket.js
+|
+|
+└── app.json
+````
+
+Write the code `ticket.imp.json`:
+
+<Detail title="View source code">
+
+````json
+{
+  "title": "Import Ticket",
+  "process": "scripts.imports.ticket.Import",
+  "output": "scripts.imports.ticket.Output",
+  "columns": [
+    {
+      "label": "Nickname",
+      "name": "name",
+      "match": ["nickname", "nickname", "name"],
+      "rules": []
+    },
+    {
+      "label": "Phone",
+      "name": "phone",
+      "match": ["phone", "phone", "phone"],
+      "rules": []
+    },
+    {
+      "label": "Gender",
+      "name": "gender",
+      "match": ["gender", "gender", "gender"],
+      "rules": []
+    },
+    {
+      "label": "Region",
+      "name": "area",
+      "match": ["region", "region","area"],
+      "rules": []
+    }
+  ],
+  "option": {
+    "autoMatching": true,
+    "chunkSize": 200,
+    "logging": "error",
+    "mappingPreview": "auto",
+    "dataPreview": "auto",
+    "templateLink": "/somelinke/download/xxx"
+  },
+  "rules": {}
+}
+````
+
+</Detail>
+
+Write the code `/scripts/imports/ticket.js`:
+
+````javascript
+function Import(columns, data) {
+  // todo handles import logic
+
+  // print the implicit relation
+  console.log(columns);
+
+  // print the obtained data
+  console.log(data);
+
+  var success = 0;
+  var fail = 0;
+
+  return [success, fail];
+}
+function Output(data) {
+  // todo handles the logic after import, this function will be called automatically after import: "output": "scripts.imports.ticket.Output",
+  return data;
+}
+````
+
+### Step 3: Get the file url
+
+#### Request URL, request method: POST
+
+- `/api/xiang/storage/upload`
+
+#### parameters
+
+| Parameter Name | Required | Type | Description |
+| :----- | :--- | :--- | -------- |
+| file | yes | file | file name |
+
+#### return example
+
+````
+ "20220411/0C3A5E7FCA0FE897710DE2CA00240FFE.xlsx"
+````
+
+### Step 4: Get the mapping relationship
+
+#### Request URL, request method GET
+
+- `/api/xiang/import/ticket/mapping`
+
+#### parameters
+
+| Parameter Name | Required | Type | Description |
+| :----- | :--- | :----- | ------------ |
+| file | yes | string | file name url |
+
+### Step 5: Pass all the data
+
+#### request URL, request method POST
+
+- `/api/xiang/import/ticket`
+
+#### parameters
+
+| Parameter Name | Required | Type | Description |
+| :------ | :--- | :----- | ---------------------- |
+| file | yes | string | file name |
+| mapping | yes | string | mapping relation returns all data |
+
+#### Request parameter example
+
+<Detail title="View source code">
+
+````json
+{
+  "file": "20220407/BB9DDF196D0B5DF9319EA8ADB5C914D3.xlsx",
+  "mapping": {
+    "sheet": "sheet1",
+    "colStart": 1,
+    "rowStart": 1,
+    "data": [
+      {
+        "label": "Nickname",
+        "field": "name",
+        "name": "Nickname",
+        "axis": "B1",
+        "value": "Zhang San",
+        "rules": null
+      },
+      {
+        "label": "Phone",
+        "field": "phone",
+        "name": "Phone",
+        "axis": "C1",
+        "value": "15000000000",
+        "rules": null
+      },
+      {
+        "label": "Gender",
+        "field": "gender",
+        "name": "gender",
+        "axis": "D1",
+        "value": "Male",
+        "rules": null
+      },
+      {
+        "label": "Region",
+        "field": "area",
+        "name": "Region",
+        "axis": "A1",
+        "value": "Beijing",
+        "rules": null
+      }
+    ],
+    "autoMatching": true,
+    "templateMatching": false
+  }
+}
+````
+
+</Detail>
+
+<Div style={{ display: "flex", justifyContent: "space-between" }}>
+  <Link type="prev" title="Chart" link="Manual/Widgets/Chart"></Link>
+  <Link type="next" title="Store" link="Manual/Widgets/Store"></Link>
+</Div>
