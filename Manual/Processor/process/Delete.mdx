@@ -1,52 +1,52 @@
 # Delete
 
-标记删除指定主键的单条数据记录. 如模型定义时未开启 `soft_deletes` 则真删除数据记录。
+Mark to delete a single data record with the specified primary key. If `soft_deletes` is not enabled in the model definition, the data record will be deleted.
 
-## `delete` 删除单条记录(标记删除)
+## `delete` delete a single record (mark delete)
 
-### 处理器
+### Processor
 
-`models.模型名称.Delete`
+`models.modelname.Delete`
 
-### 参数表
+### Parameters Table
 
-| 参数    | 类型       | 说明     | 示例 |
-| ------- | ---------- | -------- | ---- |
-| args[0] | Object Row | 模型主键 | `1`  |
+| Parameters | Type       | Description       | Example |
+| ---------- | ---------- | ----------------- | ------- |
+| args[0]    | Object Row | Model primary key | `1`     |
 
-### 返回值
+### return value
 
-`null` 无返回值
+`null` returns no value
 
-## 示例一
+## Example one
 
-### 数据模型
+### Data Model
 
-| 模型 | 模型定义                              |
-| ---- | ------------------------------------- |
-| user | [模型描述文件](../examples/user) |
+| Model | Model Definition                           |
+| ----- | ------------------------------------------ |
+| user  | [model description file](../examples/user) |
 
-### 处理器
+### Processor
 
 ```json
 models.user.Delete
 ```
 
-### 参数表
+### Parameters Table
 
 ```json
 [1]
 ```
 
-### 返回值
+### return value
 
 ```json
 null
 ```
 
-## 外部引用
+## external references
 
-### 在业务逻辑(`Flow`) 中调用:
+### Called in business logic (`Flow`):
 
 ```json
 {
@@ -61,7 +61,7 @@ null
 }
 ```
 
-### 在服务接口(`API`) 中调用:
+### Called in the service interface (`API`):
 
 ```json
 {
@@ -83,16 +83,16 @@ null
 POST /api/user/delete/1
 ```
 
-## 示例二
+## Example 2
 
-### 新建模型，新增`models/category.mod.json`文件，写入以下内容：
+### Create a new model, add a `models/category.mod.json` file, and write the following content:
 
 ```json
 {
-  "name": "书籍分类",
+  "name": "Book Category",
   "table": {
     "name": "category",
-    "comment": "书籍分类"
+    "comment": "Book Category"
   },
   "columns": [
     {
@@ -103,13 +103,13 @@ POST /api/user/delete/1
       "primary": true
     },
     {
-      "label": "父级id",
+      "label": "parent id",
       "name": "parent_id",
       "type": "integer",
       "nullable": true
     },
     {
-      "label": "分类名称",
+      "label": "Classification Name",
       "name": "name",
       "type": "string",
       "length": 128,
@@ -140,38 +140,38 @@ POST /api/user/delete/1
     {
       "id": 1,
       "parent_id": null,
-      "name": "文史类"
+      "name": "Literature and History"
     },
     {
       "id": 2,
       "parent_id": 1,
-      "name": "历史"
+      "name": "History"
     },
     {
       "id": 3,
       "parent_id": 1,
-      "name": "古诗"
+      "name": "Ancient Poem"
     },
     {
       "id": 4,
       "parent_id": null,
-      "name": "理工类"
+      "name": "Science and Engineering"
     },
     {
       "id": 5,
       "parent_id": 4,
-      "name": "数学"
+      "name": "Math"
     },
     {
       "id": 6,
       "parent_id": 4,
-      "name": "物理"
+      "name": "Physical"
     }
   ]
 }
 ```
 
-### Delete 传入 id 删除，如果有设置软删除，则会变成软删除，新建`scripts/test.js`
+### Delete Input id to delete, if soft delete is set, it will become soft delete, create `scripts/test.js`
 
 ```javascript
 function deletes() {
@@ -179,4 +179,4 @@ function deletes() {
 }
 ```
 
-运行 `yao run scripts.test.deletes`
+run `yao run scripts.test.deletes`

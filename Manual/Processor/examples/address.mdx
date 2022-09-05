@@ -1,51 +1,51 @@
 ```json
 {
-  "name": "地址",
+  "name": "Address",
   "table": {
     "name": "address",
-    "comment": "地址表",
+    "comment": "Address Table",
     "engine": "InnoDB"
   },
   "columns": [
     { "name": "id", "type": "ID" },
     {
-      "label": "用户",
+      "label": "User",
       "name": "user_id",
       "type": "bigInteger",
-      "comment": "所属用户",
+      "comment": "Owning User",
       "index": true
     },
     {
-      "label": "省份",
+      "label": "Province",
       "name": "province",
       "type": "string",
       "length": 200,
-      "comment": "省份",
+      "comment": "Province",
       "index": true
     },
     {
-      "label": "城市",
+      "label": "City",
       "name": "city",
       "type": "string",
       "length": 200,
-      "comment": "城市",
+      "comment": "City",
       "index": true
     },
     {
-      "label": "地址",
+      "label": "Address",
       "name": "location",
       "type": "string",
       "length": 400,
-      "comment": "详细地址",
+      "comment": "Detailed address",
       "index": true
     },
     {
-      "label": "状态",
+      "label": "Status",
       "name": "status",
       "type": "enum",
       "default": "enabled",
       "option": ["enabled", "disabled"],
-      "comment": "状态 enabled 开启, disabled 关闭",
+      "comment": "Status enabled on, disabled off",
       "index": true
     }
   ],
@@ -54,27 +54,27 @@
   "values": [
     {
       "user_id": 1,
-      "province": "北京市",
-      "city": "丰台区",
-      "location": "银海星月9号楼9单元9层1024室"
+      "province": "Beijing",
+      "city": "Fengtai District",
+      "location": "Room 1024, 9th Floor, Unit 9, Building 9, Yinhai Xingyue"
     },
     {
       "user_id": 1,
-      "province": "北京市",
-      "city": "丰台区",
-      "location": "北京国家数字出版基地A103"
+      "province": "Beijing",
+      "city": "Fengtai District",
+      "location": "Beijing National Digital Publishing Base A103"
     },
     {
       "user_id": 2,
-      "province": "北京市",
-      "city": "海淀区",
-      "location": "华严北里7号楼7单元7层2048室"
+      "province": "Beijing",
+      "city": "Haidian District",
+      "location": "Room 2048, 7th Floor, Unit 7, Building 7, Huayan North Lane"
     },
     {
       "user_id": 3,
-      "province": "山东省",
-      "city": "威海市",
-      "location": "威海市6号楼6单元6层1056室"
+      "province": "Shandong Province",
+      "city": "Weihai City",
+      "location": "Room 1056, 6th Floor, Unit 6, Building 6, Weihai City"
     }
   ]
 }

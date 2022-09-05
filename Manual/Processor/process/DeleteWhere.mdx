@@ -1,38 +1,38 @@
 # DeleteWhere
 
-按条件标记删除数据, 返回删除行数。如模型定义时未开启 `soft_deletes` 则真删除数据记录。
+Delete data by conditional tag, return the number of deleted rows. If `soft_deletes` is not enabled when the model is defined, the data record will be deleted.
 
-## `deleteWhere` 按条件标记删除数据, 返回删除行数
+## `deleteWhere` delete data by conditional tag, return the number of deleted rows
 
-### 处理器
+### Processor
 
-`models.模型名称.DeleteWhere`
+`models.modelname.DeleteWhere`
 
-### 参数表
+### Parameters Table
 
-| 参数    | 类型              | 说明     | 示例                                             |
-| ------- | ----------------- | -------- | ------------------------------------------------ |
-| args[0] | Object QueryParam | 查询条件 | `{"wheres":[{"column":"name", "value":"张三"}]}` |
+| Parameters | Type              | Description      | Example                                               |
+| ---------- | ----------------- | ---------------- | ----------------------------------------------------- |
+| args[0]    | Object QueryParam | Query conditions | `{"wheres":[{"column":"name", "value":"Zhang San"}]}` |
 
-### 返回值
+### return value
 
-`Integer` 删除行数
+`Integer` number of rows to delete
 
-## 示例一
+## Example one
 
-### 数据模型
+### Data Model
 
-| 模型 | 模型定义                              |
-| ---- | ------------------------------------- |
-| user | [模型描述文件](../examples/user) |
+| Model | Model Definition                           |
+| ----- | ------------------------------------------ |
+| user  | [model description file](../examples/user) |
 
-### 处理器
+### Processor
 
 ```json
 models.user.DeleteWhere
 ```
 
-### 参数表
+### Parameters Table
 
 ```json
 [
@@ -42,15 +42,15 @@ models.user.DeleteWhere
 ]
 ```
 
-### 返回值
+### return value
 
 ```json
 4
 ```
 
-## 外部引用
+## external references
 
-### 在业务逻辑(`Flow`) 中调用:
+### Called in business logic (`Flow`):
 
 ```json
 {
@@ -69,7 +69,7 @@ models.user.DeleteWhere
 }
 ```
 
-### 在服务接口(`API`) 中调用:
+### Called in the service interface (`API`):
 
 ```json
 {
@@ -92,16 +92,16 @@ models.user.DeleteWhere
 POST /api/user/deletewhere?where.status.eq=enabled
 ```
 
-## 示例二
+## Example 2
 
-### 新建模型，新增`models/category.mod.json`文件，写入以下内容：
+### Create a new model, add a `models/category.mod.json` file, and write the following content:
 
 ```json
 {
-  "name": "书籍分类",
+  "name": "Book Category",
   "table": {
     "name": "category",
-    "comment": "书籍分类"
+    "comment": "Book Category"
   },
   "columns": [
     {
@@ -112,13 +112,13 @@ POST /api/user/deletewhere?where.status.eq=enabled
       "primary": true
     },
     {
-      "label": "父级id",
+      "label": "parent id",
       "name": "parent_id",
       "type": "integer",
       "nullable": true
     },
     {
-      "label": "分类名称",
+      "label": "Classification Name",
       "name": "name",
       "type": "string",
       "length": 128,
@@ -149,38 +149,38 @@ POST /api/user/deletewhere?where.status.eq=enabled
     {
       "id": 1,
       "parent_id": null,
-      "name": "文史类"
+      "name": "Literature and History"
     },
     {
       "id": 2,
       "parent_id": 1,
-      "name": "历史"
+      "name": "History"
     },
     {
       "id": 3,
       "parent_id": 1,
-      "name": "古诗"
+      "name": "Ancient Poem"
     },
     {
       "id": 4,
       "parent_id": null,
-      "name": "理工类"
+      "name": "Science and Engineering"
     },
     {
       "id": 5,
       "parent_id": 4,
-      "name": "数学"
+      "name": "Math"
     },
     {
       "id": 6,
       "parent_id": 4,
-      "name": "物理"
+      "name": "Physical"
     }
   ]
 }
 ```
 
-### Deletewhere 批量删除，也是软删除
+### Deletewhere batch delete, also soft delete
 
 ```javascript
 function Deletewhere() {
@@ -190,4 +190,4 @@ function Deletewhere() {
 }
 ```
 
-运行 `yao run scripts.test.Deletewhere`
+run `yao run scripts.test.Deletewhere`

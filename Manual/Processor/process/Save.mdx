@@ -1,44 +1,44 @@
 # Save
 
-保存单条记录。如数据记录中包含主键字段则更新，不包含主键字段则创建记录；返回创建或更新的记录 ID。
+Save a single record. If the data record contains the primary key field, it will be updated, and if the data record does not contain the primary key field, the record will be created; it will return the ID of the record created or updated.
 
-## `save` 保存单条记录, 不存在创建记录, 存在更新记录, 返回记录 ID
+## `save` save a single record, there is no created record, there is an update record, return the record ID
 
-### 处理器
+### Processor
 
-`models.模型名称.Save`
+`models.modelname.Save`
 
-### 参数表
+### Parameters Table
 
-| 参数    | 类型       | 说明     | 示例                                               |
-| ------- | ---------- | -------- | -------------------------------------------------- |
-| args[0] | Object Row | 数据记录 | `{"name": "用户创建","manu_id": 2,"type": "user"}` |
+| Parameters | Type       | Description | Example                                                |
+| ---------- | ---------- | ----------- | ------------------------------------------------------ |
+| args[0]    | Object Row | Data record | `{"name": "user created","manu_id": 2,"type": "user"}` |
 
-### 返回值
+### return value
 
-`Integer` 创建或更新的记录 ID
+`Integer` the ID of the record created or updated
 
-## 示例一
+## Example one
 
-### 数据模型
+### Data Model
 
-| 模型 | 模型定义                              |
-| ---- | ------------------------------------- |
-| user | [模型描述文件](../examples/user) |
+| Model | Model Definition                           |
+| ----- | ------------------------------------------ |
+| user  | [model description file](../examples/user) |
 
-### 处理器
+### Processor
 
 ```json
 models.user.Save
 ```
 
-### 参数表
+### Parameters Table
 
 ```json
 [
   {
     "id": 101,
-    "name": "用户保存",
+    "name": "User Save",
     "manu_id": 2,
     "type": "user",
     "idcard": "23082619820207006X",
@@ -47,20 +47,20 @@ models.user.Save
     "key": "XZ12MiPp",
     "secret": "wBeYjL7FjbcvpAdBrxtDFfjydsoPKhRN",
     "status": "enabled",
-    "extra": { "sex": "女" }
+    "extra": { "sex": "female" }
   }
 ]
 ```
 
-### 返回值
+### return value
 
 ```json
 101
 ```
 
-## 外部引用
+## external references
 
-### 在业务逻辑(`Flow`) 中调用:
+### Called in business logic (`Flow`):
 
 ```json
 {
@@ -71,7 +71,7 @@ models.user.Save
       "args": [
         {
           "id": 101,
-          "name": "用户保存",
+          "name": "User Save",
           "manu_id": 2,
           "type": "user",
           "idcard": "23082619820207006X",
@@ -80,7 +80,7 @@ models.user.Save
           "key": "XZ12MiPp",
           "secret": "wBeYjL7FjbcvpAdBrxtDFfjydsoPKhRN",
           "status": "enabled",
-          "extra": { "sex": "女" }
+          "extra": { "sex": "female" }
         }
       ],
       "outs": ["{{$out}}"]
@@ -89,7 +89,7 @@ models.user.Save
 }
 ```
 
-### 在服务接口(`API`) 中调用:
+### Called in the service interface (`API`):
 
 ```json
 {
@@ -117,7 +117,7 @@ POST /api/user/save
 ```json
 {
   "id": 101,
-  "name": "用户保存",
+  "name": "User Save",
   "manu_id": 2,
   "type": "user",
   "idcard": "23082619820207006X",
@@ -126,20 +126,20 @@ POST /api/user/save
   "key": "XZ12MiPp",
   "secret": "wBeYjL7FjbcvpAdBrxtDFfjydsoPKhRN",
   "status": "enabled",
-  "extra": { "sex": "女" }
+  "extra": { "sex": "female" }
 }
 ```
 
-## 示例二
+## Example 2
 
-### 新建模型，新增`models/category.mod.json`文件，写入以下内容：
+### Create a new model, add a `models/category.mod.json` file, and write the following content:
 
 ```json
 {
-  "name": "书籍分类",
+  "name": "Book Category",
   "table": {
     "name": "category",
-    "comment": "书籍分类"
+    "comment": "Book Category"
   },
   "columns": [
     {
@@ -150,13 +150,13 @@ POST /api/user/save
       "primary": true
     },
     {
-      "label": "父级id",
+      "label": "parent id",
       "name": "parent_id",
       "type": "integer",
       "nullable": true
     },
     {
-      "label": "分类名称",
+      "label": "Classification Name",
       "name": "name",
       "type": "string",
       "length": 128,
@@ -187,46 +187,46 @@ POST /api/user/save
     {
       "id": 1,
       "parent_id": null,
-      "name": "文史类"
+      "name": "Literature and History"
     },
     {
       "id": 2,
       "parent_id": 1,
-      "name": "历史"
+      "name": "History"
     },
     {
       "id": 3,
       "parent_id": 1,
-      "name": "古诗"
+      "name": "Ancient Poem"
     },
     {
       "id": 4,
       "parent_id": null,
-      "name": "理工类"
+      "name": "Science and Engineering"
     },
     {
       "id": 5,
       "parent_id": 4,
-      "name": "数学"
+      "name": "Math"
     },
     {
       "id": 6,
       "parent_id": 4,
-      "name": "物理"
+      "name": "Physical"
     }
   ]
 }
 ```
 
-### 新增`scripts/test.js`
+### Add `scripts/test.js`
 
 ```javascript
 function Save() {
   return Process("models.category.save", {
     parent_id: 1,
-    name: "语文",
+    name: "language",
   });
 }
 ```
 
-执行 `yao run scripts.test.Save`
+Execute `yao run scripts.test.Save`

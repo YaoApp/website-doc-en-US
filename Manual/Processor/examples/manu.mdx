@@ -1,36 +1,36 @@
 ```json
 {
-  "name": "厂商",
+  "name": "Manufacturer",
   "table": {
     "name": "manu",
-    "comment": "厂商表",
+    "comment": "Manufacturer table",
     "engine": "InnoDB"
   },
   "columns": [
     { "name": "id", "type": "ID" },
     {
-      "label": "名称",
+      "label": "Name",
       "name": "name",
       "type": "string",
       "length": 200,
-      "comment": "全称",
+      "comment": "Full name",
       "unique": true
     },
     {
-      "label": "简称",
+      "label": "abbreviation",
       "name": "short_name",
       "type": "string",
       "length": 200,
-      "comment": "简称",
+      "comment": "abbreviation",
       "index": true
     },
     {
-      "label": "类型",
+      "label": "Type",
       "name": "type",
       "type": "enum",
-      "option": ["服务商", "采购商", "其他"],
-      "comment": "厂商类型 服务商, 采购商, 其他",
-      "default": "服务商",
+      "option": ["Service Provider", "Buyer", "Other"],
+      "comment": "Vendor Type Service Provider, Purchaser, Other",
+      "default": "Service Provider",
       "index": true
     },
     {
@@ -42,74 +42,92 @@
       "nullable": true
     },
     {
-      "label": "简介",
+      "label": "Introduction",
       "name": "summary",
       "type": "string",
       "length": 600,
-      "comment": "简介",
+      "comment": "Introduction",
       "nullable": true,
       "index": true
     },
     {
-      "label": "官网",
+      "label": "Official website",
       "name": "link",
       "type": "string",
       "length": 200,
-      "comment": "官网地址",
+      "comment": "Official website address",
       "nullable": true
     },
     {
-      "label": "联系人",
+      "label": "Contact",
       "name": "contact_name",
       "type": "string",
       "length": 200,
-      "comment": "联系人",
+      "comment": "Contact",
       "nullable": true,
       "index": true
     },
     {
-      "label": "联系电话",
+      "label": "Contact number",
       "name": "contact_mobile",
       "type": "string",
-      "comment": "联系电话",
+      "comment": "Contact number",
       "nullable": true,
       "index": true
     },
     {
-      "label": "详情",
+      "label": "Details",
       "name": "desc",
       "type": "text",
-      "comment": "介绍",
+      "comment": "Introduction",
       "nullable": true
     },
     {
-      "label": "排序",
+      "label": "Sort",
       "name": "rank",
       "type": "integer",
       "default": 9999999,
-      "comment": "查询排序"
+      "comment": "Query Sort"
     },
     {
-      "label": "状态",
+      "label": "Status",
       "name": "status",
       "type": "enum",
       "default": "enabled",
       "option": ["enabled", "disabled"],
-      "comment": "状态 enabled 开启, disabled 关闭",
+      "comment": "Status enabled on, disabled off",
       "index": true
     }
   ],
   "relations": {},
   "option": { "timestamps": true, "soft_deletes": true },
   "values": [
-    { "name": "北京云道天成科技有限公司", "short_name": "云道天成" },
-    { "name": "象传高新（北京）数字科技有限公司", "short_name": "象传高新" },
-    { "name": "象传智数（北京）软件科技有限公司", "short_name": "象传智数" },
-    { "name": "象传智慧（北京）软件科技有限公司", "short_name": "象传智慧" },
-    { "name": "象传数据服务引擎", "short_name": "服务引擎" },
-    { "name": "象传数据应用开发平台", "short_name": "应用开发平台" },
-    { "name": "象传数据解决方案", "short_name": "解决方案" },
-    { "name": "象传数据企业服务", "short_name": "企业服务" }
+    {
+      "name": "Beijing Yundao Tiancheng Technology Co., Ltd.",
+      "short_name": "Yundao Tiancheng"
+    },
+    {
+      "name": "Xiang Chuan Hi-Tech (Beijing) Digital Technology Co., Ltd.",
+      "short_name": "Xiang Chuan Hi-Tech"
+    },
+    {
+      "name": "Xiang Chuan Zhishu (Beijing) Software Technology Co., Ltd.",
+      "short_name": "Xiang Chuan Zhishu"
+    },
+    {
+      "name": "Xiang Chuan Wisdom (Beijing) Software Technology Co., Ltd.",
+      "short_name": "Xiang Chuan Wisdom"
+    },
+    { "name": "Zoom Data Service Engine", "short_name": "Service Engine" },
+    {
+      "name": "Xiangchuan Data Application Development Platform",
+      "short_name": "Application Development Platform"
+    },
+    { "name": "Solution of Elephant Data", "short_name": "Solution" },
+    {
+      "name": "Elephant Data Enterprise Service",
+      "short_name": "Enterprise Service"
+    }
   ]
 }
 ```

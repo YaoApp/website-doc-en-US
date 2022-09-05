@@ -1,46 +1,46 @@
 # EachSave
 
-保存多条记录, 不包含主键字段则创建记录, 存在更新记录, 返回记录 ID 集合 ，返回创建或更新的记录 ID 集合。
+Save multiple records, create a record if the primary key field is not included, if there is an update record, return the record ID collection, and return the created or updated record ID collection.
 
-## `eachsave` 保存多条记录, 不存在创建记录, 存在更新记录, 返回记录 ID
+## `eachsave` saves multiple records, there is no created record, there is an update record, return the record ID
 
-### 处理器
+### Processor
 
-`models.模型名称.EachSave`
+`models.modelname.EachSave`
 
-### 参数表
+### Parameters Table
 
-| 参数    | 类型                | 必填项 | 说明                                                                                     | 示例                                         |
-| ------- | ------------------- | ------ | ---------------------------------------------------------------------------------------- | -------------------------------------------- |
-| args[0] | Array\<Object Row\> | 是     | 待保存数据记录集合                                                                       | `[{"id":1,"name": "张三"},{"name": "李四"}]` |
-| args[1] | Object Row          | 否     | 共有字段，写入时合并到到每条数据记录；若字段数值为 `$index` 将替换为数据记录集合的 index | `{"manu_id": 2,"sort": "$index"}`            |
+| Parameters | Type                | Required Fields | Description                                                                                                                                                | Example                                             |
+| ---------- | ------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| args[0]    | Array\<Object Row\> | Yes             | Set of data records to be saved                                                                                                                            | `[{"id":1,"name": "Zhang San"},{"name": "Li Si" }]` |
+| args[1]    | Object Row          | No              | Common fields, merged into each data record when writing; if the field value is `$index`, it will be replaced with the index of the data record collection | `{"manu_id": 2, "sort": "$index"}`                  |
 
-### 返回值
+### return value
 
-`Array<Integer>` 创建或更新的记录 ID 集合
+`Array<Integer>` collection of record IDs created or updated
 
-## 示例
+## Example
 
-### 数据模型
+### Data Model
 
-| 模型 | 模型定义                              |
-| ---- | ------------------------------------- |
-| user | [模型描述文件](../examples/user) |
+| Model | Model Definition                           |
+| ----- | ------------------------------------------ |
+| user  | [model description file](../examples/user) |
 
-### 处理器
+### Processor
 
 ```json
 models.user.EachSave
 ```
 
-### 参数表
+### Parameters Table
 
 ```json
 [
   [
     {
       "id": 101,
-      "name": "张三",
+      "name": "Zhang San",
       "manu_id": 2,
       "type": "user",
       "idcard": "23082619820207006X",
@@ -49,10 +49,10 @@ models.user.EachSave
       "key": "XZ12MiPp",
       "secret": "wBeYjL7FjbcvpAdBrxtDFfjydsoPKhRN",
       "status": "enabled",
-      "extra": { "sex": "女" }
+      "extra": { "sex": "female" }
     },
     {
-      "name": "李四",
+      "name": "Li Si",
       "type": "user",
       "idcard": "23082619820207003X",
       "mobile": "13900004444",
@@ -60,22 +60,22 @@ models.user.EachSave
       "key": "XZ12MiDp",
       "secret": "wBeYjL7FjbcvpAdBrxtDFfjydsoPKhRN",
       "status": "enabled",
-      "extra": { "sex": "难" }
+      "extra": { "sex": "difficult" }
     }
   ],
   { "manu_id": 2, "balance": "$index" }
 ]
 ```
 
-### 返回值
+### return value
 
 ```json
 [101, 107]
 ```
 
-## 外部引用
+## external references
 
-### 在业务逻辑(`Flow`) 中调用:
+### Called in business logic (`Flow`):
 
 ```json
 {
@@ -84,7 +84,7 @@ models.user.EachSave
       "name": "user",
       "process": "models.user.EachSave",
       "args": [
-        [{ "id": 101, "name": "张三" }, { "name": "李四" }],
+        [{ "id": 101, "name": "Zhang San" }, { "name": "Li Si" }],
         { "manu_id": 2, "balance": "$index" }
       ],
       "outs": ["{{$out}}"]
@@ -93,7 +93,7 @@ models.user.EachSave
 }
 ```
 
-### 在服务接口(`API`) 中调用:
+### Called in the service interface (`API`):
 
 ```json
 {
@@ -120,7 +120,7 @@ POST /api/user/save
 
 ```json
 {
-  "data": [{ "id": 101, "name": "张三" }, { "name": "李四" }],
+  "data": [{ "id": 101, "name": "Zhang San" }, { "name": "Li Si" }],
   "query": { "manu_id": 2, "balance": "$index" }
 }
 ```

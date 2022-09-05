@@ -375,127 +375,123 @@ Defined in the model file `user.json`
 <Detail title="View source code">
 
 ```json
-
+{
+  "relations": {
+    "manu": {
+      "type": "hasOne",
+      "model": "manu",
+      "key": "id",
+      "foreign": "manu_id",
+      "query": { "select": ["name", "short_name", "type"] }
+    },
+    "addresses": {
+      "type": "hasMany",
+      "model": "address",
+      "key": "user_id",
+      "foreign": "id",
+      "query": {
+        "select": ["province", "city", "location", "status"],
+        "pagesize": 20
+      }
+    },
+    "mother": {
+      "type": "hasOneThrough",
+      "links": [
+        {
+          "type": "hasOne",
+          "model": "friends",
+          "key": "user_id",
+          "foreign": "user.id",
+          "query": {
+            "select": ["status", "type", "friend_id"],
+            "wheres": [
+              {
+                "column": "type",
+                "value": "monther"
+              }
+            ]
+          }
+        },
+        {
+          "type": "hasOne",
+          "model": "user",
+          "key": "id",
+          "foreign": "user_mother_friends.friend_id",
+          "query": {
+            "select": ["name", "id", "status", "type", "secret", "extra"],
+            "withs": {
+              "manu": {},
+              "roles": {},
+              "address": {}
+            }
+          }
+        }
+      ]
+    },
+    "roles": {
+      "type": "hasManyThrough",
+      "links": [
+        {
+          "type": "hasMany",
+          "model": "user_roles",
+          "key": "user_id",
+          "foreign": "id",
+          "query": {
+            "select": ["status"],
+            "pagesize": 20
+          }
+        },
+        {
+          "type": "hasOne",
+          "model": "role",
+          "key": "id",
+          "foreign": "role_id",
+          "query": {
+            "select": ["name", "label", "permission"]
+          }
+        }
+      ]
+    }
+  }
+}
 ```
-
-{
-"relations": {
-"manu": {
-"type": "hasOne",
-"model": "manu",
-"key": "id",
-"foreign": "manu_id",
-"query": { "select": ["name", "short_name", "type"] }
-},
-"addresses": {
-"type": "hasMany",
-"model": "address",
-"key": "user_id",
-"foreign": "id",
-"query": {
-"select": ["province", "city", "location", "status"],
-"pagesize": 20
-}
-},
-"mother": {
-"type": "hasOneThrough",
-"links": [
-{
-"type": "hasOne",
-"model": "friends",
-"key": "user_id",
-"foreign": "user.id",
-"query": {
-"select": ["status", "type", "friend_id"],
-"wheres": [
-{
-"column": "type",
-"value": "monther"
-}
-]
-}
-},
-{
-"type": "hasOne",
-"model": "user",
-"key": "id",
-"foreign": "user_mother_friends.friend_id",
-"query": {
-"select": ["name", "id", "status", "type", "secret", "extra"],
-"withs": {
-"manu": {},
-"roles": {},
-"address": {}
-}
-}
-}
-]
-},
-"roles": {
-"type": "hasManyThrough",
-"links": [
-{
-"type": "hasMany",
-"model": "user_roles",
-"key": "user_id",
-"foreign": "id",
-"query": {
-"select": ["status"],
-"pagesize": 20
-}
-},
-{
-"type": "hasOne",
-"model": "role",
-"key": "id",
-"foreign": "role_id",
-"query": {
-"select": ["name", "label", "permission"]
-}
-}
-]
-}
-}
-}
-
-`````
 
 </Detail>
 
 **`Object Relation`**
 
-| Fields | Type | Description | Required Fields |
-| ------- | ------------------------ | ---------------- -------------------------------------------------- -------------- | ------ |
-| type | String | Relationship Type Permitted Values ​​`hasOne`, `hasOneThrough` , `hasMany` , `hasManyThrough` | yes |
-| key | String | Association field name of the association model | no |
-| model | String | associated model name | no |
-| foreign | String | current model's associated field name | no |
-| query | Object QueryParam | Relational query parameter default value. If no associated query parameters are specified in the query, the query parameters defined in the model are used instead | no |
-| links | Array\<Object Relation\> | `hasOneThrough` or `hasManyThrough` multi-table relationship definition | no |
+| Fields  | Type                     | Description                                                                                                                                                        | Required Fields |
+| ------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------- |
+| type    | String                   | Relationship Type Permitted Values ​​`hasOne`, `hasOneThrough` , `hasMany` , `hasManyThrough`                                                                      | yes             |
+| key     | String                   | Association field name of the association model                                                                                                                    | no              |
+| model   | String                   | associated model name                                                                                                                                              | no              |
+| foreign | String                   | current model's associated field name                                                                                                                              | no              |
+| query   | Object QueryParam        | Relational query parameter default value. If no associated query parameters are specified in the query, the query parameters defined in the model are used instead | no              |
+| links   | Array\<Object Relation\> | `hasOneThrough` or `hasManyThrough` multi-table relationship definition                                                                                            | no              |
 
 #### `hasOne` one-to-one
 
 The data model `user` data table structure is as follows:
 
-| Field | Type | Description |
-| ------- | ---------- | ------------- |
-| id | ID | User ID |
+| Field   | Type       | Description     |
+| ------- | ---------- | --------------- |
+| id      | ID         | User ID         |
 | manu_id | bigInteger | Manufacturer ID |
-| name | string | name |
+| name    | string     | name            |
 
 The data model `manu` data table structure is as follows:
 
-| Field | Type | Description |
-| ------- | ------ | -------- |
-| id | ID | Manufacturer ID |
-| short | string | Manufacturer short name |
-| company | string | company name |
+| Field   | Type   | Description             |
+| ------- | ------ | ----------------------- |
+| id      | ID     | Manufacturer ID         |
+| short   | string | Manufacturer short name |
+| company | string | company name            |
 
 When querying user data, you can list the manufacturer information at the same time or query by related manufacturers, you can set the relationship with the `manu` data model when defining the `user` data model.
 
 Defined in the model file `user.json`
 
-````json
+```json
 {
   "name": "User",
   "relations": {
@@ -508,7 +504,7 @@ Defined in the model file `user.json`
     }
   }
 }
-`````
+```
 
 **illustrate**
 

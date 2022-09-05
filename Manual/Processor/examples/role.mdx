@@ -1,42 +1,42 @@
 ```json
 {
-  "name": "角色",
+  "name": "role",
   "table": {
     "name": "role",
-    "comment": "角色表",
+    "comment": "Role table",
     "engine": "InnoDB"
   },
   "columns": [
     { "name": "id", "type": "ID" },
     {
-      "label": "名称",
+      "label": "Name",
       "name": "name",
       "type": "string",
       "length": 200,
-      "comment": "名称",
+      "comment": "Name",
       "index": true
     },
     {
-      "label": "标签",
+      "label": "label",
       "name": "label",
       "type": "string",
       "length": 200,
-      "comment": "标签",
+      "comment": "Label",
       "index": true
     },
     {
-      "label": "权限",
+      "label": "Permissions",
       "name": "permission",
       "type": "JSON",
-      "comment": "权限"
+      "comment": "Permissions"
     },
     {
-      "label": "状态",
+      "label": "Status",
       "name": "status",
       "type": "enum",
       "default": "enabled",
       "option": ["enabled", "disabled"],
-      "comment": "状态 enabled 开启, disabled 关闭",
+      "comment": "Status enabled on, disabled off",
       "index": true
     }
   ],
@@ -44,25 +44,25 @@
   "option": { "timestamps": true, "soft_deletes": true },
   "values": [
     {
-      "label": "超级管理员",
+      "label": "Super Administrator",
       "name": "admin",
       "status": "enabled",
       "permission": { "read": ["t1", "t2", "t3"] }
     },
     {
-      "label": "编辑",
+      "label": "Edit",
       "name": "editor",
       "status": "enabled",
       "permission": { "read": ["t1", "t2", "t3"] }
     },
     {
-      "label": "用户",
+      "label": "User",
       "name": "user",
       "status": "enabled",
       "permission": { "read": ["t1", "t2", "t3"] }
     },
     {
-      "label": "访客",
+      "label": "Visitor",
       "name": "any",
       "status": "disabled",
       "permission": { "read": ["t1", "t2", "t3"] }

@@ -1,59 +1,69 @@
 # Insert
 
-插入多条数据记录，返回插入行数
+Insert multiple data records, return the number of inserted rows
 
-## `insert` 插入多条记录, 返回插入行数
+## `insert` Insert multiple records, return the number of inserted rows
 
-### 处理器
+### Processor
 
-`models.模型名称.Insert`
+`models.modelname.Insert`
 
-### 参数表
+### Parameters Table
 
-| 参数    | 类型                  | 说明         | 示例                            |
-| ------- | --------------------- | ------------ | ------------------------------- |
-| args[0] | Array\<String\>       | 字段清单     | `["user_id", "province"]`       |
-| args[1] | Array\<Array\<Any\>\> | 数据记录集合 | `[[4, "北京市"],[4, "天津市"]]` |
+| Parameters | Type                  | Description                | Example                           |
+| ---------- | --------------------- | -------------------------- | --------------------------------- |
+| args[0]    | Array\<String\>       | Field list                 | `["user_id", "province"]`         |
+| args[1]    | Array\<Array\<Any\>\> | Collection of data records | `[[4, "Beijing"],[4, "Tianjin"]]` |
 
-### 返回值
+### return value
 
-`Integer` 插入行数
+`Integer` number of rows inserted
 
-## 示例一
+## Example one
 
-### 数据模型
+### Data Model
 
-| 模型    | 模型定义                                 |
-| ------- | ---------------------------------------- |
-| address | [模型描述文件](../examples/address) |
+| Model   | Model Definition                              |
+| ------- | --------------------------------------------- |
+| address | [model description file](../examples/address) |
 
-### 处理器
+### Processor
 
 ```json
 models.address.Insert
 ```
 
-### 参数表
+### Parameters Table
 
 ```json
 [
   ["user_id", "province", "city", "location"],
   [
-    [4, "北京市", "丰台区", "银海星月9号楼9单元9层1024室"],
-    [4, "天津市", "塘沽区", "益海星云7号楼3单元1003室"]
+    [
+      4,
+      "Beijing",
+      "Fengtai District",
+      "Room 1024, 9th Floor, Unit 9, Building 9, Yinhai Xingyue"
+    ],
+    [
+      4,
+      "Tianjin City",
+      "Tanggu District",
+      "Room 1003, Unit 3, Building 7, Yihai Xingyun"
+    ]
   ]
 ]
 ```
 
-### 返回值
+### return value
 
 ```json
 2
 ```
 
-## 外部引用
+## external references
 
-### 在业务逻辑(`Flow`) 中调用:
+### Called in business logic (`Flow`):
 
 ```json
 {
@@ -64,8 +74,18 @@ models.address.Insert
       "args": [
         ["user_id", "province", "city", "location"],
         [
-          [4, "北京市", "丰台区", "银海星月9号楼9单元9层1024室"],
-          [4, "天津市", "塘沽区", "益海星云7号楼3单元1003室"]
+          [
+            4,
+            "Beijing",
+            "Fengtai District",
+            "Room 1024, 9th Floor, Unit 9, Building 9, Yinhai Xingyue"
+          ],
+          [
+            4,
+            "Tianjin City",
+            "Tanggu District",
+            "Room 1003, Unit 3, Building 7, Yihai Xingyun"
+          ]
         ]
       ],
       "outs": ["{{$out}}"]
@@ -74,7 +94,7 @@ models.address.Insert
 }
 ```
 
-### 在服务接口(`API`) 中调用:
+### Called in the service interface (`API`):
 
 ```json
 {
@@ -103,22 +123,32 @@ POST /api/address/insert
 {
   "columns": ["user_id", "province", "city", "location"],
   "data": [
-    [4, "北京市", "丰台区", "银海星月9号楼9单元9层1024室"],
-    [4, "天津市", "塘沽区", "益海星云7号楼3单元1003室"]
+    [
+      4,
+      "Beijing",
+      "Fengtai District",
+      "Room 1024, 9th Floor, Unit 9, Building 9, Yinhai Xingyue"
+    ],
+    [
+      4,
+      "Tianjin City",
+      "Tanggu District",
+      "Room 1003, Unit 3, Building 7, Yihai Xingyun"
+    ]
   ]
 }
 ```
 
-## 示例二
+## Example 2
 
-### 新建模型，新增`models/category.mod.json`文件，写入以下内容：
+### Create a new model, add a `models/category.mod.json` file, and write the following content:
 
 ```json
 {
-  "name": "书籍分类",
+  "name": "Book Category",
   "table": {
     "name": "category",
-    "comment": "书籍分类"
+    "comment": "Book Category"
   },
   "columns": [
     {
@@ -129,13 +159,13 @@ POST /api/address/insert
       "primary": true
     },
     {
-      "label": "父级id",
+      "label": "parent id",
       "name": "parent_id",
       "type": "integer",
       "nullable": true
     },
     {
-      "label": "分类名称",
+      "label": "Classification Name",
       "name": "name",
       "type": "string",
       "length": 128,
@@ -166,38 +196,38 @@ POST /api/address/insert
     {
       "id": 1,
       "parent_id": null,
-      "name": "文史类"
+      "name": "Literature and History"
     },
     {
       "id": 2,
       "parent_id": 1,
-      "name": "历史"
+      "name": "History"
     },
     {
       "id": 3,
       "parent_id": 1,
-      "name": "古诗"
+      "name": "Ancient Poem"
     },
     {
       "id": 4,
       "parent_id": null,
-      "name": "理工类"
+      "name": "Science and Engineering"
     },
     {
       "id": 5,
       "parent_id": 4,
-      "name": "数学"
+      "name": "Math"
     },
     {
       "id": 6,
       "parent_id": 4,
-      "name": "物理"
+      "name": "Physical"
     }
   ]
 }
 ```
 
-### Insert 批量新增：
+### Insert Batch add:
 
 ```javascript
 function Insert() {
@@ -205,11 +235,11 @@ function Insert() {
     "models.category.insert",
     ["parent_id", "name"],
     [
-      [1, "语文"],
-      [1, "地理"],
+      [1, "language"],
+      [1, "geography"],
     ]
   );
 }
 ```
 
-执行 `yao run scripts.test.Insert`
+Execute `yao run scripts.test.Insert`

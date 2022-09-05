@@ -1,52 +1,52 @@
-# Destroy
+#Destroy
 
-真删除指定主键的单条数据记录.
+True deletes a single data record with the specified primary key.
 
-## `destroy` 删除单条记录(真删除)
+## `destroy` delete a single record (true delete)
 
-### 处理器
+### Processor
 
-`models.模型名称.Destroy`
+`models.modelname.Destroy`
 
-### 参数表
+### Parameters Table
 
-| 参数    | 类型       | 说明     | 示例 |
-| ------- | ---------- | -------- | ---- |
-| args[0] | Object Row | 模型主键 | `1`  |
+| Parameters | Type       | Description       | Example |
+| ---------- | ---------- | ----------------- | ------- |
+| args[0]    | Object Row | Model primary key | `1`     |
 
-### 返回值
+### return value
 
-`null` 无返回值
+`null` returns no value
 
-## 示例一
+## Example one
 
-### 数据模型
+### Data Model
 
-| 模型 | 模型定义                              |
-| ---- | ------------------------------------- |
-| user | [模型描述文件](../examples/user) |
+| Model | Model Definition                           |
+| ----- | ------------------------------------------ |
+| user  | [model description file](../examples/user) |
 
-### 处理器
+### Processor
 
 ```json
 models.user.Destroy
 ```
 
-### 参数表
+### Parameters Table
 
 ```json
 [1]
 ```
 
-### 返回值
+### return value
 
 ```json
 null
 ```
 
-## 外部引用
+## external references
 
-### 在业务逻辑(`Flow`) 中调用:
+### Called in business logic (`Flow`):
 
 ```json
 {
@@ -61,7 +61,7 @@ null
 }
 ```
 
-### 在服务接口(`API`) 中调用:
+### Called in the service interface (`API`):
 
 ```json
 {
@@ -83,16 +83,16 @@ null
 POST /api/user/destroy/1
 ```
 
-## 示例二
+## Example 2
 
-### 新建模型，新增`models/category.mod.json`文件，写入以下内容:
+### Create a new model, add the `models/category.mod.json` file, and write the following content:
 
 ```json
 {
-  "name": "书籍分类",
+  "name": "Book Category",
   "table": {
     "name": "category",
-    "comment": "书籍分类"
+    "comment": "Book Category"
   },
   "columns": [
     {
@@ -103,13 +103,13 @@ POST /api/user/destroy/1
       "primary": true
     },
     {
-      "label": "父级id",
+      "label": "parent id",
       "name": "parent_id",
       "type": "integer",
       "nullable": true
     },
     {
-      "label": "分类名称",
+      "label": "Classification Name",
       "name": "name",
       "type": "string",
       "length": 128,
@@ -140,38 +140,38 @@ POST /api/user/destroy/1
     {
       "id": 1,
       "parent_id": null,
-      "name": "文史类"
+      "name": "Literature and History"
     },
     {
       "id": 2,
       "parent_id": 1,
-      "name": "历史"
+      "name": "History"
     },
     {
       "id": 3,
       "parent_id": 1,
-      "name": "古诗"
+      "name": "Ancient Poem"
     },
     {
       "id": 4,
       "parent_id": null,
-      "name": "理工类"
+      "name": "Science and Engineering"
     },
     {
       "id": 5,
       "parent_id": 4,
-      "name": "数学"
+      "name": "Math"
     },
     {
       "id": 6,
       "parent_id": 4,
-      "name": "物理"
+      "name": "Physical"
     }
   ]
 }
 ```
 
-### Destroy 直接从数据库中删除:
+### Destroy Delete directly from the database:
 
 ```javascript
 function Destroy() {
@@ -179,4 +179,4 @@ function Destroy() {
 }
 ```
 
-运行 `yao run scripts.test.Destroy`
+run `yao run scripts.test.Destroy`

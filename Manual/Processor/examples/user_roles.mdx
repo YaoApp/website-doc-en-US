@@ -1,34 +1,34 @@
 ```json
 {
-  "name": "用户角色",
+  "name": "User Role",
   "table": {
     "name": "user_roles",
-    "comment": "用户角色关系表",
+    "comment": "User role relationship table",
     "engine": "InnoDB"
   },
   "columns": [
     { "name": "id", "type": "ID" },
     {
-      "label": "用户ID",
+      "label": "User ID",
       "name": "user_id",
       "type": "bigInteger",
-      "comment": "所属用户",
+      "comment": "Owning User",
       "index": true
     },
     {
-      "label": "角色ID",
+      "label": "Role ID",
       "name": "role_id",
       "type": "bigInteger",
-      "comment": "角色ID",
+      "comment": "Role ID",
       "index": true
     },
     {
-      "label": "状态",
+      "label": "Status",
       "name": "status",
       "type": "enum",
       "default": "enabled",
       "option": ["enabled", "disabled"],
-      "comment": "状态 enabled 开启, disabled 关闭",
+      "comment": "Status enabled on, disabled off",
       "index": true
     }
   ],

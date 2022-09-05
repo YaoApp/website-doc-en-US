@@ -1,42 +1,42 @@
 # Get
 
-按条件查询数据记录, 返回符合条件的结果集
+Query data records by condition and return a result set that meets the conditions
 
-## `Get` 按条件查询, 不分页
+## `Get` Query by condition, no pagination
 
-### 处理器
+### Processor
 
-`models.模型名称.Get`
+`models.modelname.Get`
 
-### 参数表
+### Parameters Table
 
-| 参数    | 类型              | 说明     | 示例                                                                 |
-| ------- | ----------------- | -------- | -------------------------------------------------------------------- |
-| args[0] | Object QueryParam | 查询条件 | `{"wheres":[{"column":"name", "value":"张三"}],"withs":{"manu":{}}}` |
+| Parameters | Type              | Description      | Example                                                                    |
+| ---------- | ----------------- | ---------------- | -------------------------------------------------------------------------- |
+| args[0]    | Object QueryParam | Query conditions | `{"wheres":[{"column":"name", "value":"Zhang San"}],"withs":{"manu":{} }}` |
 
-### 返回值
+### return value
 
-`Array<Object Row>` 数据记录集合
+`Array<Object Row>` collection of data records
 
-返回符合条件的的数据记录（Key-Value 结构 Object)集合, JSON 类型字段自动解析, AES 字段自动解密。 关联模型作为一个独立字段，字段名称为关联关系名称； hasOne 关联为数据记录 Object , hasMany 关联为数据记录数组 Array\<Object\>。
+Returns a collection of eligible data records (Key-Value structure Object), JSON type fields are automatically parsed, and AES fields are automatically decrypted. The association model is regarded as an independent field, and the field name is the name of the association relationship; hasOne is associated with the data record Object , and hasMany is associated with the data record array Array\<Object\>.
 
-## 示例一
+## Example one
 
-### 数据模型
+### Data Model
 
-| 模型              | 模型定义                                 |
-| ----------------- | ---------------------------------------- |
-| user `主`         | [模型描述文件](../examples/user)    |
-| manu `hasOne`     | [模型描述文件](../examples/manu)    |
-| address `hasMany` | [模型描述文件](../examples/address) |
+| Model             | Model Definition                              |
+| ----------------- | --------------------------------------------- |
+| user `main`       | [model description file](../examples/user)    |
+| manu `hasOne`     | [model description file](../examples/manu)    |
+| address `hasMany` | [model description file](../examples/address) |
 
-### 处理器
+### Processor
 
 ```json
 models.user.Get
 ```
 
-### 参数表
+### Parameters Table
 
 ```json
 [
@@ -50,19 +50,19 @@ models.user.Get
 ]
 ```
 
-### 返回值
+### return value
 
 ```json
 [
   {
     "addresses": [
       {
-        "city": "威海市",
+        "city": "Weihai City",
         "created_at": "2021-09-15T08:34:20+08:00",
         "deleted_at": null,
         "id": 4,
-        "location": "威海市6号楼6单元6层1056室",
-        "province": "山东省",
+        "location": "Room 1056, 6th Floor, Unit 6, Building 6, Weihai City",
+        "province": "Shandong Province",
         "status": "enabled",
         "updated_at": null,
         "user_id": 3
@@ -78,12 +78,12 @@ models.user.Get
       "id": 2,
       "link": null,
       "logo": null,
-      "name": "象传高新（北京）数字科技有限公司",
+      "name": "Xiang Chuan High-tech (Beijing) Digital Technology Co., Ltd.",
       "rank": 9999999,
-      "short_name": "象传高新",
+      "short_name": "Xiang Chuan Gaoxin",
       "status": "enabled",
       "summary": null,
-      "type": "服务商",
+      "type": "Service Provider",
       "updated_at": null
     },
     "mobile": "13900003333",
@@ -100,17 +100,17 @@ models.user.Get
       "status": null,
       "type": null
     },
-    "name": "用户"
+    "name": "User"
   },
   {
     "addresses": [
       {
-        "city": "海淀区",
+        "city": "Haidian District",
         "created_at": "2021-09-15T08:34:20+08:00",
         "deleted_at": null,
         "id": 3,
-        "location": "华严北里7号楼7单元7层2048室",
-        "province": "北京市",
+        "location": "Room 2048, 7th Floor, Unit 7, Building 7, Huayan North Lane",
+        "province": "Beijing",
         "status": "enabled",
         "updated_at": null,
         "user_id": 2
@@ -126,12 +126,12 @@ models.user.Get
       "id": 1,
       "link": null,
       "logo": null,
-      "name": "北京云道天成科技有限公司",
+      "name": "Beijing Yundao Tiancheng Technology Co., Ltd.",
       "rank": 9999999,
-      "short_name": "云道天成",
+      "short_name": "Yundao Tiancheng",
       "status": "enabled",
       "summary": null,
-      "type": "服务商",
+      "type": "Service Provider",
       "updated_at": null
     },
     "mobile": "13900002222",
@@ -148,14 +148,14 @@ models.user.Get
       "status": null,
       "type": null
     },
-    "name": "员工"
+    "name": "Employee"
   }
 ]
 ```
 
-## 外部引用
+## external references
 
-### 在业务逻辑(`Flow`) 中调用:
+### Called in business logic (`Flow`):
 
 ```json
 {
@@ -178,7 +178,7 @@ models.user.Get
 }
 ```
 
-### 在服务接口(`API`) 中调用:
+### Called in the service interface (`API`):
 
 ```json
 {
@@ -201,16 +201,16 @@ models.user.Get
 GET /api/user/search?withs=manu,mother,addresses&where.status.eq=enabled&order=id.desc&select=id,name,mobile,status&limit=2
 ```
 
-## 示例二
+## Example 2
 
-### 新增`models/category.mod.json`文件，写入以下内容：
+### Add `models/category.mod.json` file and write the following content:
 
 ```json
 {
-  "name": "书籍分类",
+  "name": "Book Category",
   "table": {
     "name": "category",
-    "comment": "书籍分类"
+    "comment": "Book Category"
   },
   "columns": [
     {
@@ -221,13 +221,13 @@ GET /api/user/search?withs=manu,mother,addresses&where.status.eq=enabled&order=i
       "primary": true
     },
     {
-      "label": "父级id",
+      "label": "parent id",
       "name": "parent_id",
       "type": "integer",
       "nullable": true
     },
     {
-      "label": "分类名称",
+      "label": "Classification Name",
       "name": "name",
       "type": "string",
       "length": 128,
@@ -258,38 +258,38 @@ GET /api/user/search?withs=manu,mother,addresses&where.status.eq=enabled&order=i
     {
       "id": 1,
       "parent_id": null,
-      "name": "文史类"
+      "name": "Literature and History"
     },
     {
       "id": 2,
       "parent_id": 1,
-      "name": "历史"
+      "name": "History"
     },
     {
       "id": 3,
       "parent_id": 1,
-      "name": "古诗"
+      "name": "Ancient Poem"
     },
     {
       "id": 4,
       "parent_id": null,
-      "name": "理工类"
+      "name": "Science and Engineering"
     },
     {
       "id": 5,
       "parent_id": 4,
-      "name": "数学"
+      "name": "Math"
     },
     {
       "id": 6,
       "parent_id": 4,
-      "name": "物理"
+      "name": "Physical"
     }
   ]
 }
 ```
 
-### Get 获取多条匹配条件的数据：
+### Get Get the data of multiple matching conditions:
 
 ```javascript
 function Get() {
@@ -299,4 +299,4 @@ function Get() {
 }
 ```
 
-执行 `yao run scripts.test.Get`
+Execute `yao run scripts.test.Get`

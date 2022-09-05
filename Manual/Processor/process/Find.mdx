@@ -1,43 +1,43 @@
 # Find
 
-按主键查询单条记录，返回数据记录
+Query a single record by primary key and return data records
 
-## `find` 查询单条记录
+## `find` query a single record
 
-### 处理器
+### Processor
 
-`models.模型名称.Find`
+`models.modelname.Find`
 
-### 参数表
+### Parameters Table
 
-| 参数    | 类型              | 说明                      | 示例                                                 |
-| ------- | ----------------- | ------------------------- | ---------------------------------------------------- |
-| args[0] | Integer \| String | 模型主键                  | `1`                                                  |
-| args[1] | Object QueryParam | 查询条件, 仅 `withs` 有效 | `{"withs":{"manu":{}, "mother":{}, "addresses":{}}}` |
+| Parameters | Type              | Description                              | Example                                              |
+| ---------- | ----------------- | ---------------------------------------- | ---------------------------------------------------- |
+| args[0]    | Integer \| String | Model primary key                        | `1`                                                  |
+| args[1]    | Object QueryParam | Query conditions, only valid for `withs` | `{"withs":{"manu":{}, "mother":{}, "addresses":{}}}` |
 
-### 返回值
+### return value
 
-`Object Row` 数据记录
+`Object Row` data record
 
-返回主键数值等于 `args[0]` 的数据记录（Key-Value 结构 Object), JSON 类型字段自动解析, AES 字段自动解密。 关联模型作为一个独立字段，字段名称为关联关系名称； hasOne 关联为数据记录 Object , hasMany 关联为数据记录数组 Array\<Object\>。
+Returns the data record whose primary key value is equal to `args[0]` (Key-Value structure Object), the JSON type field is automatically parsed, and the AES field is automatically decrypted. The association model is regarded as an independent field, and the field name is the name of the association relationship; hasOne is associated with the data record Object , and hasMany is associated with the data record array Array\<Object\>.
 
-## 示例一
+## Example one
 
-### 数据模型
+### Data Model
 
-| 模型              | 模型定义                                 |
-| ----------------- | ---------------------------------------- |
-| user `主`         | [模型描述文件](../examples/user)    |
-| manu `hasOne`     | [模型描述文件](../examples/manu)    |
-| address `hasMany` | [模型描述文件](../examples/address) |
+| Model             | Model Definition                              |
+| ----------------- | --------------------------------------------- |
+| user `main`       | [model description file](../examples/user)    |
+| manu `hasOne`     | [model description file](../examples/manu)    |
+| address `hasMany` | [model description file](../examples/address) |
 
-### 处理器
+### Processor
 
 ```json
 models.user.Find
 ```
 
-### 参数表
+### Parameters Table
 
 ```json
 [
@@ -48,18 +48,18 @@ models.user.Find
 ]
 ```
 
-### 返回值
+### return value
 
 ```json
 {
   "addresses": [
     {
-      "city": "丰台区",
+      "city": "Fengtai District",
       "created_at": "2021-09-15T08:34:19+08:00",
       "deleted_at": null,
       "id": 2,
-      "location": "北京国家数字出版基地A103",
-      "province": "北京市",
+      "location": "Beijing National Digital Publishing Base A103",
+      "province": "Beijing",
       "status": "enabled",
       "updated_at": null,
       "user_id": 1
@@ -69,7 +69,7 @@ models.user.Find
   "created_at": "2021-09-15T08:34:06+08:00",
   "deleted_at": null,
   "extra": {
-    "sex": "男"
+    "sex": "male"
   },
   "id": 1,
   "idcard": "230624198301170015",
@@ -83,18 +83,18 @@ models.user.Find
     "id": 1,
     "link": null,
     "logo": null,
-    "name": "北京云道天成科技有限公司",
+    "name": "Beijing Yundao Tiancheng Technology Co., Ltd.",
     "rank": 9999999,
-    "short_name": "云道天成",
+    "short_name": "Yundao Tiancheng",
     "status": "enabled",
     "summary": null,
-    "type": "服务商",
+    "type": "Service Provider",
     "updated_at": null
   },
   "mobile": "13900001111",
   "mother": {
     "extra": {
-      "sex": "女"
+      "sex": "female"
     },
     "friends": {
       "friend_id": 2,
@@ -102,12 +102,12 @@ models.user.Find
       "type": "monther"
     },
     "id": 2,
-    "name": "员工",
+    "name": "Employee",
     "secret": "wBeYjL7FjbcvpAdBrxtDFfjydsoPKhRN",
     "status": "enabled",
     "type": "staff"
   },
-  "name": "管理员",
+  "name": "Administrator",
   "password": "$2a$04$nDBXydTJ93gmZo5UVj./PeGJGweSfEbXyEvMZjJ2Pf3THIpvAkhhO",
   "resume": null,
   "secret": "XMTdNRVigbgUiAPdiJCfaWgWcz2PaQXw",
@@ -117,9 +117,9 @@ models.user.Find
 }
 ```
 
-## 外部引用
+## external references
 
-### 在业务逻辑(`Flow`) 中调用:
+### Called in business logic (`Flow`):
 
 ```json
 {
@@ -139,7 +139,7 @@ models.user.Find
 }
 ```
 
-### 在服务接口(`API`) 中调用:
+### Called in the service interface (`API`):
 
 ```json
 {
@@ -162,16 +162,16 @@ models.user.Find
 GET /api/user/find/1?withs=manu,mother,addresses
 ```
 
-## 示例二
+## Example 2
 
-### 新增`models/category.mod.json`文件，写入以下内容:
+### Add `models/category.mod.json` file and write the following:
 
 ```json
 {
-  "name": "书籍分类",
+  "name": "Book Category",
   "table": {
     "name": "category",
-    "comment": "书籍分类"
+    "comment": "Book Category"
   },
   "columns": [
     {
@@ -182,13 +182,13 @@ GET /api/user/find/1?withs=manu,mother,addresses
       "primary": true
     },
     {
-      "label": "父级id",
+      "label": "parent id",
       "name": "parent_id",
       "type": "integer",
       "nullable": true
     },
     {
-      "label": "分类名称",
+      "label": "Classification Name",
       "name": "name",
       "type": "string",
       "length": 128,
@@ -219,38 +219,38 @@ GET /api/user/find/1?withs=manu,mother,addresses
     {
       "id": 1,
       "parent_id": null,
-      "name": "文史类"
+      "name": "Literature and History"
     },
     {
       "id": 2,
       "parent_id": 1,
-      "name": "历史"
+      "name": "History"
     },
     {
       "id": 3,
       "parent_id": 1,
-      "name": "古诗"
+      "name": "Ancient Poem"
     },
     {
       "id": 4,
       "parent_id": null,
-      "name": "理工类"
+      "name": "Science and Engineering"
     },
     {
       "id": 5,
       "parent_id": 4,
-      "name": "数学"
+      "name": "Math"
     },
     {
       "id": 6,
       "parent_id": 4,
-      "name": "物理"
+      "name": "Physical"
     }
   ]
 }
 ```
 
-### Find 获取已知 id 的数据,新建`scripts/test.js`
+### Find Get the data of the known id and create a new `scripts/test.js`
 
 ```javascript
 function Find() {
@@ -258,4 +258,4 @@ function Find() {
 }
 ```
 
-执行 `yao run scripts.test.Find`
+Execute `yao run scripts.test.Find`

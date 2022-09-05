@@ -1,43 +1,43 @@
 ```json
 {
-  "name": "好友",
+  "name": "Friend",
   "table": {
     "name": "friends",
-    "comment": "好友关系表",
+    "comment": "Friend relationship table",
     "engine": "InnoDB"
   },
   "columns": [
     { "name": "id", "type": "ID" },
     {
-      "label": "用户ID",
+      "label": "User ID",
       "name": "user_id",
       "type": "bigInteger",
-      "comment": "所属用户",
+      "comment": "Owning User",
       "index": true
     },
     {
-      "label": "好友用户ID",
+      "label": "Friend User ID",
       "name": "friend_id",
       "type": "bigInteger",
-      "comment": "好友用户ID",
+      "comment": "Friend User ID",
       "index": true
     },
     {
-      "label": "类型",
+      "label": "Type",
       "name": "type",
       "type": "enum",
       "default": "monther",
       "option": ["monther", "father", "friend"],
-      "comment": "类型 monther 母亲, father 父亲, friend 朋友",
+      "comment": "Type monther mother, father, friend",
       "index": true
     },
     {
-      "label": "状态",
+      "label": "Status",
       "name": "status",
       "type": "enum",
       "default": "enabled",
       "option": ["enabled", "disabled"],
-      "comment": "状态 enabled 开启, disabled 关闭",
+      "comment": "Status enabled on, disabled off",
       "index": true
     }
   ],
