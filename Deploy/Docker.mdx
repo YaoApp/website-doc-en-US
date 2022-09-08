@@ -1,18 +1,132 @@
 # Docker
 
-- 安装 Docker 下载安装 Docker
+This part is about how to build Docker images and deploy using Docker images.
 
-- 创建并启动容器: `docker run -d --restart unless-stopped --name yao -v <app root>:/data/app -p <Port>:5099 yaoapp/yao:0.10.1-amd64`
+## Build docker image
 
-**Yao Docker Images**
+### Download Dockerfile :
 
-| 镜像                    | 环境     | 使用场景              |
-| ----------------------- | -------- | --------------------- |
-| yaoapp/yao:0.10.1-amd64 | 生产环境 | 适用于云主机物理机    |
-| yaoapp/yao:0.10.1-arm64 | 生产环境 | 适用于 ARM64 设备部署 |
-
-检查服务状态:
+Download address: [https://github.com/YaoApp/dockerfiles](https://github.com/YaoApp/dockerfiles)
 
 ```bash
-curl http://127.0.0.1:<Port>/api/xiang/ping
+git clone https://github.com/YaoApp/dockerfiles /path/root/dockerfiles
+```
+
+### Build command:
+
+#### AMD64
+
+Build command:
+
+```bash
+docker build \
+   --platform linux/amd64 \
+   --build-arg REPO=${REPO} \
+   --build-arg TOKEN=${TOKEN} \
+   --build-arg VERSION=${VERSION} \
+   -t ${ORG}/${NAME}:${VERSION} .
+```
+
+Example:
+
+```bash
+cd /path/root/dockerfiles/application/amd64
+docker build --platform linux/amd64 \
+      --build-arg REPO=github.com/YaoApp/yao-wms \
+      --build-arg TOKEN=xxxxxxxxx \
+      --build-arg VERSION=1.0.3 \
+      -t yaoapp/yao-wms:1.0.3-amd64 .
+```
+
+Build parameters:
+
+| parameter name | description                                                                                                                                                        | example                   |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------- |
+| REPO           | Application code repository address                                                                                                                                | github.com/YaoApp/yao-wms |
+| TOKEN          | GitHub personal access token [view documentation](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) | ghp_xxxxxxxxxxxxxxxxxx    |
+| VERSION        | Application version number                                                                                                                                         | 1.0.3                     |
+
+#### ARM64
+
+Build command:
+
+```bash
+docker build \
+   --platform linux/arm64 \
+   --build-arg REPO=${REPO} \
+   --build-arg TOKEN=${TOKEN} \
+   --build-arg VERSION=${VERSION} \
+   -t ${ORG}/${NAME}:${VERSION} .
+```
+
+Example:
+
+```bash
+cd /path/root/dockerfiles/application/arm64
+docker build --platform linux/arm64 \
+      --build-arg REPO=github.com/YaoApp/yao-wms \
+      --build-arg TOKEN=xxxxxxxxx \
+      --build-arg VERSION=1.0.3 \
+      -t yaoapp/yao-wms:1.0.3-arm64 .
+```
+
+Build parameters:
+
+| parameter name | description                                                                                                                                                        | example                   |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------- |
+| REPO           | Application code repository address                                                                                                                                | github.com/YaoApp/yao-wms |
+| TOKEN          | GitHub personal access token [view documentation](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) | ghp_xxxxxxxxxxxxxxxxxx    |
+| VERSION        | Application version number                                                                                                                                         | 1.0.3                     |
+
+## Using the docker image
+
+### Environment variables
+
+| variable name     | description                                                                                                                                                                                                        | example         |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------- |
+| YAO_INIT          | `yaoadmin start` Before starting for the first time, initialize data, allow `demo` to initialize data, and run DEMO processing, `reset` initialize data. If not set, no initialization operation will be performed | demo            |
+| YAO_PROCESS_RESET | `yaoadmin reset` The processor to run after successfully migrating data                                                                                                                                            | flows.init.menu |
+| YAO_PROCESS_DEMO  | `yaoadmin reset --with-demo` Processor for generating demo data                                                                                                                                                    | flows.init.menu |
+
+### SQLite database
+
+```bash
+docker run -d -p 5099:5099 --restart unless-stopped \
+    -e YAO_INIT=demo \
+    -e YAO_PROCESS_RESET=flows.init.menu \
+    -e YAO_PROCESS_DEMO=flows.demo.data \
+    yaoapp/yao-wms:1.0.3-amd64
+```
+
+### MySQL database
+
+```bash
+docker run -d -p 3307:3306 --restart unless-stopped -e MYSQL_PASSWORD=123456 yaoapp/mysql:8.0-amd64
+```
+
+```bash
+docker run -d -p 5099:5099 --restart unless-stopped \
+    -e YAO_INIT=demo \
+    -e YAO_PROCESS_RESET=flows.init.menu \
+    -e YAO_PROCESS_DEMO=flows.demo.data \
+    -e YAO_DB_DRIVER=mysql \
+    -e YAO_DB_PRIMARY="yao:123456@tcp(172.17.0.1:3307)/yao?charset=utf8mb4&parseTime=True&loc=Local" \
+    yaoapp/yao-wms:1.0.3-amd64
+```
+
+Docker Compose
+
+```yaml
+version: "3.9"
+services:
+  yao:
+    image: yaoapp/yao-wms:1.0.3-amd64
+    environment:
+      - YAO_INIT=demo
+        YAO_PROCESS_RESET=flows.init.menu
+        YAO_PROCESS_DEMO=flows.demo.data
+        YAO_DB_DRIVER=mysql
+        YAO_DB_PRIMARY="yao:123456@tcp(mysql:3306)/yao?charset=utf8mb4&parseTime=True&loc=Local"
+    ports:
+      - "5099:509
 ```
