@@ -1,4 +1,4 @@
-# YAO schema analysis
+# Architecture
 
 ![Architecture diagram](https://release-sv-1252011659.cos.na-siliconvalley.myqcloud.com/docs/%E4%BB%8B%E7%BB%8D/architecture.png)
 
@@ -56,7 +56,7 @@ import(
 )
 
 func init() {
-gou.RegisterProcessHandler("mycom.myprocesses.hello", processHello) // register the process
+  gou.RegisterProcessHandler("mycom.myprocesses.hello", processHello) // register the process
 }
 
 // processHello processing logic
@@ -75,21 +75,21 @@ Edit `/code/root/yao/main.go`
 package main
 
 import (
-"github.com/yaoapp/yao/cmd"
+  "github.com/yaoapp/yao/cmd"
 
-_ "github.com/yaoapp/gou/encoding"
-_ "github.com/yaoapp/yao/crypto"
-_ "github.com/yaoapp/yao/helper"
-_ "github.com/yaoapp/yao/network"
-_ "github.com/yaoapp/yao/system"
-_ "github.com/yaoapp/yao/user"
-_ "github.com/yaoapp/yao/xfs"
-    _ "github.com/yaoapp/yao/myprocesses"
+  _ "github.com/yaoapp/gou/encoding"
+  _ "github.com/yaoapp/yao/crypto"
+  _ "github.com/yaoapp/yao/helper"
+  _ "github.com/yaoapp/yao/network"
+  _ "github.com/yaoapp/yao/system"
+  _ "github.com/yaoapp/yao/user"
+  _ "github.com/yaoapp/yao/xfs"
+  _ "github.com/yaoapp/yao/myprocesses"
 )
 
 // main program
 func main() {
-cmd.Execute()
+  cmd.Execute()
 }
 
 ```
