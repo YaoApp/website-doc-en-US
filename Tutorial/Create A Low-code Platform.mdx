@@ -1,34 +1,37 @@
-# Use YAO Widget to create a cloud table
+# Use YAO Widget to create a dynamic forms system
 
-70% of the functions of most business systems and management backgrounds are the addition, deletion, modification and checking of data tables. These functions are not technically difficult, just copy and paste to modify the fields. YAO provides a more elegant way of "copying and pasting". If you want to say goodbye to tedious repetitive work, **faster and better** to complete such function coding, or you need to **build your own set of cloud forms **System, the following content can help you.
+​​70% of the functions of most business systems and admin panel are the addition, deletion, modification. The implementation of these functions is mainly based on copying and pasting modified fields. This article will try to write such functionality in a more elegant "copy-paste" way. If you want to say goodbye to tedious repetitive work, or you need to build your own cloud form system, the following content can help you.
 
-## DEMO demo
+## DEMO
 
 Through the form editor, online design and production of form function modules. Function modules suitable for user management, supplier management, order management and other form CURD operations.
-![image.png](https://release-sv-1252011659.cos.na-siliconvalley.myqcloud.com/docs/%E6%95%99%E7%A8%8B/image.png)
 
-![res.png](https://release-sv-1252011659.cos.na-siliconvalley.myqcloud.com/docs/%E6%95%99%E7%A8%8B/res.png)
+![image.png](https://release-bj.yaoapps.com/docs/%E6%95%99%E7%A8%8B/image.png)
+
+![res.png](https://release-bj.yaoapps.com/docs/%E6%95%99%E7%A8%8B/res.png)
 
 **Source address:** [https://github.com/YaoApp/demo-widget](https://github.com/YaoApp/demo-widget)
-**One-click deployment: **[https://letsinfra.com/openapp/demo-widget](https://letsinfra.com/openapp/demo-widget)
+
+**One-click deployment:** [https://letsinfra.com/openapp/demo-widget](https://letsinfra.com/openapp/demo-widget)
 
 ## build tools
 
-### YAO open source application engine
+### YAO App Engine
 
-![yao-arch-white.png](https://release-sv-1252011659.cos.na-siliconvalley.myqcloud.com/docs/%E6%95%99%E7%A8%8B/yao-arch-white.png)
-YAO is an open source application engine, written in Golang, in the form of a command-line tool that can be downloaded and used immediately. It is suitable for building business systems, website/APP API interfaces, management background and other applications.
+YAO is an open-source application engine, written in Golang, in the form of a command-line tool that can be downloaded and used immediately. It is suitable for developing business systems, website/APP API, admin panel, self-built low-code platforms, etc.
 
-YAO adopts the flow-based programming mode, and realizes various functions by writing YAO DSL (Logical Description in JSON format) or JavaScript process. The YAO DSL can be written in several ways:
+YAO adopts a flow-based programming model to implement various functions by writing YAO DSL (Logical Description in JSON format) or using JavaScript to write processes. The YAO DSL can be written in several ways:
 
 1. Purely hand-written
+
 2. Use automated scripts to generate contextual logic
+
 3. Use the visual editor to create by "drag and drop"
 
-**GitHub address: ** [https://github.com/yaoapp/yao](https://github.com/yaoapp/yao)
+**GitHub Repo:** [https://github.com/yaoapp/yao](https://github.com/yaoapp/yao)
 **Github Stars:** 4.3K
-**Open Source License:** Apache 2.0
-**Official Documentation:** [https://yaoapps.com/doc](https://yaoapps.com/doc)
+**License:** Apache 2.0
+**Documentation:** [https://yaoapps.com/doc](https://yaoapps.com/en-US/doc)
 
 ### YAO Widget
 
@@ -61,8 +64,9 @@ YAO provides a new way to use DSL to describe the difference content and quickly
 ### Preparation: Install the YAO command
 
 To read the following content, you need to have basic programming ability, familiar with RESTFul API, relational database, JavaScript language and other programming common sense.
-Reference Document [Getting Started Guide](../Introduction/Getting Started), install the YAO command (version: v0.10.1) locally, and be familiar with the basic usage.
-**Create an app locally: **
+Reference Document [Getting Started Guide](https://yaoapps.com/en-US/doc/Introduction/Getting%20Started), install the YAO command (version: v0.10.1) locally, and be familiar with the basic usage.
+
+**Create a project: **
 
 ```bash
 # Create a project folder
@@ -75,7 +79,7 @@ yao init
 yao migrate && yao run flows.setmenu
 ```
 
-### Step 1: Design the Widge DSL data structure
+### Step 1: Design the Widge DSL structure
 
 Design the DSL structure according to the business logic features. In this example, the differences between different tables are table fields, searchers, and table names.
 **dyform Widget DSL data structure: **
@@ -115,15 +119,15 @@ Design the DSL structure according to the business logic features. In this examp
 }
 ```
 
-**Field Description DSL:**
+**Fields:**
 
-| **Configuration Items** | **Description**                                  |
-| ----------------------- | ------------------------------------------------ |
-| title                   | The title displayed in the table                 |
-| name                    | Field name, corresponding to database field name |
-| type                    | The component used when filling out the form     |
-| props                   | Component properties                             |
-| search                  | Whether this field can be used as a filter item  |
+| **Field** | **Description**                                  |
+| --------- | ------------------------------------------------ |
+| title     | The title displayed in the table                 |
+| name      | Field name, corresponding to database field name |
+| type      | The component used when filling out the form     |
+| props     | Component properties                             |
+| search    | Whether this field can be used as a filter item  |
 
 Create a dyforms file for saving the DSL
 
@@ -177,9 +181,9 @@ Use an editor to open **dyform/widget.json** and fill in the basic information o
 
 ### Step 3: Write the dyform handler
 
-Write **dyform/process.js ** script, implement **Model, Table ** process, convert custom DSL into YAO data model widget and table widget.
+Write **dyform/process.js ** script, implement **Model, Table ** processor, convert custom DSL into YAO data model widget and table widget.
 
-Write the Export function, declare the process to be exported, [View source](https://github.com/YaoApp/demo-widget/blob/main/widgets/dyform/process.js)
+Write the Export function, declare the processor to be exported, [View source](https://github.com/YaoApp/demo-widget/blob/main/widgets/dyform/process.js#L311)
 
 ```javascript
 function Export() {
@@ -187,29 +191,29 @@ function Export() {
 }
 ```
 
-Implement Model & Table process logic
+Implement Model & Table processor logic
 
-| **process** | **Description**                                                                                                       | **Source link**                                                                              |
-| ----------- | --------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| Model       | Convert dyform DSL to model DSL, which is equivalent to manually writing a xxx.mod.json DSL file in the models folder | [View source](https://github.com/YaoApp/demo-widget/blob/main/widgets/dyform/process.js#L11) |
-| Table       | Convert dyform DSL to table DSL, which is equivalent to manually writing a xxx..json DSL file in the tables folder    | [View source](https://github.com/YaoApp/demo-widget/blob/main/widgets/dyform/process.js#L27) |
+| **Processor** | **Description**                                                                                                       | **Source link**                                                                               |
+| ------------- | --------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Model         | Convert dyform DSL to model DSL, which is equivalent to manually writing a xxx.mod.json DSL file in the models folder | [View source](https://github.com/YaoApp/demo-widget/blob/ main/widgets/dyform/process.js#L11) |
+| Table         | Convert dyform DSL to table DSL, which is equivalent to manually writing a xxx..json DSL file in the tables folder    | [View source](https://github.com/YaoApp/demo-widget/blob/main /widgets/dyform/process.js#L27) |
 
-Tip: It is recommended to use the yao run command to debug the process, refer to the source code comment documentation.
+Tip: It is recommended to use the yao run command to debug the processor, refer to the source code comment documentation.
 
 ### Step 4: Export as Model & Table widget
 
 Write **dyform/export.js** script, implement Models, Tables functions, export as YAO model & table widgets.
 
-| **Export function** | **Description**                                                                                                     | **Source code link**                                                                             |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| Models              | Call the Model process to export the Yao model widget, the data structure is {MODEL_NAME:String: Model_DSL:Object}  | [View source code](https://github.com/YaoApp/demo-widget/blob/main/widgets/dyform/export.js#L10) |
-| Tables              | Call the Table process, export it as Yao table widget, the data structure is: {TABLE_NAME:String: Table_DSL:Object} | [View source code](https://github.com/YaoApp/demo-widget/blob/main/widgets/dyform/export.js#L24) |
+| **Export function** | **Description**                                                                                                       | **Source code link**                                                                              |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Models              | Call the Model processor to export the Yao model widget, the data structure is {MODEL_NAME:String: Model_DSL:Object}  | [View source code](https://github.com/YaoApp/demo-widget/blob/main/widgets /dyform/export.js#L10) |
+| Tables              | Call the Table processor, export it as Yao table widget, the data structure is: {TABLE_NAME:String: Table_DSL:Object} | [View source code](https://github.com/YaoApp/demo-widget/blob/main /widgets/dyform/export.js#L24) |
 
 ### Effect preview
 
-In the dyforms folder, add the **xxx.form.json ** file and write the dyform DSL description file to quickly create a set of form management modules, form APIs, form processes and model processes.
+In the dyforms folder, add the **xxx.form.json ** file and write the dyform DSL description file to quickly create a set of form management modules, form APIs, form processors and model processors.
 
-![demo.png](https://release-sv-1252011659.cos.na-siliconvalley.myqcloud.com/docs/%E6%95%99%E7%A8%8B/demo.png)
+![demo.png](https://release-bj.yaoapps.com/docs/%E6%95%99%E7%A8%8B/demo.png)
 
 Use the **yao migrate** command to create the data table structure, the **yao start** command to start the service, and log in to the management interface to use the table management function.
 Routing address: http://127.0.0.1:5099/xiang/table/dyform.xxx
@@ -220,7 +224,7 @@ If you want to open the form making function to the user, and the code directory
 
 ### Step 1: Create a template model to store the dyform DSL
 
-How to create and use data models models/template.mod.json and manage tables tables/template.tab.json, refer to [Model documentation](../Base%20Features/Create%20Data%20Model.mdx) and [Table Documentation](../Manual/process/Data%20Table)
+How to create and use data models models/template.mod.json and manage tables tables/template.tab.json, refer to [Model documentation](https://yaoapps.com/doc/b.%E5%9F%BA%E7% A1%80%E7%89%B9%E6%80%A7/a.%E5%88%9B%E5%BB%BA%E6%95%B0%E6%8D%AE%E6%A8%A1%E5 %9E%8B) and [Table Documentation](https://yaoapps.com/doc/b.%E5%9F%BA%E7%A1%80%E7%89%B9%E6%80%A7/c. %E6%8F%8F%E8%BF%B0%E7%95%8C%E9%9D%A2#%E6%95%B0%E6%8D%AE%E8%A1%A8%E6%A0%BC)
 **models/template.mod.json is as follows**
 
 ```json
@@ -243,11 +247,11 @@ How to create and use data models models/template.mod.json and manage tables tab
 ```
 
 **DSL management interface**
-![admin.png](https://release-sv-1252011659.cos.na-siliconvalley.myqcloud.com/docs/%E6%95%99%E7%A8%8B/admin.png)
+![admin.png](https://release-bj.yaoapps.com/docs/%E6%95%99%E7%A8%8B/admin.png)
 
 ### Step 2: Add Save & Delete handler to dyform Widget
 
-Write the Export function, declare the process to be exported, [View source](https://github.com/YaoApp/demo-widget/blob/main/widgets/dyform/process.js#L311)
+Write the Export function, declare the processor to be exported, [View source](https://github.com/YaoApp/demo-widget/blob/main/widgets/dyform/process.js#L311)
 
 ```javascript
 function Export() {
@@ -257,16 +261,17 @@ function Export() {
 
 Implement Save & Delete handler logic
 
-| **process** | **Description**                                                                                                                | **Source link**                                                                                   |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
-| Save        | Convert the dyform DSL to the model DSL, update the corresponding data model structure, and reload the corresponding instance. | [View source](https://github.com/YaoApp/demo-widget/blob/main/widgets/dyform/process.js#L43)      |
-| Delete      | Delete the data table corresponding to the data model                                                                          | [View source code](https://github.com/YaoApp/demo-widget/blob/main/widgets/dyform/process.js#L76) |
+| **Processor** | **Description**                                                                                                                | **Source link**                                                                                   |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| Save          | Convert the dyform DSL to the model DSL, update the corresponding data model structure, and reload the corresponding instance. | [View source](https://github.com/YaoApp/demo-widget/blob/main/widgets/dyform/process.js#L43)      |
+| Delete        | Delete the data table corresponding to the data model                                                                          | [View source code](https://github.com/YaoApp/demo-widget/blob/main/widgets/dyform/process.js#L76) |
 
 Edit tables/template.tab.json, add hooks scripts, update/delete data tables, create/delete menus when tables are saved and deleted.
 
 **Modify tables/template.tab.json to add Hook **[**View source code**](https://github.com/YaoApp/demo-widget/blob/main/tables/template.tab.json#L7)\*\* \*\*
 
-```json"hooks": {
+```json
+  "hooks": {
     "after:save": "scripts.template.AfterSave",
     "after:delete": "scripts.template.AfterDelete"
   },
@@ -323,14 +328,14 @@ function Source() {
 ### Effect preview
 
 Log in to the management background and dynamically add dyform DSL to dynamically create and delete corresponding forms.
-![admin2.png](https://release-sv-1252011659.cos.na-siliconvalley.myqcloud.com/docs/%E6%95%99%E7%A8%8B/admin2.png)
-![res.png](https://release-sv-1252011659.cos.na-siliconvalley.myqcloud.com/docs/%E6%95%99%E7%A8%8B/res-2.png)
+![admin2.png](https://release-bj.yaoapps.com/docs/%E6%95%99%E7%A8%8B/admin2.png)
+![res.png](https://release-bj.yaoapps.com/docs/%E6%95%99%E7%A8%8B/res-2.png)
 
 ## Part III: Visual Form Editor
 
 The form DSL can be generated using the form authoring tool. There are many excellent open source form editors to choose from, such as [XXXX](https://github.com/xxxx/xxx). In order to demonstrate the effect, XGEN quickly implements a DEMO-level editor component, and the product-level implementation will Available when XGEN-NEXT (official version) is released.
-Source address:[https://github.com/YaoApp/xgen/tree/main/src/cloud/components/form/FormPrinter](https://github.com/YaoApp/xgen/tree/main/src/cloud/components/form/FormPrinter)
-![image.png](https://release-sv-1252011659.cos.na-siliconvalley.myqcloud.com/docs/%E6%95%99%E7%A8%8B/overview-4.png)
+Source address: [https://github.com/YaoApp/xgen/tree/main/src/cloud/components/form/FormPrinter](https://github.com/YaoApp/xgen/tree/main/src/cloud /components/form/FormPrinter)
+![image.png](https://release-bj.yaoapps.com/docs/%E6%95%99%E7%A8%8B/overview-4.png)
 
 ### Step 1: Adapt the editor component input and output
 
@@ -437,7 +442,7 @@ function AfterFind(template, id) {
 ### Step 2: Update the components bound by the DSL
 
 Edit the `tables/template.tab.json` file and set the DSL field editing component to FormPrinter.
-Source address: [https://github.com/YaoApp/demo-widget/blob/main/tables/template.tab.json](https://github.com/YaoApp/demo-widget/blob/main/tables/template.tab.json)
+Source address: [https://github.com/YaoApp/demo-widget/blob/main/tables/template.tab.json](https://github.com/YaoApp/demo-widget/blob/main/tables /template.tab.json)
 
 ```json
 {
@@ -453,11 +458,11 @@ Source address: [https://github.com/YaoApp/demo-widget/blob/main/tables/template
 ### Effect preview
 
 Open the templates table, click Edit a template, you can use the visual editor to make the form.
-![image.png](https://release-sv-1252011659.cos.na-siliconvalley.myqcloud.com/docs/%E6%95%99%E7%A8%8B/overview-3.png)
+![image.png](https://release-bj.yaoapps.com/docs/%E6%95%99%E7%A8%8B/overview-3.png)
 
 ## Part IV: Make a C-side form page
 
-For C-side pages such as event registration and appointment registration, personalized design is required to improve user experience. for suchFor scenarios, a set of templates can be designed in a targeted manner and implemented using any front-end technology stack. Here is a demo of VUE3 implementation.
+For C-side pages such as event registration and appointment registration, personalized design is required to improve user experience. For such scenarios, a set of templates can be designed and implemented using any front-end technology stack. Here is a demo of VUE3 implementation.
 **Source address: **[https://github.com/YaoApp/demo-widget-front](https://github.com/YaoApp/demo-widget-front)
 
 ### Step 1: Add an API to read table configuration information
@@ -484,7 +489,7 @@ Add a `GET /page/form/setting/:name` API, under the apis folder, add a page.http
 }
 ```
 
-Source address: [https://github.com/YaoApp/demo-widget/blob/main/apis/page.http.json](https://github.com/YaoApp/demo-widget/blob/main/apis/page.http.json)
+Source address: [https://github.com/YaoApp/demo-widget/blob/main/apis/page.http.json](https://github.com/YaoApp/demo-widget/blob/main/apis /page.http.json)
 
 ### Step 2: During SETUP, request to configure the interface to obtain configuration information.
 
@@ -519,7 +524,7 @@ response
   });
 ```
 
-Source address: [https://github.com/YaoApp/demo-widget-front/blob/main/vue3/src/App.vue](https://github.com/YaoApp/demo-widget-front/blob/main/vue3/src/App.vue)
+Source address: [https://github.com/YaoApp/demo-widget-front/blob/main/vue3/src/App.vue](https://github.com/YaoApp/demo-widget-front/blob /main/vue3/src/App.vue)
 
 ### Step 3: Dynamically render the form
 
@@ -546,7 +551,7 @@ Use the `component` component to render the form according to the configuration
 </template>
 ```
 
-Source address: [https://github.com/YaoApp/demo-widget-front/blob/main/vue3/src/App.vue](https://github.com/YaoApp/demo-widget-front/blob/main/vue3/src/App.vue)
+Source address: [https://github.com/YaoApp/demo-widget-front/blob/main/vue3/src/App.vue](https://github.com/YaoApp/demo-widget-front/blob /main/vue3/src/App.vue)
 
 ### Step 4: Copy artifacts to UI directory
 
@@ -565,7 +570,7 @@ Open the browser, enter `http://your-host:port/xiang/login/admin` to enter the b
 Default username: `xiang@iqka.com`
 Default password: `A123456p+`
 
-![image.png](https://release-sv-1252011659.cos.na-siliconvalley.myqcloud.com/docs/%E6%95%99%E7%A8%8B/overview.png)
+![image.png](https://release-bj.yaoapps.com/docs/%E6%95%99%E7%A8%8B/overview.png)
 
 Open `http://your-host:port/vue3/?form=dyform.instance_1` to access the custom form page
-![image.png](https://release-sv-1252011659.cos.na-siliconvalley.myqcloud.com/docs/%E6%95%99%E7%A8%8B/overview-last.png)
+![image.png](https://release-bj.yaoapps.com/docs/%E6%95%99%E7%A8%8B/overview-last.png)
